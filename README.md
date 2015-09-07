@@ -1,4 +1,4 @@
-#MS SEA++
+#M/S SEA++
 
 
 ![We are the C-men!](http://i.imgur.com/1o7EmbK.png)
