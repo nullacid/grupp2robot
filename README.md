@@ -5,6 +5,9 @@
 
 Grupp 2 i TSEA29
 
+
+
+
 ##Lit (l33t?) Gitcommandon som är nice.
 Gör typ samma i Desktop om man har det ist.
 ###Klona repot
