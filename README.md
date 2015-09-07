@@ -5,7 +5,7 @@
 
 Grupp 2 i TSEA29
 
-##Lit Gitcommandon som är nice.
+##Lit (l33t?) Gitcommandon som är nice.
 Gör typ samma i Desktop om man har det ist.
 ###Klona repot
 Gå till den mapp du vill ha repot.
