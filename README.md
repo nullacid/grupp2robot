@@ -1,6 +1,9 @@
 #MS SEA++
 Grupp 2 i TSEA29
 
+![We are the C-men!](http://i.imgur.com/1o7EmbK.png)
+
+
 ##Lit Gitcommandon som är nice.
 Gör typ samma i Desktop om man har det ist.
 ###Klona repot
