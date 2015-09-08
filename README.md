@@ -1,12 +1,13 @@
-#MS SEA++
+#M/S SEA++
 
 
 ![We are the C-men!](http://i.imgur.com/1o7EmbK.png)
 
 Grupp 2 i TSEA29
 
+<a href="https://www.youtube.com/watch?v=q34f2McGfQo&feature=youtu.be">Här finns en film.</a>
 
-
+<a href="http://vpython.org/index.html">Här finns VPython</a>
 
 ##Lit (l33t?) Gitcommandon som är nice.
 Gör typ samma i Desktop om man har det ist.
