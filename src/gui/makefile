@@ -17,6 +17,8 @@ COMPILER_FLAGS = -w
 #-Wl,-subsystem,windows
 
 #LINKER_FLAGS specifies the libraries we're linking against
+#If compiling on linux, add -I/usr/include/SDL2
+#and remove -lmingw32 and lSDL2main
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer
 
 #OBJ_NAME specifies the name of our exectuable
