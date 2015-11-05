@@ -36,15 +36,26 @@ unsigned char receiveData()
 	return data;
 }
 
+void transmitByte(unsigned char data){
+    /* Wait for empty transmit buffer */
+    while ( !( UCSR0A & (1<<UDRE0)) );
+    
+    /* Put data into buffer, sends the data */
+    UDR0 = data;
+}
+
+
 int main(void)
 {
 	init_USART();
 	
-	UDR0 |= 0x7F;
+	//transmitByte(0x42);
 	
     while (1) 
     {
-		receiveData();
+		unsigned char data = receiveData();
+		
+		transmitByte(data);
     }
 }
 

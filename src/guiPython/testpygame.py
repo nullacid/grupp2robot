@@ -43,11 +43,17 @@ if desiredDevice != None:
 	#ourSock.send(data)
 	#print("data sent")
 	print("Connected")
+	
+	#Manage go get data into bytes form and send :>
+	ourSock.send()
+
 	while True:
 		data = ourSock.recv(1)
-		print(data)
+		
+		for i in range(0,len(data)):
+			print(hex(data[0]))
 	
-	
+
 	
 	ourSock.close()
 	

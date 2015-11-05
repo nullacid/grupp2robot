@@ -30,5 +30,16 @@ makefile
 *.x86_64
 *.hex
 
+*.vs
+*.atsln
+*.cproj
+*.xml
+*.eep
+*.lss
+*.d
+*.map
+*.mk
+*.srec
+
 # Debug files
 *.dSYM/
