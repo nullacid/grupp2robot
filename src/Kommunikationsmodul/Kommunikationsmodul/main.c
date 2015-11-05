@@ -1,0 +1,51 @@
+/*
+ * Kommunikationsmodul.c
+ *
+ * Created: 03/11/2015 10:42:37
+ * Author : Peter Victor
+ */ 
+
+#define F_CPU 14.7456E6
+#include <avr/io.h>
+#include <util/delay.h>
+
+/* Initialize USART. */
+void init_USART(){
+	
+	unsigned int baud = 7;
+	
+	/* Set baud rate */
+	UBRR0H = (unsigned char)(baud>>8);
+	UBRR0L = (unsigned char)baud;
+			
+	/* Enable receiver and transmitter */
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+			
+	/* Set frame format: 8data, 1stop bit */
+	UCSR0C = (0<<USBS0)|(3<<UCSZ00);		
+}
+
+unsigned char receiveData()
+{
+	while (!(UCSR0A & (1<<RXC0)));
+	
+	PORTA |= 1 << PORTA0;
+	/* Get and return received data from buffer */
+	unsigned char data = UDR0;
+	
+	return data;
+}
+
+int main(void)
+{
+	init_USART();
+	
+	UDR0 |= 0x7F;
+	
+    while (1) 
+    {
+		receiveData();
+    }
+}
+
+
