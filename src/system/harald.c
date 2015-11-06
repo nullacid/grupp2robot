@@ -8,7 +8,7 @@
 #define F_CPU 14.7456E6
 #include <avr/io.h>
 #include <util/delay.h>
-#include "lib/usart.h"
+#include "lib\usart.h"
 
 
 int main(void)

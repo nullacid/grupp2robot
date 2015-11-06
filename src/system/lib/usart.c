@@ -1,4 +1,4 @@
-#include "lib/usart.h"
+#include "usart.h"
 
 /* Initialize USART. */
 void init_USART_up(){
