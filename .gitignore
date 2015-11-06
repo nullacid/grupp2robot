@@ -30,6 +30,7 @@ makefile
 *.x86_64
 *.hex
 
+*.pyc
 *.vs
 *.atsln
 *.cproj

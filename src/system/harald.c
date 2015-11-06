@@ -50,12 +50,12 @@ int main(void)
 	init_USART();
 	
 	//transmitByte(0x42);
-	
     while (1) 
     {
 		unsigned char data = receiveData();
-		
-		transmitByte(data);
+		if(data == 0x42){
+			transmitByte(0xFF);
+		}
     }
 }
 

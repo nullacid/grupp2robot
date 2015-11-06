@@ -1,83 +1,40 @@
 import pygame
-import bluetooth
+
+
+#Import bluetooth class
+from Harald import *
 
 #from pygame.locals import *
 from pygame import *
 import sys, os, traceback
 
-#Mac Address of our firefly module
-fireflyMacAddr = '00:06:66:03:A6:96'
+
 
 #Center the screen
 if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
-print("performing inquiry...")
-nearby_devices = []
-try:
-	nearby_devices = bluetooth.discover_devices(
-		duration=8, lookup_names=True, flush_cache=True, lookup_class=False)
-except IOError:
-	print("Can't find any bluetooth devices")
-
-print("found %d devices" % len(nearby_devices))
-for addr, name in nearby_devices:
-	try:
-		print("  %s - %s" % (addr, name))
-	except UnicodeEncodeError:
-		print("  %s - %s" % (addr, name.encode('utf-8', 'replace')))
 	
+#Create bluetooth object
+harald = Harald()
 	
-
-#Find the desired firefly module in the list of nearby_devices	
-desiredDevice = None		
-for i in range(0, len(nearby_devices)):
-	if nearby_devices[i][0] == fireflyMacAddr:
-		desiredDevice = nearby_devices[i][0]
-	
-#Setup connection with firefly module
-if desiredDevice != None:
-	ourSock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-	port = 1
-	ourSock.connect((desiredDevice, port))
-	#data = input("please input data: ")
-	#ourSock.send(data)
-	#print("data sent")
-	print("Connected")
-	
-	#Manage go get data into bytes form and send :>
-	ourSock.send()
-
-	while True:
-		data = ourSock.recv(1)
-		
-		for i in range(0,len(data)):
-			print(hex(data[0]))
-	
-
-	
-	ourSock.close()
-	
-	
-	
-
-
 #Initialize
-#pygame.display.init()
-#pygame.font.init()
+pygame.display.init()
+pygame.font.init()
 
 #Set up a window
-screenWidth = 1600
-screenHeight = 900
+screenWidth = 600
+screenHeight = 405
 squareWidth = screenHeight/15
 squareHeight = screenHeight/15
 
 screen_size = [screenWidth,screenHeight]
 #A blank icon
-#icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
+icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
-#pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
+pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 #Make the windowing surface!
 #surface = pygame.display.set_mode(screen_size, FULLSCREEN)
+surface = pygame.display.set_mode(screen_size)
 
 #Global variable for when the game is running
 crayRunning = True
@@ -91,6 +48,7 @@ RED = (255,0,0)
 CYAN = (0,255,255)
 MAGENTA = (255,0,255)
 YELLOW = (255,255,0)
+
 
 
 class RobotMap():
@@ -145,14 +103,15 @@ def handle_D():
 	global robotMap
 	robotMap.arrayMap[9][4] = "UNEXPLORED"
 
-#clears the board
 def handle_BACKSPACE():
-	global robotMap
-	robotMap.clearMap()
+	global harald
+	harald.sendData(b'\x43')
+	print("Received data: " + harald.waitToReceive(1))
 	
 def handle_SPACE():
-	global robotMap
-	robotMap.drawMap()
+	global harald
+	harald.sendData(b'\x42')
+	print("Received data: " + harald.waitToReceive(1))
 
 	
 #dictionary of key bindings
@@ -166,13 +125,11 @@ handle_dictionary = {
 	K_SPACE: handle_SPACE
 }
 
-
-
 robotMap = RobotMap();
 
-#while(crayRunning):
-	#robotMap.paintMap()
-	#robotMap.paintText()
-	#for event in pygame.event.get():
-	#	if event.type == pygame.KEYDOWN and event.key in handle_dictionary:
-	#		handle_dictionary[event.key]()
+while(crayRunning):
+	robotMap.paintMap()
+	robotMap.paintText()
+	for event in pygame.event.get():
+		if event.type == pygame.KEYDOWN and event.key in handle_dictionary:
+			handle_dictionary[event.key]()
