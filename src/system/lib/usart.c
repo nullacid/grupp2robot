@@ -8,12 +8,13 @@ void init_USART_up(){
 	/* Set baud rate */
 	UBRR0H = (unsigned char)(baud>>8);
 	UBRR0L = (unsigned char)baud;
-			
-	/* Enable receiver and transmitter */
-	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
-			
-	/* Set frame format: 8data, 1stop bit */
-	UCSR0C = (0<<USBS0)|(3<<UCSZ00);		
+
+	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
+	 USBS0 as 0 gives 1 stopbit */
+	UCSR0C |= (1<<UPM01)|(0<<UPM00)|(0<<UCSZ00)|(1<<UCSZ01)|(0<<USBS0);
+
+	//RXEN0=1 enables receive and TXEN0=1 enables transmit
+	UCSR0B |= (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
 }
 
 unsigned char receiveByte_up()
