@@ -5,7 +5,7 @@ makefile
 *.ko
 *.obj
 *.elf
-
+*.lst
 # Precompiled Headers
 *.gch
 *.pch
