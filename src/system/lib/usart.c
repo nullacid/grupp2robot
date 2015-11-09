@@ -40,6 +40,7 @@ unsigned char receiveByte_up()
 	
 	/* If upe0=1 parity check failed */
 	if (!(UCSR0A & (1<<UPE0))){
+<<<<<<< HEAD
 		/* Get and return received data from buffer */
 		unsigned char data = UDR0;
 		transmitOK_up();
@@ -47,6 +48,12 @@ unsigned char receiveByte_up()
 	}
 	else{
 		transmitERROR_up();
+=======
+			/* Get and return received data from buffer */
+		//unsigned char data = UDR0;
+		//return data;
+		return UDR0;
+>>>>>>> 323fe0d34b458cd3a6160f0aa64b56193351a9e0
 	}
 	return 0xFF;
 }
@@ -60,9 +67,13 @@ unsigned char receiveByte_down()
 			/* Get and return received data from buffer */
 		//unsigned char data = UDR0;
 		//return data;
+<<<<<<< HEAD
 		unsigned char data = UDR1;
 		transmitOK_down();
 		return data;
+=======
+		return UDR1;
+>>>>>>> 323fe0d34b458cd3a6160f0aa64b56193351a9e0
 	}
 	return 0xFF;
 	transmitERROR_down();

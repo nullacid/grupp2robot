@@ -2,6 +2,7 @@
 #include <avr/interrupt.h>
 #define F_CPU 20000000
 #include <util/delay.h>
+#include "lib/usart.h"
 
 #define FORWARD 1
 #define BACK 0
@@ -13,74 +14,110 @@ void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir, uint8_t rdir);
 void init_motors();
 void handle_messages();
 uint8_t decide_if_repeated(uint8_t msg);
-
+void update_sensor_data(); 
 
 uint8_t dir_left = 1; //0 or 1 = back or forward
 uint8_t dir_right = 1;
 uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
-uint8_t button_autonom = 0; // 0 om manuellt l‰ge, 1 om autonomt l‰ge
+uint8_t button_autonom = 0; // 0 om manuellt l√§ge, 1 om autonomt l√§ge
 uint8_t message = 1;
 uint8_t activeDirs = 0;
 bool new_message = false;
 
+
+
+//-----SENSOR DB------------
+
+//	sensor/token_sensor_fram/bak/v√§nster/h√∂ger upper/lower
+
+uint8_t s_LIDAR_u = 0;
+uint8_t s_LIDAR_l = 0;
+uint8_t t_LIDAR = 0;
+
+uint8_t s_ir_h_f = 0;
+uint8_t s_ir_h_b = 0;
+uint8_t s_ir_v_f = 0;
+uint8_t s_ir_v_b = 0;
+
+//	Token parallell v√§nster/h√∂ger
+
+uint8_t t_p_h = 0;
+uint8_t t_p_v = 0;
+
+uint8_t t_vagg_h_f = 0;
+uint8_t t_vagg_h_b = 0;
+uint8_t t_vagg_v_f = 0;
+uint8_t t_vagg_v_b = 0;
+
+uint8_t s_gyro_u = 0;
+uint8_t s_gyro_l = 0;
+uint8_t t_gyro = 0;
+
+uint8_t s_reflex = 0;
+uint8_t t_reflex_u = 0;
+uint8_t t_reflex_l = 0;
+//----------------------------
+
 int main(){
 	
+	init_USART_up();
+	init_USART_down();
 	init_motors();
 	
 	while(1){
 		
 		handle_messages();
-		//updatera sensordata
-		
+		update_sensor_data();
+
 		if (button_autonom == 1){
 			
 			//tolka sensordata
-			//reagera pÂ sensordata
+			//reagera p√• sensordata
 			
 		}
 		
 		
 	
 	
-		setSpeed(50,100,FORWARD,BACK);
+		//setSpeed(50,100,FORWARD,BACK);
 	}
 }
 
 uint8_t decide_if_repeated(uint8_t msg){
 	
-	answer = false;
+	bool answer = false;
 
 	switch(msg){
 		case (0): //pil UPP trycks ner	
-			answer = activeDirs	&& 1; // 1 om kommandot ‰r repeatat annars 0
+			answer = activeDirs	&& 1; // 1 om kommandot √§r repeatat annars 0
 			activeDirs = activeDirs || 1;
 		break;
-		case(1): //pil UPP sl‰pps		
+		case(1): //pil UPP sl√§pps		
 			answer = false;
 			activeDirs = activeDirs && 254;
 		break;
-		case(2): //pil VƒNSTER trycks ner
-			answer = activeDirs	&& 4; // 1 om kommandot ‰r repeatat annars 0
+		case(2): //pil V√ÑNSTER trycks ner
+			answer = activeDirs	&& 4; // 1 om kommandot √§r repeatat annars 0
 			activeDirs = activeDirs || 4;
 		break;
-		case(3): //pil VƒNSTER sl‰pps
+		case(3): //pil V√ÑNSTER sl√§pps
 			answer = false;
 			activeDirs = activeDirs && 251;
 		break;
 		case (4): //pil NER trycks ner	
-			answer = activeDirs	&& 2; // 1 om kommandot ‰r repeatat annars 0
+			answer = activeDirs	&& 2; // 1 om kommandot √§r repeatat annars 0
 			activeDirs = activeDirs || 2;
 		break;
-		case(5): //pil NER sl‰pps
+		case(5): //pil NER sl√§pps
 			answer = false;
 			activeDirs = activeDirs && 253;
 		break;
-		case(6): //pil H÷GER trycks ner
-			answer = activeDirs	&& 8; // 1 om kommandot ‰r repeatat annars 0
+		case(6): //pil H√ñGER trycks ner
+			answer = activeDirs	&& 8; // 1 om kommandot √§r repeatat annars 0
 			activeDirs = activeDirs || 8;
 		break;
-		case(7): //pil H÷GER sl‰pps
+		case(7): //pil H√ñGER sl√§pps
 			answer = false;
 			activeDirs = activeDirs && 247;
 		break;				
@@ -91,6 +128,8 @@ uint8_t decide_if_repeated(uint8_t msg){
 
 void handle_messages(){
 	
+	message = 00;
+
 	uint8_t message_cpy = message;
 	
 	//plocka ut OP-koden
@@ -99,7 +138,7 @@ void handle_messages(){
 	uint8_t repeated = decide_if_repeated(message_cpy);
 
 	
-	if (button_autonom == 0){ //Manuellt l‰ge
+	if (button_autonom == 0){ //Manuellt l√§ge
 		if (!repeated){
 			switch(message_cpy){
 				case (0): //pil UPP trycks ner
@@ -109,14 +148,14 @@ void handle_messages(){
 				spd_left = spd_left + 50;
 				spd_right = spd_right + 50;
 				break;
-				case(1): //pil UPP sl‰pps
+				case(1): //pil UPP sl√§pps
 				spd_left = spd_left - 50;
 				spd_right = spd_right - 50;
 				break;
-				case(2): //pil VƒNSTER trycks ner
+				case(2): //pil V√ÑNSTER trycks ner
 				spd_right = spd_right + 50;
 				break;
-				case(3): //pil VƒNSTER sl‰pps
+				case(3): //pil V√ÑNSTER sl√§pps
 				spd_right = spd_right - 50;
 				break;
 				case (4): //pil NER trycks ner
@@ -125,91 +164,94 @@ void handle_messages(){
 				spd_left = spd_left + 50;
 				spd_right = spd_right + 50;
 				break;
-				case(5): //pil NER sl‰pps
+				case(5): //pil NER sl√§pps
 				dir_left = 1;
 				dir_right = 1;
 				spd_left = spd_left - 50;
 				spd_right = spd_right - 50;
 				break;
-				case(6): //pil H÷GER trycks ner
+				case(6): //pil H√ñGER trycks ner
 				spd_left = spd_left + 50;
 				break;
-				case(7): //pil H÷GER sl‰pps
+				case(7): //pil H√ñGER sl√§pps
 				spd_left = spd_left - 50;
 				break;				
 			}
 		}
-		//setSpeed(spd_left,spd_right,dir_left,dir_right);
+		setSpeed(spd_left,spd_right,dir_left,dir_right);
 	}
 
 	switch(message_cpy){
 		
 		case (0x08):
-			//l‰gg lidardata i send-buffern
+			//l√§gg lidardata i send-buffern
+			transmitByte_up(s_LIDAR_u);
+			transmitByte_up(s_LIDAR_l);
+
 		break;
 		
 		case (0x09):
-		//l‰gg sensordata IR hˆger fram-data i send-buffern
+		//l√§gg sensordata IR h√∂ger fram-data i send-buffern
 		break;
 		
 		case (0x0A):
-		//l‰gg sensordata IR hˆger bak-data i send-buffern
+		//l√§gg sensordata IR h√∂ger bak-data i send-buffern
 		break;
 		
 		case (0x0B):
-		//l‰gg sensordata IR v‰nster fram-data i send-buffern
+		//l√§gg sensordata IR v√§nster fram-data i send-buffern
 		break;
 		
 		case (0x0C):
-		//l‰gg sensordata IR v‰nster bak-data i send-buffern
+		//l√§gg sensordata IR v√§nster bak-data i send-buffern
 		break;
 		
 		case (0x0D):
-		//l‰gg gyro-data i send-buffern
+		//l√§gg gyro-data i send-buffern
 		break;
 		
 		case (0x0E):
-		//l‰gg reflexsensor-data i send-buffern
+		//l√§gg reflexsensor-data i send-buffern
 		break;
 		
 		case (0x0F):
-		//l‰gg lidar-token i send-buffern
+		//l√§gg lidar-token i send-buffern
 		break;
 		
 		case (0x10):
-		//l‰gg parallell hˆger-token i send-buffern
+		//l√§gg parallell h√∂ger-token i send-buffern
 		break;
 		
 		case (0x11):
-		//l‰gg parallell v‰nster-token i send-buffern
+		//l√§gg parallell v√§nster-token i send-buffern
 		break;
 		
 		case (0x12):
-		//l‰gg gyro-token i send-buffern
+		//l√§gg gyro-token i send-buffern
 		break;
 		
 		case (0x13):
-		//l‰gg v‰gg hˆger fram-token i send-buffern
+		//l√§gg v√§gg h√∂ger fram-token i send-buffern
 		break;
 		
 		case (0x14):
-		//l‰gg v‰gg hˆger bak-token i send-buffern
+		//l√§gg v√§gg h√∂ger bak-token i send-buffern
 		break;
 		
 		case (0x15):
-		//l‰gg v‰gg v‰nster fram-token i send-buffern
+		//l√§gg v√§gg v√§nster fram-token i send-buffern
 		break;
 		
 		case (0x16):
-		//l‰gg v‰gg v‰nster bak-token i send-buffern
+		//l√§gg v√§gg v√§nster bak-token i send-buffern
 		break;
 		
 		case (0x17):
-		//l‰gg reflex-token i send-buffern
+		//l√§gg reflex-token i send-buffern
 		break;
 		
 		case (0x18):
-		//l‰gg kartdata i send-buffern
+		//l√§gg kartdata i send-buffern
 		break;
 		
 		case (0x19):
@@ -225,12 +267,17 @@ void handle_messages(){
 		break;
 		
 		case (0x1C):
-		//l‰gg tempKartdata i send-buffern
+		//l√§gg tempKartdata i send-buffern
 		break;
 		
 	}		
 }
 
+void update_sensor_data(){
+
+
+	return;
+}
 
 void init_motors(){
 	
@@ -251,9 +298,9 @@ void init_motors(){
 
 void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
 	
-	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 ‰r v‰nster, DDA6 ‰r hˆger 	
-	OCR1A = 10*rspeed;//set the duty cycle(out of 1023) Hˆger	
-	OCR3A = 10*lspeed;//set the duty cycle(out of 1023) V‰nster
+	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 √§r v√§nster, DDA6 √§r h√∂ger 	
+	OCR1A = 10*rspeed;//set the duty cycle(out of 1023) H√∂ger	
+	OCR3A = 10*lspeed;//set the duty cycle(out of 1023) V√§nster
 	
 }
 
