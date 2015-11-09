@@ -59,6 +59,21 @@ uint8_t t_reflex_u = 0;
 uint8_t t_reflex_l = 0;
 //----------------------------
 
+
+
+
+//------KARTA DB--------------
+uint8_t kartdata_x = 0;
+uint8_t kartdata_y = 0;
+uint8_t styrdata = 0;
+uint8_t posdata_x = 0;
+uint8_t posdata_y = 0;
+uint8_t posalgoritm = 0;
+uint8_t kartdata_temp_x = 0;
+uint8_t kartdata_temp_y = 0;
+
+//----------------------------
+
 int main(){
 	
 	init_USART_up();
@@ -127,8 +142,8 @@ uint8_t decide_if_repeated(uint8_t msg){
 }
 
 void handle_messages(){
-	
-	message = 00;
+
+	message = receiveByte_up();
 
 	uint8_t message_cpy = message;
 	
@@ -192,88 +207,139 @@ void handle_messages(){
 		
 		case (0x09):
 		//lägg sensordata IR höger fram-data i send-buffern
+			transmitByte_up(s_ir_h_f);
+
 		break;
 		
 		case (0x0A):
 		//lägg sensordata IR höger bak-data i send-buffern
+			transmitByte_up(s_ir_h_b);
 		break;
 		
 		case (0x0B):
 		//lägg sensordata IR vänster fram-data i send-buffern
+			transmitByte_up(s_ir_v_f);
 		break;
 		
 		case (0x0C):
 		//lägg sensordata IR vänster bak-data i send-buffern
+			transmitByte_up(s_ir_v_b);
 		break;
 		
 		case (0x0D):
 		//lägg gyro-data i send-buffern
+			transmitByte_up(s_gyro_u);
+			transmitByte_up(s_gyro_l);
 		break;
 		
 		case (0x0E):
 		//lägg reflexsensor-data i send-buffern
+			transmitByte_up(s_reflex);
 		break;
 		
 		case (0x0F):
 		//lägg lidar-token i send-buffern
+			transmitByte_up(t_LIDAR);
 		break;
 		
 		case (0x10):
 		//lägg parallell höger-token i send-buffern
+			transmitByte_up(t_p_h);
 		break;
 		
 		case (0x11):
 		//lägg parallell vänster-token i send-buffern
+			transmitByte_up(t_p_v);
 		break;
 		
 		case (0x12):
 		//lägg gyro-token i send-buffern
+			transmitByte_up(t_gyro);
 		break;
 		
 		case (0x13):
 		//lägg vägg höger fram-token i send-buffern
+			transmitByte_up(t_vagg_h_f);
 		break;
 		
 		case (0x14):
 		//lägg vägg höger bak-token i send-buffern
+			transmitByte_up(t_vagg_h_b);
 		break;
 		
 		case (0x15):
 		//lägg vägg vänster fram-token i send-buffern
+			transmitByte_up(t_vagg_v_f);
 		break;
 		
 		case (0x16):
 		//lägg vägg vänster bak-token i send-buffern
+			transmitByte_up(t_vagg_v_b);
 		break;
 		
 		case (0x17):
 		//lägg reflex-token i send-buffern
+			transmitByte_up(t_reflex_u);
+			transmitByte_up(t_reflex_l);
 		break;
 		
 		case (0x18):
 		//lägg kartdata i send-buffern
+			transmitByte_up(kartdata_x);
+			transmitByte_up(kartdata_y);
 		break;
 		
 		case (0x19):
 		//senaste styrbeslut i send-buffern
+			transmitByte_up(styrdata);
 		break;
 
 		case (0x1A):
 		//pos karta X och Y i send-buffern
+			transmitByte_up(posdata_x);
+			transmitByte_up(posdata_y);
 		break;
 		
 		case (0x1B):
 		//pos i algoritm i send-buffern
+			transmitByte_up(posalgoritm);
 		break;
 		
 		case (0x1C):
 		//lägg tempKartdata i send-buffern
+			transmitByte_up(kartdata_temp_x);
+			transmitByte_up(kartdata_temp_y);
 		break;
+
 		
 	}		
 }
 
 void update_sensor_data(){
+	//från 08 ---> 1 7 rader
+	transmitByte_down(0x1D); //fråg efter all data
+
+	s_LIDAR_u = receiveByte_down();
+	s_LIDAR_l = receiveByte_down();
+	s_ir_h_f = receiveByte_down();
+	s_ir_h_b = receiveByte_down();
+	s_ir_v_f = receiveByte_down();
+	s_ir_v_b = receiveByte_down();
+	s_gyro_u = receiveByte_down();
+	s_gyro_l = receiveByte_down();
+	s_reflex = receiveByte_down();
+
+
+	t_LIDAR = receiveByte_down();
+	t_p_h = receiveByte_down();;
+	t_p_v = receiveByte_down();
+	t_gyro = receiveByte_down();
+	t_vagg_h_f = receiveByte_down();
+	t_vagg_h_b = receiveByte_down();
+	t_vagg_v_f = receiveByte_down();
+	t_vagg_v_b = receiveByte_down();
+	t_reflex_u = receiveByte_down();
+	t_reflex_l = receiveByte_down();
 
 
 	return;
