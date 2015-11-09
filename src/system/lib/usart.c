@@ -38,11 +38,11 @@ unsigned char receiveByte_up()
 	while (!(UCSR0A & (1<<RXC0)));
 	
 	/* If upe0=1 parity check failed */
-	if (!(UCSR0A & (1<<UPE0){
+	if (!(UCSR0A & (1<<UPE0))){
 			/* Get and return received data from buffer */
 		//unsigned char data = UDR0;
 		//return data;
-		return UDR0
+		return UDR0;
 	}
 
 	return 0xFF;
@@ -53,11 +53,11 @@ unsigned char receiveByte_in()
 	while (!(UCSR1A & (1<<RXC1)));
 	
 	/* If upe0=1 parity check failed */
-	if (!(UCSR1A & (1<<UPE1){
+	if (!(UCSR1A & (1<<UPE1))){
 			/* Get and return received data from buffer */
 		//unsigned char data = UDR0;
 		//return data;
-		return UDR1
+		return UDR1;
 	}
 
 	return 0xFF;
