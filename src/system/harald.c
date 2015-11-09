@@ -14,12 +14,29 @@
 int main(void)
 {
 	init_USART_up();
+	init_USART_down();
 
     while (1) 
     {
 		unsigned char data = receiveByte_up();
-		if(data == 0x42){
-			transmitByte_up(0xFF);
+		
+		if(data == 0x01){
+			transmitByte_up(0x43);
+		}
+		else if(data == 0x09){
+			transmitByte_up(0x09);
+		}
+		else if(data == 0x89){
+			transmitByte_up(0x89);
+		}
+		/*else if(data == 0xFF){
+			transmitByte_up(0x7F);
+		}*/
+		else if(data == 0x7E){
+			transmitByte_up(0x7E);
+		}
+		else{
+			//transmitByte_up(0x01);
 		}
     }
 }
