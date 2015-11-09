@@ -52,7 +52,6 @@ class Harald():
 			return False
 				
 	def sendData(self, data):	
-		print("send Data")
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
 			self.lastCommand = data
@@ -116,7 +115,6 @@ class Harald():
 			parity = 1
 		
 		if parity == bitArray[0]:
-			print("Parity good")
 			return True
 			
 		return False

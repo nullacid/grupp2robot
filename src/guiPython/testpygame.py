@@ -86,22 +86,37 @@ def handle_quit():
 	crayRunning = False
 	pygame.quit()
 	
-#paints a rectangle on the board
-def handle_A():
-	global robotMap
-	robotMap.arrayMap[1][5] = "OPEN"
-	
-def handle_W():
-	global robotMap
-	robotMap.arrayMap[9][4] = "WALL"
-	
-def handle_S():
-	global robotMap
-	robotMap.arrayMap[1][5] = "UNEXPLORED"
-	
-def handle_D():
-	global robotMap
-	robotMap.arrayMap[9][4] = "UNEXPLORED"
+def left_down():
+	global harald
+	harald.sendData(b'\x02')
+
+def back_down():
+	global harald
+	harald.sendData(b'\x04')
+
+def forward_down():
+	global harald
+	harald.sendData(b'\x80')
+
+def right_down():
+	global harald
+	harald.sendData(b'\x86')
+
+def left_up():
+	global harald
+	harald.sendData(b'\x83')
+
+def back_up():
+	global harald
+	harald.sendData(b'\x85')
+
+def forward_up():
+	global harald
+	harald.sendData(b'\x01')
+
+def right_up():
+	global harald
+	harald.sendData(b'\x07')
 
 def handle_BACKSPACE():
 	global harald
@@ -116,14 +131,21 @@ def handle_SPACE():
 	
 	
 #dictionary of key bindings
-handle_dictionary = {
+handle_dictionary_down = {
 	K_ESCAPE: handle_quit,
-	K_a: handle_A,
-	K_s: handle_S,
-	K_w: handle_W,
-	K_d: handle_D,
+	K_a: left_down,
+	K_s: back_down,
+	K_w: forward_down,
+	K_d: right_down,
 	K_BACKSPACE: handle_BACKSPACE,
 	K_SPACE: handle_SPACE
+}
+
+handle_dictionary_up = {
+	K_w: forward_up,
+	K_a: left_up,
+	K_s: back_up,
+	K_d: right_up
 }
 
 robotMap = RobotMap();
@@ -132,5 +154,7 @@ while(crayRunning):
 	robotMap.paintMap()
 	robotMap.paintText()
 	for event in pygame.event.get():
-		if event.type == pygame.KEYDOWN and event.key in handle_dictionary:
-			handle_dictionary[event.key]()
+		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
+			handle_dictionary_down[event.key]()
+		if event.type == pygame.KEYUP and event.key in handle_dictionary_up:
+			handle_dictionary_up[event.key]()

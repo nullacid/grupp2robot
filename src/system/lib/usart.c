@@ -26,7 +26,7 @@ void init_USART_down(){
 
 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
 	 USBS0 as 0 gives 1 stopbit */
-	UCSR1C = (1<<UPM11)|(0<<UPM10)|(0<<UCSZ10)|(1<<UCSZ11)|(0<<UCSZ12)|(0<<USBS1);
+	UCSR1C = (1<<UPM11)|(1<<UPM10)|(0<<UCSZ10)|(1<<UCSZ11)|(0<<UCSZ12)|(0<<USBS1);
 
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);	
@@ -41,7 +41,6 @@ unsigned char receiveByte_up()
 	if (!(UCSR0A & (1<<UPE0))){
 		/* Get and return received data from buffer */
 		unsigned char data = UDR0;
-		//flushUSART_up();
 		transmitOK_up();
 		return data;
 	}
@@ -51,30 +50,13 @@ unsigned char receiveByte_up()
 	return 0xFF;
 }
 
-void flushUSART_up(void){
-	unsigned char dummy;
-	int dummySum = 0;
-	while(UCSR0A & (1<<RXC0)){
-		 dummy = UDR0;
-		 dummySum++;
-	}
-	UDR1 = dummySum;
-}
-
-void flushUSART_down(void){
-	unsigned char dummy;
-	while(UCSR1A & (1<<RXC1)) dummy = UDR1;
-}
-
 unsigned char receiveByte_down()
 {
 	while (!(UCSR1A & (1<<RXC1)));
 	
 	/* If upe0=1 parity check failed */
 	if (!(UCSR1A & (1<<UPE1))){
-			/* Get and return received data from buffer */
-		//unsigned char data = UDR0;
-		//return data;
+		/* Get and return received data from buffer */
 		unsigned char data = UDR1;
 		transmitOK_down();
 		return data;
@@ -150,7 +132,6 @@ int responseError_up(){
 		
 		unsigned char data = UDR0;
 		
-		//flushUSART_up();
 		
 		if(data == 0x7e){
 			return 0;
@@ -161,11 +142,17 @@ int responseError_up(){
 }
 
 int responseError_down(){
-	unsigned char data = receiveByte_down();
-	if(data == 0x7e){
-		return 0;
-	}
+		while (!(UCSR1A & (1<<RXC1)));
+	/* If upe0=0 parity check failed */
+	if (!(UCSR1A & (1<<UPE1))){
+		
+		unsigned char data = UDR1;
+		
+		if(data == 0x7e){
+			return 0;
+		}
 	return 1;
+	}
 }
 
 /* Returns 1 if there is something in the receivebuffer */
