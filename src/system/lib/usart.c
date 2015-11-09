@@ -91,7 +91,7 @@ void transmitByte_down(unsigned char data){
 	}
 }
 
-/* Transmits an ok to the module upstairs. */
+/* Transmits an ok of parity to the module above. */
 void transmitOK_up(void){
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)) );
@@ -100,6 +100,7 @@ void transmitOK_up(void){
     UDR0 = 0x7e;
 }
 
+/* Transmits an error signal for faulty parity to module above. */
 void transmitERROR_up(void){
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)) );
@@ -108,6 +109,7 @@ void transmitERROR_up(void){
     UDR0 = 0x7f;
 }
 
+/* Transmits an ok of parity to the module below. */
 void transmitOK_down(void){
     /* Wait for empty transmit buffer */
     while ( !( UCSR1A & (1<<UDRE1)) );
@@ -116,6 +118,7 @@ void transmitOK_down(void){
     UDR1 = 0x7e;
 }
 
+/* Transmits an error signal for faulty parity to module below. */
 void transmitERROR_down(void){
     /* Wait for empty transmit buffer */
     while ( !( UCSR1A & (1<<UDRE1)) );
@@ -124,6 +127,7 @@ void transmitERROR_down(void){
     UDR1 = 0x7f;
 }
 
+/* Waits for response (regarding parity) from module above. */
 int responseError_up(){
 
 	while (!(UCSR0A & (1<<RXC0)));
@@ -141,6 +145,7 @@ int responseError_up(){
 	return 0;
 }
 
+/* Waits for response (regarding parity) from module below. */
 int responseError_down(){
 		while (!(UCSR1A & (1<<RXC1)));
 	/* If upe0=0 parity check failed */
