@@ -2,6 +2,8 @@ import bluetooth
 import sys, os, traceback
 import struct
 
+from time import *
+
 #Mac Address of our firefly module
 fireflyMacAddr = '00:06:66:03:A6:96'
 
@@ -12,10 +14,10 @@ class Harald():
 		self.targetDevice = None
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+		self.lastCommand = b'0xff'
 		
 		while not self.establishConnection():
 			pass
-		#self.establishConnection()
 		
 	def establishConnection(self):
 		print("performing inquiry...")
@@ -49,26 +51,76 @@ class Harald():
 			print("Failed to connect to firefly module, reattemping to connect")
 			return False
 				
-	def sendData(self, data):		
+	def sendData(self, data):	
+		print("send Data")
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
+			self.lastCommand = data
 			print("sent data: " + str(hex(data[0])))
+			if self.__recConfirmation():
+				print("Data Error, resending command")
+				self.sendData(data)
 			
-	def waitToReceive(self, numBytes):
+	def receiveData(self, numBytes):
+		tja = True
+		while tja:
+			data = self.__waitToReceive(numBytes)
+			if self.__sendConfirmation(data):
+				tja = False
+		if self.__checkIntegrity(data):
+			return data
+		else:
+			print("Integrity error, resending request")
+			self.sendData(self.lastCommand)
+			
+	def __sendConfirmation(self, data):
+		if self.__checkIntegrity(data):
+			self.ourSocket.send(b'\xfe')
+			return True
+		else:
+			self.ourSocket.send(b'\xff')
+			return False
+		
+	def __recConfirmation(self):
+		data = self.__waitToReceive(1)
+		if hex(data[0]) == hex(int("7f", 16)):
+			return True
+		return False
+	
+	def __waitToReceive(self, numBytes):
 		if self.targetDevice != None:
 			while True:
+				return self.ourSocket.recv(numBytes)
 			
-				data = self.ourSocket.recv(numBytes)
-				bitArray = []
-				for b in self.convertToBits(data):
-					bitArray.insert(0, b)
 				
-				return hex(data[0])
-				
-	def convertToBits(self, data):
+	def __checkIntegrity(self, data):
+		bitArray = []
+		for b in self.__convertToBits(data):
+			bitArray.insert(0, b)
+			
+		return self.__checkParity(bitArray)
+	def __convertToBits(self, data):
 		for b in data:
 			for i in range(8):
 				yield(b >> i) & 1
+				
+	def __checkParity(self, bitArray):
+		sum = 0
+		parity = 0
+		
+		for i in range(1, len(bitArray)):
+			if bitArray[i] == 1:
+				sum += 1
+				
+		if sum % 2 == 0:
+			parity = 1
+		
+		if parity == bitArray[0]:
+			print("Parity good")
+			return True
+			
+		return False
+		
 			
 			
 			

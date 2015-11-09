@@ -22,6 +22,8 @@ makefile
 *.so.*
 *.dylib
 
+*.lst
+
 # Executables
 *.exe
 *.out

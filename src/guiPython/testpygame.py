@@ -1,5 +1,5 @@
 import pygame
-
+from time import *
 
 #Import bluetooth class
 from Harald import *
@@ -105,14 +105,15 @@ def handle_D():
 
 def handle_BACKSPACE():
 	global harald
-	harald.sendData(b'\x43')
+	harald.sendData(b'\x89')
 	print("Received data: " + harald.waitToReceive(1))
 	
 def handle_SPACE():
 	global harald
-	harald.sendData(b'\x42')
-	print("Received data: " + harald.waitToReceive(1))
-
+	harald.sendData(b'\x01')
+	data = harald.receiveData(1)
+	print("Data received: " + hex(data[0]));
+	
 	
 #dictionary of key bindings
 handle_dictionary = {
