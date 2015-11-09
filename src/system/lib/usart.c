@@ -167,3 +167,9 @@ int responseError_down(){
 	}
 	return 1;
 }
+
+/* Returns 1 if there is something in the receivebuffer */
+int checkUSARTflag(){
+	return (UCSR1A & (1<<RXC1));
+}
+
