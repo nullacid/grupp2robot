@@ -59,10 +59,9 @@ class Harald():
 			print("sent data: " + str(hex(data[0])))
 			if self.__recConfirmation():
 				print("Data Error, resending command")
-				#self.sendData(data)
+				self.sendData(data)
 			
 	def receiveData(self, numBytes):
-		print("receive data")
 		tja = True
 		while tja:
 			data = self.__waitToReceive(numBytes)
@@ -75,22 +74,16 @@ class Harald():
 			self.sendData(self.lastCommand)
 			
 	def __sendConfirmation(self, data):
-		print("send confirmation")
-		#sleep(5)
 		if self.__checkIntegrity(data):
-			print("good data")
-			self.ourSocket.send(b'\x7e')
+			self.ourSocket.send(b'\xfe')
 			return True
 		else:
-			self.ourSocket.send(b'\x7f')
+			self.ourSocket.send(b'\xff')
 			return False
 		
 	def __recConfirmation(self):
-		print("receive confirmation")
 		data = self.__waitToReceive(1)
-		print("data: " + hex(data[0]))
 		if hex(data[0]) == hex(int("7f", 16)):
-			print("tja")
 			return True
 		return False
 	
@@ -115,12 +108,9 @@ class Harald():
 		sum = 0
 		parity = 0
 		
-		print(bitArray[0], end = "")
 		for i in range(1, len(bitArray)):
-			print(bitArray[i], end = "")
 			if bitArray[i] == 1:
 				sum += 1
-		print("\n")
 				
 		if sum % 2 == 0:
 			parity = 1

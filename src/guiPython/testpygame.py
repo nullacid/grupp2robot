@@ -110,7 +110,7 @@ def handle_BACKSPACE():
 	
 def handle_SPACE():
 	global harald
-	harald.sendData(b'\x89')
+	harald.sendData(b'\x01')
 	data = harald.receiveData(1)
 	print("Data received: " + hex(data[0]));
 	

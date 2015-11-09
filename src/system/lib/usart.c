@@ -35,27 +35,35 @@ void init_USART_down(){
 /* Returns the value in the receivebuffer if the paritybit is correct, 0xFF otherwise */
 unsigned char receiveByte_up()
 {
-	//PORTA |= (1<<PORTA2) | (1<<PORTA3);
 	while (!(UCSR0A & (1<<RXC0)));
 	
 	/* If upe0=1 parity check failed */
 	if (!(UCSR0A & (1<<UPE0))){
-<<<<<<< HEAD
 		/* Get and return received data from buffer */
 		unsigned char data = UDR0;
+		//flushUSART_up();
 		transmitOK_up();
 		return data;
 	}
 	else{
 		transmitERROR_up();
-=======
-			/* Get and return received data from buffer */
-		//unsigned char data = UDR0;
-		//return data;
-		return UDR0;
->>>>>>> 323fe0d34b458cd3a6160f0aa64b56193351a9e0
 	}
 	return 0xFF;
+}
+
+void flushUSART_up(void){
+	unsigned char dummy;
+	int dummySum = 0;
+	while(UCSR0A & (1<<RXC0)){
+		 dummy = UDR0;
+		 dummySum++;
+	}
+	UDR1 = dummySum;
+}
+
+void flushUSART_down(void){
+	unsigned char dummy;
+	while(UCSR1A & (1<<RXC1)) dummy = UDR1;
 }
 
 unsigned char receiveByte_down()
@@ -67,13 +75,9 @@ unsigned char receiveByte_down()
 			/* Get and return received data from buffer */
 		//unsigned char data = UDR0;
 		//return data;
-<<<<<<< HEAD
 		unsigned char data = UDR1;
 		transmitOK_down();
 		return data;
-=======
-		return UDR1;
->>>>>>> 323fe0d34b458cd3a6160f0aa64b56193351a9e0
 	}
 	return 0xFF;
 	transmitERROR_down();
@@ -139,16 +143,14 @@ void transmitERROR_down(void){
 }
 
 int responseError_up(){
-	//PORTA |= (1<<PORTA2) | (1<<PORTA3);
+
 	while (!(UCSR0A & (1<<RXC0)));
 	/* If upe0=0 parity check failed */
 	if (!(UCSR0A & (1<<UPE0))){
-		/* Get and return received data from buffer */
-		//unsigned char data = UDR0;
-		//return data;
+		
 		unsigned char data = UDR0;
 		
-		PORTA = (1 << PORTA0);
+		//flushUSART_up();
 		
 		if(data == 0x7e){
 			return 0;

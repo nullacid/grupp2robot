@@ -29,9 +29,9 @@ int main(void)
 		else if(data == 0x89){
 			transmitByte_up(0x89);
 		}
-		/*else if(data == 0xFF){
-			transmitByte_up(0x7F);
-		}*/
+		else if(data == 0x03){
+			transmitByte_up(0x54);
+		}
 		else if(data == 0x7E){
 			transmitByte_up(0x7E);
 		}
