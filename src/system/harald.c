@@ -20,6 +20,14 @@ int main(void)
     {
 		unsigned char data = receiveByte_up();
 		
+		datalength = data & ((1<<5)|(1<<6));
+
+		while(datalength != 0){
+			transmitByte_down(data);
+			datalength--;
+		}
+
+		/*
 		if(data == 0x01){
 			transmitByte_up(0x43);
 		}
@@ -38,6 +46,7 @@ int main(void)
 		else{
 			//transmitByte_up(0x01);
 		}
+		*/
     }
 }
 
