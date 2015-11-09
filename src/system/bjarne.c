@@ -12,7 +12,7 @@
 void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir, uint8_t rdir);
 void init_motors();
 void handle_messages();
-uint8_t decide_if_repeated();
+uint8_t decide_if_repeated(uint8_t msg);
 
 
 uint8_t dir_left = 1; //0 or 1 = back or forward
@@ -21,6 +21,7 @@ uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
 uint8_t button_autonom = 0; // 0 om manuellt läge, 1 om autonomt läge
 uint8_t message = 1;
+uint8_t activeDirs = 0;
 bool new_message = false;
 
 int main(){
@@ -46,8 +47,9 @@ int main(){
 	}
 }
 
-uint8_t decide_if_repeated(){
+uint8_t decide_if_repeated(uint8_t msg){
 	
+
 	
 	
 }
@@ -55,11 +57,12 @@ uint8_t decide_if_repeated(){
 void handle_messages(){
 	
 	uint8_t message_cpy = message;
-	uint8_t repeated = decide_if_repeated();
 	
 	//plocka ut OP-koden
 	message_cpy &= 31;
 	
+	uint8_t repeated = decide_if_repeated(message_cpy);
+
 	
 	if (button_autonom == 0){ //Manuellt läge
 		if (!repeated){
