@@ -49,9 +49,44 @@ int main(){
 
 uint8_t decide_if_repeated(uint8_t msg){
 	
+	answer = false;
 
-	
-	
+	switch(msg){
+		case (0): //pil UPP trycks ner	
+			answer = activeDirs	&& 1; // 1 om kommandot är repeatat annars 0
+			activeDirs = activeDirs || 1;
+		break;
+		case(1): //pil UPP släpps		
+			answer = false;
+			activeDirs = activeDirs && 254;
+		break;
+		case(2): //pil VÄNSTER trycks ner
+			answer = activeDirs	&& 4; // 1 om kommandot är repeatat annars 0
+			activeDirs = activeDirs || 4;
+		break;
+		case(3): //pil VÄNSTER släpps
+			answer = false;
+			activeDirs = activeDirs && 251;
+		break;
+		case (4): //pil NER trycks ner	
+			answer = activeDirs	&& 2; // 1 om kommandot är repeatat annars 0
+			activeDirs = activeDirs || 2;
+		break;
+		case(5): //pil NER släpps
+			answer = false;
+			activeDirs = activeDirs && 253;
+		break;
+		case(6): //pil HÖGER trycks ner
+			answer = activeDirs	&& 8; // 1 om kommandot är repeatat annars 0
+			activeDirs = activeDirs || 8;
+		break;
+		case(7): //pil HÖGER släpps
+			answer = false;
+			activeDirs = activeDirs && 247;
+		break;				
+	}	
+
+	return answer;
 }
 
 void handle_messages(){
@@ -68,6 +103,7 @@ void handle_messages(){
 		if (!repeated){
 			switch(message_cpy){
 				case (0): //pil UPP trycks ner
+
 				dir_left = 1;
 				dir_right = 1;
 				spd_left = spd_left + 50;
