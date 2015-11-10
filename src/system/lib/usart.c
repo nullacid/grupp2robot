@@ -11,7 +11,7 @@ void init_USART_up(){
 
 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
 	 USBS0 as 0 gives 1 stopbit */
-	UCSR0C = (1<<UPM01)|(1<<UPM00)|(0<<UCSZ00)|(1<<UCSZ01)|(0<<USBS0)|(0<<UMSEL01) | (0<<UMSEL00);
+	UCSR0C = (1<<UPM01)|(1<<UPM00)|(0<<UCSZ00)|(1<<UCSZ01)|(1<<USBS0)|(0<<UMSEL01) | (0<<UMSEL00);
 
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR0B = (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
@@ -26,7 +26,7 @@ void init_USART_down(){
 
 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
 	 USBS0 as 0 gives 1 stopbit */
-	UCSR1C = (1<<UPM11)|(1<<UPM10)|(0<<UCSZ10)|(1<<UCSZ11)|(0<<USBS1) | (0<<UMSEL11) | (0<<UMSEL10);
+	UCSR1C = (1<<UPM11)|(1<<UPM10)|(0<<UCSZ10)|(1<<UCSZ11)|(1<<USBS1) | (0<<UMSEL11) | (0<<UMSEL10);
 
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);	
