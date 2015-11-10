@@ -18,10 +18,21 @@ int main(void)
 
     while (1) 
     {
-		unsigned char data = receiveByte_up();
-		transmitByte_down(data);
+		//unsigned char data = receiveByte_up();
+		//transmitByte_down(data);
+		testcase1();
 
     }
+}
+
+void testcase1(){
+	unsigned char data = receiveByte_up;
+	data &= 7F;
+	if (data == 06){
+		// right down
+		transmitByte_down(06); // exakt en byte
+		//transmitByte_down(data); // oklart om den innehåller parity och typ stoppbitar
+	}
 }
 
 
