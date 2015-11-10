@@ -7,8 +7,6 @@ from time import *
 #Mac Address of our firefly module
 fireflyMacAddr = '00:06:66:03:A6:96'
 
-
-#Should socket maybe be closed?
 class Harald():
 	def __init__(self):
 		self.targetDevice = None
@@ -96,8 +94,8 @@ class Harald():
 		bitArray = []
 		for b in self.__convertToBits(data):
 			bitArray.insert(0, b)
-			
 		return self.__checkParity(bitArray)
+		
 	def __convertToBits(self, data):
 		for b in data:
 			for i in range(8):

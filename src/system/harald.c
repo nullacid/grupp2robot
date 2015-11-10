@@ -20,9 +20,10 @@ int main(void)
     {
 		unsigned char data = receiveByte_up();
 		
-		unsigned int datalength = data & ((1<<5)|(1<<6));
+		//unsigned int datalength = data & ((1<<5)|(1<<6));
 
 		transmitByte_down(data);
+		//transmitByte_down(0x37);
 
     }
 }

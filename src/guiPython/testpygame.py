@@ -83,7 +83,10 @@ class RobotMap():
 #key binding handles
 def handle_quit():
 	global crayRunning
+	global harald
+	harald.ourSocket.close()
 	crayRunning = False
+	
 	pygame.quit()
 	
 def left_down():
