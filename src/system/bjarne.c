@@ -76,8 +76,8 @@ uint8_t kartdata_temp_y = 0;
 
 int main(){
 	
-	init_USART_up();
-	init_USART_down();
+	init_USART_up(10);
+	init_USART_down(10);
 	init_motors();
 	
 	while(1){
