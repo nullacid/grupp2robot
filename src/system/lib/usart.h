@@ -5,10 +5,10 @@
 #include <avr/io.h>
 
 /* Initializes USART connection to the module upwards. */
-void init_USART_up(int cpuSpeed);
+void init_USART_up(unsigned int baud);
 
 /* Initializes USART connection to the module downwards. */
-void init_USART_down(int cpuSpeed);
+void init_USART_down(unsigned int baud);
 
 /* Listens and receives a byte from the upward module. */
 unsigned char receiveByte_up(void);

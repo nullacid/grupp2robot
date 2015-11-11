@@ -6,6 +6,7 @@
  */ 
 
 #define F_CPU 14.7456E6
+#define BAUD 7
 #include <avr/io.h>
 #include <util/delay.h>
 #include "lib\usart.h"
@@ -13,8 +14,8 @@
 
 int main(void)
 {
-	init_USART_up(7);
-	init_USART_down(7);
+	init_USART_up(BAUD);
+	init_USART_down(BAUD);
 
     while (1) 
     {
