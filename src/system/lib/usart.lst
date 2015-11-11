@@ -1,4 +1,4 @@
-GAS LISTING /tmp/ccLnLhK1.s 			page 1
+GAS LISTING /tmp/ccASTGQS.s 			page 1
 
 
    1               		.file	"usart.c"
@@ -58,7 +58,7 @@ GAS LISTING /tmp/ccLnLhK1.s 			page 1
   55               		.stabs	"_Sat unsigned short _Accum:t(0,43)=r(0,1);2;0;",128,0,0,0
   56               		.stabs	"_Sat unsigned _Accum:t(0,44)=r(0,1);4;0;",128,0,0,0
   57               		.stabs	"_Sat unsigned long _Accum:t(0,45)=r(0,1);8;0;",128,0,0,0
-GAS LISTING /tmp/ccLnLhK1.s 			page 2
+GAS LISTING /tmp/ccASTGQS.s 			page 2
 
 
   58               		.stabs	"_Sat unsigned long long _Accum:t(0,46)=r(0,1);8;0;",128,0,0,0
@@ -118,7 +118,7 @@ GAS LISTING /tmp/ccLnLhK1.s 			page 1
    3:lib/usart.c   **** /* Initialize USART. */
    4:lib/usart.c   **** void init_USART_up(){
  110               		.stabn	68,0,4,.LM0-.LFBB1
-GAS LISTING /tmp/ccLnLhK1.s 			page 3
+GAS LISTING /tmp/ccASTGQS.s 			page 3
 
 
  111               	.LM0:
@@ -143,292 +143,716 @@ GAS LISTING /tmp/ccLnLhK1.s 			page 1
   11:lib/usart.c   **** 
   12:lib/usart.c   **** 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
   13:lib/usart.c   **** 	 USBS0 as 0 gives 1 stopbit */
-  14:lib/usart.c   **** 	UCSR0C |= (1<<UPM01)|(0<<UPM00)|(0<<UCSZ00)|(1<<UCSZ01)|(0<<USBS0);
+  14:lib/usart.c   **** 	UCSR0C = (1<<UPM01)|(1<<UPM00)|(0<<UCSZ00)|(1<<UCSZ01)|(0<<USBS0)|(0<<UMSEL01) | (0<<UMSEL00);
  124               		.stabn	68,0,14,.LM3-.LFBB1
  125               	.LM3:
- 126 000a E2EC      		ldi r30,lo8(-62)
- 127 000c F0E0      		ldi r31,0
- 128 000e 8081      		ld r24,Z
- 129 0010 8462      		ori r24,lo8(36)
- 130 0012 8083      		st Z,r24
+ 126 000a 84E3      		ldi r24,lo8(52)
+ 127 000c 8093 C200 		sts 194,r24
   15:lib/usart.c   **** 
   16:lib/usart.c   **** 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
-  17:lib/usart.c   **** 	UCSR0B |= (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
- 131               		.stabn	68,0,17,.LM4-.LFBB1
- 132               	.LM4:
- 133 0014 E1EC      		ldi r30,lo8(-63)
- 134 0016 F0E0      		ldi r31,0
- 135 0018 8081      		ld r24,Z
- 136 001a 8861      		ori r24,lo8(24)
- 137 001c 8083      		st Z,r24
- 138 001e 0895      		ret
- 139               		.size	init_USART_up, .-init_USART_up
- 140               	.Lscope1:
- 141               		.stabs	"",36,0,0,.Lscope1-.LFBB1
- 142               		.stabd	78,0,0
- 143               		.stabs	"init_USART_down:F(0,47)",36,0,20,init_USART_down
- 144               	.global	init_USART_down
- 145               		.type	init_USART_down, @function
- 146               	init_USART_down:
- 147               		.stabd	46,0,0
+  17:lib/usart.c   **** 	UCSR0B = (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
+ 128               		.stabn	68,0,17,.LM4-.LFBB1
+ 129               	.LM4:
+ 130 0010 88E1      		ldi r24,lo8(24)
+ 131 0012 8093 C100 		sts 193,r24
+ 132 0016 0895      		ret
+ 133               		.size	init_USART_up, .-init_USART_up
+ 134               	.Lscope1:
+ 135               		.stabs	"",36,0,0,.Lscope1-.LFBB1
+ 136               		.stabd	78,0,0
+ 137               		.stabs	"init_USART_down:F(0,47)",36,0,20,init_USART_down
+ 138               	.global	init_USART_down
+ 139               		.type	init_USART_down, @function
+ 140               	init_USART_down:
+ 141               		.stabd	46,0,0
   18:lib/usart.c   **** }
   19:lib/usart.c   **** 
   20:lib/usart.c   **** void init_USART_down(){
- 148               		.stabn	68,0,20,.LM5-.LFBB2
- 149               	.LM5:
- 150               	.LFBB2:
- 151               	/* prologue: function */
-GAS LISTING /tmp/ccLnLhK1.s 			page 4
-
-
- 152               	/* frame size = 0 */
- 153               	/* stack size = 0 */
- 154               	.L__stack_usage = 0
+ 142               		.stabn	68,0,20,.LM5-.LFBB2
+ 143               	.LM5:
+ 144               	.LFBB2:
+ 145               	/* prologue: function */
+ 146               	/* frame size = 0 */
+ 147               	/* stack size = 0 */
+ 148               	.L__stack_usage = 0
   21:lib/usart.c   **** 	unsigned int baud = 7;
   22:lib/usart.c   **** 	
   23:lib/usart.c   **** 	/* Set baud rate */
+GAS LISTING /tmp/ccASTGQS.s 			page 4
+
+
   24:lib/usart.c   **** 	UBRR1H = (unsigned char)(baud>>8);
- 155               		.stabn	68,0,24,.LM6-.LFBB2
- 156               	.LM6:
- 157 0020 1092 CD00 		sts 205,__zero_reg__
+ 149               		.stabn	68,0,24,.LM6-.LFBB2
+ 150               	.LM6:
+ 151 0018 1092 CD00 		sts 205,__zero_reg__
   25:lib/usart.c   **** 	UBRR1L = (unsigned char)baud;
- 158               		.stabn	68,0,25,.LM7-.LFBB2
- 159               	.LM7:
- 160 0024 87E0      		ldi r24,lo8(7)
- 161 0026 8093 CC00 		sts 204,r24
+ 152               		.stabn	68,0,25,.LM7-.LFBB2
+ 153               	.LM7:
+ 154 001c 87E0      		ldi r24,lo8(7)
+ 155 001e 8093 CC00 		sts 204,r24
   26:lib/usart.c   **** 
   27:lib/usart.c   **** 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
   28:lib/usart.c   **** 	 USBS0 as 0 gives 1 stopbit */
-  29:lib/usart.c   **** 	UCSR1C |= (1<<UPM11)|(0<<UPM10)|(0<<UCSZ10)|(1<<UCSZ11)|(0<<USBS1);
- 162               		.stabn	68,0,29,.LM8-.LFBB2
- 163               	.LM8:
- 164 002a EAEC      		ldi r30,lo8(-54)
- 165 002c F0E0      		ldi r31,0
- 166 002e 8081      		ld r24,Z
- 167 0030 8462      		ori r24,lo8(36)
- 168 0032 8083      		st Z,r24
+  29:lib/usart.c   **** 	UCSR1C = (1<<UPM11)|(1<<UPM10)|(0<<UCSZ10)|(1<<UCSZ11)|(0<<USBS1) | (0<<UMSEL11) | (0<<UMSEL10);
+ 156               		.stabn	68,0,29,.LM8-.LFBB2
+ 157               	.LM8:
+ 158 0022 84E3      		ldi r24,lo8(52)
+ 159 0024 8093 CA00 		sts 202,r24
   30:lib/usart.c   **** 
   31:lib/usart.c   **** 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
-  32:lib/usart.c   **** 	UCSR1B |= (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);	
- 169               		.stabn	68,0,32,.LM9-.LFBB2
- 170               	.LM9:
- 171 0034 E9EC      		ldi r30,lo8(-55)
- 172 0036 F0E0      		ldi r31,0
- 173 0038 8081      		ld r24,Z
- 174 003a 8861      		ori r24,lo8(24)
- 175 003c 8083      		st Z,r24
- 176 003e 0895      		ret
- 177               		.size	init_USART_down, .-init_USART_down
- 178               	.Lscope2:
- 179               		.stabs	"",36,0,0,.Lscope2-.LFBB2
- 180               		.stabd	78,0,0
- 181               		.stabs	"receiveByte_up:F(0,11)",36,0,36,receiveByte_up
- 182               	.global	receiveByte_up
- 183               		.type	receiveByte_up, @function
- 184               	receiveByte_up:
- 185               		.stabd	46,0,0
-  33:lib/usart.c   **** }
-  34:lib/usart.c   **** 
-  35:lib/usart.c   **** /* Returns the value in the receivebuffer if the paritybit is correct, 0xFF otherwise */
-  36:lib/usart.c   **** unsigned char receiveByte_up()
-  37:lib/usart.c   **** {
- 186               		.stabn	68,0,37,.LM10-.LFBB3
- 187               	.LM10:
- 188               	.LFBB3:
- 189               	/* prologue: function */
- 190               	/* frame size = 0 */
- 191               	/* stack size = 0 */
-GAS LISTING /tmp/ccLnLhK1.s 			page 5
+  32:lib/usart.c   **** 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);	
+ 160               		.stabn	68,0,32,.LM9-.LFBB2
+ 161               	.LM9:
+ 162 0028 88E1      		ldi r24,lo8(24)
+ 163 002a 8093 C900 		sts 201,r24
+ 164 002e 0895      		ret
+ 165               		.size	init_USART_down, .-init_USART_down
+ 166               	.Lscope2:
+ 167               		.stabs	"",36,0,0,.Lscope2-.LFBB2
+ 168               		.stabd	78,0,0
+ 169               		.stabs	"transmitOK_up:F(0,47)",36,0,98,transmitOK_up
+ 170               	.global	transmitOK_up
+ 171               		.type	transmitOK_up, @function
+ 172               	transmitOK_up:
+ 173               		.stabd	46,0,0
+  33:lib/usart.c   **** 	
+  34:lib/usart.c   **** 	
+  35:lib/usart.c   **** }
+  36:lib/usart.c   **** 
+  37:lib/usart.c   **** /* Returns the value in the receivebuffer if the paritybit is correct, 0xFF otherwise */
+  38:lib/usart.c   **** unsigned char receiveByte_up()
+  39:lib/usart.c   **** {
+  40:lib/usart.c   **** 	while (!(UCSR0A & (1<<RXC0)));
+  41:lib/usart.c   **** 	
+  42:lib/usart.c   **** 	/* If upe0=1 parity check failed */
+  43:lib/usart.c   **** 	if (!(UCSR0A & (1<<UPE0))){
+  44:lib/usart.c   **** 		/* Get and return received data from buffer */
+  45:lib/usart.c   **** 		unsigned char data = UDR0;
+  46:lib/usart.c   **** 		PORTA = data;
+  47:lib/usart.c   **** 		transmitOK_up();
+  48:lib/usart.c   **** 		return data;
+  49:lib/usart.c   **** 	}
+  50:lib/usart.c   **** 	else{
+  51:lib/usart.c   **** 		transmitERROR_up();
+  52:lib/usart.c   **** 	}
+  53:lib/usart.c   **** 	return 0xFF;
+  54:lib/usart.c   **** }
+  55:lib/usart.c   **** 
+GAS LISTING /tmp/ccASTGQS.s 			page 5
 
 
- 192               	.L__stack_usage = 0
- 193               	.L5:
-  38:lib/usart.c   **** 	while (!(UCSR0A & (1<<RXC0)));
- 194               		.stabn	68,0,38,.LM11-.LFBB3
- 195               	.LM11:
- 196 0040 8091 C000 		lds r24,192
- 197 0044 87FF      		sbrs r24,7
- 198 0046 00C0      		rjmp .L5
-  39:lib/usart.c   **** 	
-  40:lib/usart.c   **** 	/* If upe0=1 parity check failed */
-  41:lib/usart.c   **** 	if (!(UCSR0A & (1<<UPE0))){
- 199               		.stabn	68,0,41,.LM12-.LFBB3
- 200               	.LM12:
- 201 0048 8091 C000 		lds r24,192
- 202 004c 82FD      		sbrc r24,2
- 203 004e 00C0      		rjmp .L7
-  42:lib/usart.c   **** 			/* Get and return received data from buffer */
-  43:lib/usart.c   **** 		//unsigned char data = UDR0;
-  44:lib/usart.c   **** 		//return data;
-  45:lib/usart.c   **** 		return UDR0;
- 204               		.stabn	68,0,45,.LM13-.LFBB3
- 205               	.LM13:
- 206 0050 8091 C600 		lds r24,198
- 207 0054 0895      		ret
- 208               	.L7:
-  46:lib/usart.c   **** 	}
-  47:lib/usart.c   **** 
-  48:lib/usart.c   **** 	return 0xFF;
- 209               		.stabn	68,0,48,.LM14-.LFBB3
+  56:lib/usart.c   **** unsigned char receiveByte_down()
+  57:lib/usart.c   **** {
+  58:lib/usart.c   **** 	while (!(UCSR1A & (1<<RXC1)));
+  59:lib/usart.c   **** 	
+  60:lib/usart.c   **** 	/* If upe0=1 parity check failed */
+  61:lib/usart.c   **** 	if (!(UCSR1A & (1<<UPE1))){
+  62:lib/usart.c   **** 		/* Get and return received data from buffer */
+  63:lib/usart.c   **** 		unsigned char data = UDR1;
+  64:lib/usart.c   **** 		transmitOK_down();
+  65:lib/usart.c   **** 		return data;
+  66:lib/usart.c   **** 	}
+  67:lib/usart.c   **** 	return 0xFF;
+  68:lib/usart.c   **** 	transmitERROR_down();
+  69:lib/usart.c   **** }
+  70:lib/usart.c   **** 
+  71:lib/usart.c   **** /* Transmit data to the module above */
+  72:lib/usart.c   **** void transmitByte_up(unsigned char data){
+  73:lib/usart.c   ****     /* Wait for empty transmit buffer */
+  74:lib/usart.c   ****     while ( !( UCSR0A & (1<<UDRE0)) );
+  75:lib/usart.c   ****     
+  76:lib/usart.c   ****     /* Put data into buffer, sends the data */
+  77:lib/usart.c   ****     UDR0 = data;
+  78:lib/usart.c   **** 	
+  79:lib/usart.c   **** 	if(responseError_up()){
+  80:lib/usart.c   **** 		transmitByte_up(data);
+  81:lib/usart.c   **** 	}
+  82:lib/usart.c   **** }
+  83:lib/usart.c   **** 
+  84:lib/usart.c   **** /* Transmit data to the module below */
+  85:lib/usart.c   **** void transmitByte_down(unsigned char data){
+  86:lib/usart.c   ****     /* Wait for empty transmit buffer */
+  87:lib/usart.c   ****     while ( !( UCSR1A & (1<<UDRE1)) );
+  88:lib/usart.c   ****     
+  89:lib/usart.c   ****     /* Put data into buffer, sends the data */
+  90:lib/usart.c   ****     UDR1 = data;
+  91:lib/usart.c   **** 	
+  92:lib/usart.c   **** 	if(responseError_down()){
+  93:lib/usart.c   **** 		transmitByte_down(data);
+  94:lib/usart.c   **** 	}
+  95:lib/usart.c   **** }
+  96:lib/usart.c   **** 
+  97:lib/usart.c   **** /* Transmits an ok of parity to the module above. */
+  98:lib/usart.c   **** void transmitOK_up(void){
+ 174               		.stabn	68,0,98,.LM10-.LFBB3
+ 175               	.LM10:
+ 176               	.LFBB3:
+ 177               	/* prologue: function */
+ 178               	/* frame size = 0 */
+ 179               	/* stack size = 0 */
+ 180               	.L__stack_usage = 0
+ 181               	.L5:
+  99:lib/usart.c   ****     /* Wait for empty transmit buffer */
+ 100:lib/usart.c   ****     while ( !( UCSR0A & (1<<UDRE0)) );
+ 182               		.stabn	68,0,100,.LM11-.LFBB3
+ 183               	.LM11:
+ 184 0030 8091 C000 		lds r24,192
+ 185 0034 85FF      		sbrs r24,5
+GAS LISTING /tmp/ccASTGQS.s 			page 6
+
+
+ 186 0036 00C0      		rjmp .L5
+ 101:lib/usart.c   ****     
+ 102:lib/usart.c   ****     /* Put data into buffer, sends the data */
+ 103:lib/usart.c   ****     UDR0 = 0x7e;
+ 187               		.stabn	68,0,103,.LM12-.LFBB3
+ 188               	.LM12:
+ 189 0038 8EE7      		ldi r24,lo8(126)
+ 190 003a 8093 C600 		sts 198,r24
+ 191 003e 0895      		ret
+ 192               		.size	transmitOK_up, .-transmitOK_up
+ 193               	.Lscope3:
+ 194               		.stabs	"",36,0,0,.Lscope3-.LFBB3
+ 195               		.stabd	78,0,0
+ 196               		.stabs	"transmitERROR_up:F(0,47)",36,0,107,transmitERROR_up
+ 197               	.global	transmitERROR_up
+ 198               		.type	transmitERROR_up, @function
+ 199               	transmitERROR_up:
+ 200               		.stabd	46,0,0
+ 104:lib/usart.c   **** }
+ 105:lib/usart.c   **** 
+ 106:lib/usart.c   **** /* Transmits an error signal for faulty parity to module above. */
+ 107:lib/usart.c   **** void transmitERROR_up(void){
+ 201               		.stabn	68,0,107,.LM13-.LFBB4
+ 202               	.LM13:
+ 203               	.LFBB4:
+ 204               	/* prologue: function */
+ 205               	/* frame size = 0 */
+ 206               	/* stack size = 0 */
+ 207               	.L__stack_usage = 0
+ 208               	.L9:
+ 108:lib/usart.c   ****     /* Wait for empty transmit buffer */
+ 109:lib/usart.c   ****     while ( !( UCSR0A & (1<<UDRE0)) );
+ 209               		.stabn	68,0,109,.LM14-.LFBB4
  210               	.LM14:
- 211 0056 8FEF      		ldi r24,lo8(-1)
-  49:lib/usart.c   **** }
- 212               		.stabn	68,0,49,.LM15-.LFBB3
- 213               	.LM15:
- 214 0058 0895      		ret
- 215               		.size	receiveByte_up, .-receiveByte_up
- 216               	.Lscope3:
- 217               		.stabs	"",36,0,0,.Lscope3-.LFBB3
- 218               		.stabd	78,0,0
- 219               		.stabs	"receiveByte_in:F(0,11)",36,0,51,receiveByte_in
- 220               	.global	receiveByte_in
- 221               		.type	receiveByte_in, @function
- 222               	receiveByte_in:
- 223               		.stabd	46,0,0
-  50:lib/usart.c   **** 
-  51:lib/usart.c   **** unsigned char receiveByte_in()
-  52:lib/usart.c   **** {
- 224               		.stabn	68,0,52,.LM16-.LFBB4
- 225               	.LM16:
- 226               	.LFBB4:
- 227               	/* prologue: function */
- 228               	/* frame size = 0 */
- 229               	/* stack size = 0 */
- 230               	.L__stack_usage = 0
- 231               	.L11:
-  53:lib/usart.c   **** 	while (!(UCSR1A & (1<<RXC1)));
- 232               		.stabn	68,0,53,.LM17-.LFBB4
-GAS LISTING /tmp/ccLnLhK1.s 			page 6
+ 211 0040 8091 C000 		lds r24,192
+ 212 0044 85FF      		sbrs r24,5
+ 213 0046 00C0      		rjmp .L9
+ 110:lib/usart.c   ****     
+ 111:lib/usart.c   ****     /* Put data into buffer, sends the data */
+ 112:lib/usart.c   ****     UDR0 = 0x7f;
+ 214               		.stabn	68,0,112,.LM15-.LFBB4
+ 215               	.LM15:
+ 216 0048 8FE7      		ldi r24,lo8(127)
+ 217 004a 8093 C600 		sts 198,r24
+ 218 004e 0895      		ret
+ 219               		.size	transmitERROR_up, .-transmitERROR_up
+ 220               	.Lscope4:
+ 221               		.stabs	"",36,0,0,.Lscope4-.LFBB4
+ 222               		.stabd	78,0,0
+ 223               		.stabs	"receiveByte_up:F(0,11)",36,0,38,receiveByte_up
+ 224               	.global	receiveByte_up
+ 225               		.type	receiveByte_up, @function
+ 226               	receiveByte_up:
+ 227               		.stabd	46,0,0
+  39:lib/usart.c   **** {
+ 228               		.stabn	68,0,39,.LM16-.LFBB5
+ 229               	.LM16:
+GAS LISTING /tmp/ccASTGQS.s 			page 7
 
 
- 233               	.LM17:
- 234 005a 8091 C800 		lds r24,200
- 235 005e 87FF      		sbrs r24,7
- 236 0060 00C0      		rjmp .L11
-  54:lib/usart.c   **** 	
-  55:lib/usart.c   **** 	/* If upe0=1 parity check failed */
-  56:lib/usart.c   **** 	if (!(UCSR1A & (1<<UPE1))){
- 237               		.stabn	68,0,56,.LM18-.LFBB4
- 238               	.LM18:
- 239 0062 8091 C800 		lds r24,200
- 240 0066 82FD      		sbrc r24,2
- 241 0068 00C0      		rjmp .L13
-  57:lib/usart.c   **** 			/* Get and return received data from buffer */
-  58:lib/usart.c   **** 		//unsigned char data = UDR0;
-  59:lib/usart.c   **** 		//return data;
-  60:lib/usart.c   **** 		return UDR1;
- 242               		.stabn	68,0,60,.LM19-.LFBB4
- 243               	.LM19:
- 244 006a 8091 CE00 		lds r24,206
- 245 006e 0895      		ret
- 246               	.L13:
-  61:lib/usart.c   **** 	}
-  62:lib/usart.c   **** 
-  63:lib/usart.c   **** 	return 0xFF;
- 247               		.stabn	68,0,63,.LM20-.LFBB4
- 248               	.LM20:
- 249 0070 8FEF      		ldi r24,lo8(-1)
-  64:lib/usart.c   **** }
- 250               		.stabn	68,0,64,.LM21-.LFBB4
- 251               	.LM21:
- 252 0072 0895      		ret
- 253               		.size	receiveByte_in, .-receiveByte_in
- 254               	.Lscope4:
- 255               		.stabs	"",36,0,0,.Lscope4-.LFBB4
- 256               		.stabd	78,0,0
- 257               		.stabs	"transmitByte_up:F(0,47)",36,0,67,transmitByte_up
- 258               		.stabs	"data:P(0,11)",64,0,67,24
- 259               	.global	transmitByte_up
- 260               		.type	transmitByte_up, @function
- 261               	transmitByte_up:
- 262               		.stabd	46,0,0
-  65:lib/usart.c   **** 
-  66:lib/usart.c   **** /* Transmit data to the module above */
-  67:lib/usart.c   **** void transmitByte_up(unsigned char data){
- 263               		.stabn	68,0,67,.LM22-.LFBB5
- 264               	.LM22:
- 265               	.LFBB5:
- 266               	/* prologue: function */
- 267               	/* frame size = 0 */
- 268               	/* stack size = 0 */
- 269               	.L__stack_usage = 0
- 270               	.L16:
-  68:lib/usart.c   ****     /* Wait for empty transmit buffer */
-  69:lib/usart.c   ****     while ( !( UCSR0A & (1<<UDRE0)) );
- 271               		.stabn	68,0,69,.LM23-.LFBB5
- 272               	.LM23:
- 273 0074 9091 C000 		lds r25,192
-GAS LISTING /tmp/ccLnLhK1.s 			page 7
+ 230               	.LFBB5:
+ 231 0050 CF93      		push r28
+ 232               	/* prologue: function */
+ 233               	/* frame size = 0 */
+ 234               	/* stack size = 1 */
+ 235               	.L__stack_usage = 1
+ 236               	.L12:
+  40:lib/usart.c   **** 	while (!(UCSR0A & (1<<RXC0)));
+ 237               		.stabn	68,0,40,.LM17-.LFBB5
+ 238               	.LM17:
+ 239 0052 8091 C000 		lds r24,192
+ 240 0056 87FF      		sbrs r24,7
+ 241 0058 00C0      		rjmp .L12
+  43:lib/usart.c   **** 	if (!(UCSR0A & (1<<UPE0))){
+ 242               		.stabn	68,0,43,.LM18-.LFBB5
+ 243               	.LM18:
+ 244 005a 8091 C000 		lds r24,192
+ 245 005e 82FD      		sbrc r24,2
+ 246 0060 00C0      		rjmp .L13
+ 247               	.LBB2:
+  45:lib/usart.c   **** 		unsigned char data = UDR0;
+ 248               		.stabn	68,0,45,.LM19-.LFBB5
+ 249               	.LM19:
+ 250 0062 C091 C600 		lds r28,198
+  46:lib/usart.c   **** 		PORTA = data;
+ 251               		.stabn	68,0,46,.LM20-.LFBB5
+ 252               	.LM20:
+ 253 0066 C2B9      		out 0x2,r28
+  47:lib/usart.c   **** 		transmitOK_up();
+ 254               		.stabn	68,0,47,.LM21-.LFBB5
+ 255               	.LM21:
+ 256 0068 0E94 0000 		call transmitOK_up
+  48:lib/usart.c   **** 		return data;
+ 257               		.stabn	68,0,48,.LM22-.LFBB5
+ 258               	.LM22:
+ 259 006c 8C2F      		mov r24,r28
+ 260 006e 00C0      		rjmp .L14
+ 261               	.L13:
+ 262               	.LBE2:
+ 263               	.LBB3:
+  51:lib/usart.c   **** 		transmitERROR_up();
+ 264               		.stabn	68,0,51,.LM23-.LFBB5
+ 265               	.LM23:
+ 266 0070 0E94 0000 		call transmitERROR_up
+ 267               	.LBE3:
+  53:lib/usart.c   **** 	return 0xFF;
+ 268               		.stabn	68,0,53,.LM24-.LFBB5
+ 269               	.LM24:
+ 270 0074 8FEF      		ldi r24,lo8(-1)
+ 271               	.L14:
+ 272               	/* epilogue start */
+  54:lib/usart.c   **** }
+ 273               		.stabn	68,0,54,.LM25-.LFBB5
+ 274               	.LM25:
+ 275 0076 CF91      		pop r28
+ 276 0078 0895      		ret
+ 277               		.size	receiveByte_up, .-receiveByte_up
+GAS LISTING /tmp/ccASTGQS.s 			page 8
 
 
- 274 0078 95FF      		sbrs r25,5
- 275 007a 00C0      		rjmp .L16
-  70:lib/usart.c   ****     
-  71:lib/usart.c   ****     /* Put data into buffer, sends the data */
-  72:lib/usart.c   ****     UDR0 = data;
- 276               		.stabn	68,0,72,.LM24-.LFBB5
- 277               	.LM24:
- 278 007c 8093 C600 		sts 198,r24
- 279 0080 0895      		ret
- 280               		.size	transmitByte_up, .-transmitByte_up
+ 278               		.stabs	"data:r(0,11)",64,0,45,28
+ 279               		.stabn	192,0,0,.LBB2-.LFBB5
+ 280               		.stabn	224,0,0,.LBE2-.LFBB5
  281               	.Lscope5:
  282               		.stabs	"",36,0,0,.Lscope5-.LFBB5
  283               		.stabd	78,0,0
- 284               		.stabs	"transmitByte_in:F(0,47)",36,0,76,transmitByte_in
- 285               		.stabs	"data:P(0,11)",64,0,76,24
- 286               	.global	transmitByte_in
- 287               		.type	transmitByte_in, @function
- 288               	transmitByte_in:
- 289               		.stabd	46,0,0
-  73:lib/usart.c   **** }
-  74:lib/usart.c   **** 
-  75:lib/usart.c   **** /* Transmit data to the module below */
-  76:lib/usart.c   **** void transmitByte_in(unsigned char data){
- 290               		.stabn	68,0,76,.LM25-.LFBB6
- 291               	.LM25:
- 292               	.LFBB6:
- 293               	/* prologue: function */
- 294               	/* frame size = 0 */
- 295               	/* stack size = 0 */
- 296               	.L__stack_usage = 0
- 297               	.L19:
-  77:lib/usart.c   ****     /* Wait for empty transmit buffer */
-  78:lib/usart.c   ****     while ( !( UCSR1A & (1<<UDRE1)) );
- 298               		.stabn	68,0,78,.LM26-.LFBB6
- 299               	.LM26:
- 300 0082 9091 C800 		lds r25,200
- 301 0086 95FF      		sbrs r25,5
- 302 0088 00C0      		rjmp .L19
-  79:lib/usart.c   ****     
-  80:lib/usart.c   ****     /* Put data into buffer, sends the data */
-  81:lib/usart.c   ****     UDR1 = data;
- 303               		.stabn	68,0,81,.LM27-.LFBB6
- 304               	.LM27:
- 305 008a 8093 CE00 		sts 206,r24
- 306 008e 0895      		ret
- 307               		.size	transmitByte_in, .-transmitByte_in
+ 284               		.stabs	"transmitOK_down:F(0,47)",36,0,116,transmitOK_down
+ 285               	.global	transmitOK_down
+ 286               		.type	transmitOK_down, @function
+ 287               	transmitOK_down:
+ 288               		.stabd	46,0,0
+ 113:lib/usart.c   **** }
+ 114:lib/usart.c   **** 
+ 115:lib/usart.c   **** /* Transmits an ok of parity to the module below. */
+ 116:lib/usart.c   **** void transmitOK_down(void){
+ 289               		.stabn	68,0,116,.LM26-.LFBB6
+ 290               	.LM26:
+ 291               	.LFBB6:
+ 292               	/* prologue: function */
+ 293               	/* frame size = 0 */
+ 294               	/* stack size = 0 */
+ 295               	.L__stack_usage = 0
+ 296               	.L17:
+ 117:lib/usart.c   ****     /* Wait for empty transmit buffer */
+ 118:lib/usart.c   ****     while ( !( UCSR1A & (1<<UDRE1)) );
+ 297               		.stabn	68,0,118,.LM27-.LFBB6
+ 298               	.LM27:
+ 299 007a 8091 C800 		lds r24,200
+ 300 007e 85FF      		sbrs r24,5
+ 301 0080 00C0      		rjmp .L17
+ 119:lib/usart.c   ****     
+ 120:lib/usart.c   ****     /* Put data into buffer, sends the data */
+ 121:lib/usart.c   ****     UDR1 = 0x7e;
+ 302               		.stabn	68,0,121,.LM28-.LFBB6
+ 303               	.LM28:
+ 304 0082 8EE7      		ldi r24,lo8(126)
+ 305 0084 8093 CE00 		sts 206,r24
+ 306 0088 0895      		ret
+ 307               		.size	transmitOK_down, .-transmitOK_down
  308               	.Lscope6:
  309               		.stabs	"",36,0,0,.Lscope6-.LFBB6
  310               		.stabd	78,0,0
- 311               		.stabs	"",100,0,0,.Letext0
- 312               	.Letext0:
- 313               		.ident	"GCC: (GNU) 4.8.2"
-GAS LISTING /tmp/ccLnLhK1.s 			page 8
+ 311               		.stabs	"receiveByte_down:F(0,11)",36,0,56,receiveByte_down
+ 312               	.global	receiveByte_down
+ 313               		.type	receiveByte_down, @function
+ 314               	receiveByte_down:
+ 315               		.stabd	46,0,0
+  57:lib/usart.c   **** {
+ 316               		.stabn	68,0,57,.LM29-.LFBB7
+ 317               	.LM29:
+ 318               	.LFBB7:
+ 319 008a CF93      		push r28
+ 320               	/* prologue: function */
+ 321               	/* frame size = 0 */
+ 322               	/* stack size = 1 */
+ 323               	.L__stack_usage = 1
+ 324               	.L20:
+GAS LISTING /tmp/ccASTGQS.s 			page 9
+
+
+  58:lib/usart.c   **** 	while (!(UCSR1A & (1<<RXC1)));
+ 325               		.stabn	68,0,58,.LM30-.LFBB7
+ 326               	.LM30:
+ 327 008c 8091 C800 		lds r24,200
+ 328 0090 87FF      		sbrs r24,7
+ 329 0092 00C0      		rjmp .L20
+  61:lib/usart.c   **** 	if (!(UCSR1A & (1<<UPE1))){
+ 330               		.stabn	68,0,61,.LM31-.LFBB7
+ 331               	.LM31:
+ 332 0094 8091 C800 		lds r24,200
+ 333 0098 82FD      		sbrc r24,2
+ 334 009a 00C0      		rjmp .L22
+ 335               	.LBB4:
+  63:lib/usart.c   **** 		unsigned char data = UDR1;
+ 336               		.stabn	68,0,63,.LM32-.LFBB7
+ 337               	.LM32:
+ 338 009c C091 CE00 		lds r28,206
+  64:lib/usart.c   **** 		transmitOK_down();
+ 339               		.stabn	68,0,64,.LM33-.LFBB7
+ 340               	.LM33:
+ 341 00a0 0E94 0000 		call transmitOK_down
+  65:lib/usart.c   **** 		return data;
+ 342               		.stabn	68,0,65,.LM34-.LFBB7
+ 343               	.LM34:
+ 344 00a4 8C2F      		mov r24,r28
+ 345 00a6 00C0      		rjmp .L21
+ 346               	.L22:
+ 347               	.LBE4:
+  67:lib/usart.c   **** 	return 0xFF;
+ 348               		.stabn	68,0,67,.LM35-.LFBB7
+ 349               	.LM35:
+ 350 00a8 8FEF      		ldi r24,lo8(-1)
+ 351               	.L21:
+ 352               	/* epilogue start */
+  69:lib/usart.c   **** }
+ 353               		.stabn	68,0,69,.LM36-.LFBB7
+ 354               	.LM36:
+ 355 00aa CF91      		pop r28
+ 356 00ac 0895      		ret
+ 357               		.size	receiveByte_down, .-receiveByte_down
+ 358               		.stabs	"data:r(0,11)",64,0,63,28
+ 359               		.stabn	192,0,0,.LBB4-.LFBB7
+ 360               		.stabn	224,0,0,.LBE4-.LFBB7
+ 361               	.Lscope7:
+ 362               		.stabs	"",36,0,0,.Lscope7-.LFBB7
+ 363               		.stabd	78,0,0
+ 364               		.stabs	"transmitERROR_down:F(0,47)",36,0,125,transmitERROR_down
+ 365               	.global	transmitERROR_down
+ 366               		.type	transmitERROR_down, @function
+ 367               	transmitERROR_down:
+ 368               		.stabd	46,0,0
+ 122:lib/usart.c   **** }
+ 123:lib/usart.c   **** 
+ 124:lib/usart.c   **** /* Transmits an error signal for faulty parity to module below. */
+ 125:lib/usart.c   **** void transmitERROR_down(void){
+ 369               		.stabn	68,0,125,.LM37-.LFBB8
+ 370               	.LM37:
+GAS LISTING /tmp/ccASTGQS.s 			page 10
+
+
+ 371               	.LFBB8:
+ 372               	/* prologue: function */
+ 373               	/* frame size = 0 */
+ 374               	/* stack size = 0 */
+ 375               	.L__stack_usage = 0
+ 376               	.L25:
+ 126:lib/usart.c   ****     /* Wait for empty transmit buffer */
+ 127:lib/usart.c   ****     while ( !( UCSR1A & (1<<UDRE1)) );
+ 377               		.stabn	68,0,127,.LM38-.LFBB8
+ 378               	.LM38:
+ 379 00ae 8091 C800 		lds r24,200
+ 380 00b2 85FF      		sbrs r24,5
+ 381 00b4 00C0      		rjmp .L25
+ 128:lib/usart.c   ****     
+ 129:lib/usart.c   ****     /* Put data into buffer, sends the data */
+ 130:lib/usart.c   ****     UDR1 = 0x7f;
+ 382               		.stabn	68,0,130,.LM39-.LFBB8
+ 383               	.LM39:
+ 384 00b6 8FE7      		ldi r24,lo8(127)
+ 385 00b8 8093 CE00 		sts 206,r24
+ 386 00bc 0895      		ret
+ 387               		.size	transmitERROR_down, .-transmitERROR_down
+ 388               	.Lscope8:
+ 389               		.stabs	"",36,0,0,.Lscope8-.LFBB8
+ 390               		.stabd	78,0,0
+ 391               		.stabs	"responseError_up:F(0,1)",36,0,134,responseError_up
+ 392               	.global	responseError_up
+ 393               		.type	responseError_up, @function
+ 394               	responseError_up:
+ 395               		.stabd	46,0,0
+ 131:lib/usart.c   **** }
+ 132:lib/usart.c   **** 
+ 133:lib/usart.c   **** /* Waits for response (regarding parity) from module above. */
+ 134:lib/usart.c   **** int responseError_up(){
+ 396               		.stabn	68,0,134,.LM40-.LFBB9
+ 397               	.LM40:
+ 398               	.LFBB9:
+ 399               	/* prologue: function */
+ 400               	/* frame size = 0 */
+ 401               	/* stack size = 0 */
+ 402               	.L__stack_usage = 0
+ 403               	.L28:
+ 135:lib/usart.c   **** 
+ 136:lib/usart.c   **** 	while (!(UCSR0A & (1<<RXC0)));
+ 404               		.stabn	68,0,136,.LM41-.LFBB9
+ 405               	.LM41:
+ 406 00be 8091 C000 		lds r24,192
+ 407 00c2 87FF      		sbrs r24,7
+ 408 00c4 00C0      		rjmp .L28
+ 137:lib/usart.c   **** 	/* If upe0=0 parity check failed */
+ 138:lib/usart.c   **** 	if (!(UCSR0A & (1<<UPE0))){
+ 409               		.stabn	68,0,138,.LM42-.LFBB9
+ 410               	.LM42:
+ 411 00c6 8091 C000 		lds r24,192
+ 412 00ca 82FD      		sbrc r24,2
+ 413 00cc 00C0      		rjmp .L31
+ 414               	.LBB5:
+GAS LISTING /tmp/ccASTGQS.s 			page 11
+
+
+ 139:lib/usart.c   **** 		
+ 140:lib/usart.c   **** 		unsigned char data = UDR0;
+ 415               		.stabn	68,0,140,.LM43-.LFBB9
+ 416               	.LM43:
+ 417 00ce 2091 C600 		lds r18,198
+ 141:lib/usart.c   **** 		
+ 142:lib/usart.c   **** 		
+ 143:lib/usart.c   **** 		if(data == 0x7e){
+ 418               		.stabn	68,0,143,.LM44-.LFBB9
+ 419               	.LM44:
+ 420 00d2 81E0      		ldi r24,lo8(1)
+ 421 00d4 90E0      		ldi r25,0
+ 422 00d6 2E37      		cpi r18,lo8(126)
+ 423 00d8 01F4      		brne .L29
+ 424 00da 80E0      		ldi r24,0
+ 425 00dc 0895      		ret
+ 426               	.L31:
+ 427               	.LBE5:
+ 144:lib/usart.c   **** 			return 0;
+ 145:lib/usart.c   **** 		}
+ 146:lib/usart.c   **** 		return 1;
+ 147:lib/usart.c   **** 	}
+ 148:lib/usart.c   **** 	return 0;
+ 428               		.stabn	68,0,148,.LM45-.LFBB9
+ 429               	.LM45:
+ 430 00de 80E0      		ldi r24,0
+ 431 00e0 90E0      		ldi r25,0
+ 432               	.L29:
+ 149:lib/usart.c   **** }
+ 433               		.stabn	68,0,149,.LM46-.LFBB9
+ 434               	.LM46:
+ 435 00e2 0895      		ret
+ 436               		.size	responseError_up, .-responseError_up
+ 437               		.stabs	"data:r(0,11)",64,0,140,18
+ 438               		.stabn	192,0,0,.LBB5-.LFBB9
+ 439               		.stabn	224,0,0,.LBE5-.LFBB9
+ 440               	.Lscope9:
+ 441               		.stabs	"",36,0,0,.Lscope9-.LFBB9
+ 442               		.stabd	78,0,0
+ 443               		.stabs	"transmitByte_up:F(0,47)",36,0,72,transmitByte_up
+ 444               		.stabs	"data:P(0,11)",64,0,72,28
+ 445               	.global	transmitByte_up
+ 446               		.type	transmitByte_up, @function
+ 447               	transmitByte_up:
+ 448               		.stabd	46,0,0
+  72:lib/usart.c   **** void transmitByte_up(unsigned char data){
+ 449               		.stabn	68,0,72,.LM47-.LFBB10
+ 450               	.LM47:
+ 451               	.LFBB10:
+ 452 00e4 CF93      		push r28
+ 453               	/* prologue: function */
+ 454               	/* frame size = 0 */
+ 455               	/* stack size = 1 */
+ 456               	.L__stack_usage = 1
+ 457 00e6 C82F      		mov r28,r24
+ 458               	.L34:
+  74:lib/usart.c   ****     while ( !( UCSR0A & (1<<UDRE0)) );
+GAS LISTING /tmp/ccASTGQS.s 			page 12
+
+
+ 459               		.stabn	68,0,74,.LM48-.LFBB10
+ 460               	.LM48:
+ 461 00e8 8091 C000 		lds r24,192
+ 462 00ec 85FF      		sbrs r24,5
+ 463 00ee 00C0      		rjmp .L34
+  77:lib/usart.c   ****     UDR0 = data;
+ 464               		.stabn	68,0,77,.LM49-.LFBB10
+ 465               	.LM49:
+ 466 00f0 C093 C600 		sts 198,r28
+  79:lib/usart.c   **** 	if(responseError_up()){
+ 467               		.stabn	68,0,79,.LM50-.LFBB10
+ 468               	.LM50:
+ 469 00f4 0E94 0000 		call responseError_up
+ 470 00f8 892B      		or r24,r25
+ 471 00fa 01F4      		brne .L34
+ 472               	/* epilogue start */
+  82:lib/usart.c   **** }
+ 473               		.stabn	68,0,82,.LM51-.LFBB10
+ 474               	.LM51:
+ 475 00fc CF91      		pop r28
+ 476 00fe 0895      		ret
+ 477               		.size	transmitByte_up, .-transmitByte_up
+ 478               	.Lscope10:
+ 479               		.stabs	"",36,0,0,.Lscope10-.LFBB10
+ 480               		.stabd	78,0,0
+ 481               		.stabs	"responseError_down:F(0,1)",36,0,152,responseError_down
+ 482               	.global	responseError_down
+ 483               		.type	responseError_down, @function
+ 484               	responseError_down:
+ 485               		.stabd	46,0,0
+ 150:lib/usart.c   **** 
+ 151:lib/usart.c   **** /* Waits for response (regarding parity) from module below. */
+ 152:lib/usart.c   **** int responseError_down(){
+ 486               		.stabn	68,0,152,.LM52-.LFBB11
+ 487               	.LM52:
+ 488               	.LFBB11:
+ 489               	/* prologue: function */
+ 490               	/* frame size = 0 */
+ 491               	/* stack size = 0 */
+ 492               	.L__stack_usage = 0
+ 493               	.L39:
+ 153:lib/usart.c   **** 		while (!(UCSR1A & (1<<RXC1)));
+ 494               		.stabn	68,0,153,.LM53-.LFBB11
+ 495               	.LM53:
+ 496 0100 8091 C800 		lds r24,200
+ 497 0104 87FF      		sbrs r24,7
+ 498 0106 00C0      		rjmp .L39
+ 154:lib/usart.c   **** 	/* If upe0=0 parity check failed */
+ 155:lib/usart.c   **** 	if (!(UCSR1A & (1<<UPE1))){
+ 499               		.stabn	68,0,155,.LM54-.LFBB11
+ 500               	.LM54:
+ 501 0108 8091 C800 		lds r24,200
+ 502 010c 82FD      		sbrc r24,2
+ 503 010e 00C0      		rjmp .L42
+ 504               	.LBB6:
+ 156:lib/usart.c   **** 		
+ 157:lib/usart.c   **** 		unsigned char data = UDR1;
+GAS LISTING /tmp/ccASTGQS.s 			page 13
+
+
+ 505               		.stabn	68,0,157,.LM55-.LFBB11
+ 506               	.LM55:
+ 507 0110 2091 CE00 		lds r18,206
+ 158:lib/usart.c   **** 		
+ 159:lib/usart.c   **** 		if(data == 0x7e){
+ 508               		.stabn	68,0,159,.LM56-.LFBB11
+ 509               	.LM56:
+ 510 0114 81E0      		ldi r24,lo8(1)
+ 511 0116 90E0      		ldi r25,0
+ 512 0118 2E37      		cpi r18,lo8(126)
+ 513 011a 01F4      		brne .L37
+ 514 011c 80E0      		ldi r24,0
+ 515 011e 0895      		ret
+ 516               	.L42:
+ 517               	.L37:
+ 518               	.LBE6:
+ 160:lib/usart.c   **** 			return 0;
+ 161:lib/usart.c   **** 		}
+ 162:lib/usart.c   **** 	return 1;
+ 163:lib/usart.c   **** 	}
+ 164:lib/usart.c   **** }
+ 519               		.stabn	68,0,164,.LM57-.LFBB11
+ 520               	.LM57:
+ 521 0120 0895      		ret
+ 522               		.size	responseError_down, .-responseError_down
+ 523               		.stabs	"data:r(0,11)",64,0,157,18
+ 524               		.stabn	192,0,0,.LBB6-.LFBB11
+ 525               		.stabn	224,0,0,.LBE6-.LFBB11
+ 526               	.Lscope11:
+ 527               		.stabs	"",36,0,0,.Lscope11-.LFBB11
+ 528               		.stabd	78,0,0
+ 529               		.stabs	"transmitByte_down:F(0,47)",36,0,85,transmitByte_down
+ 530               		.stabs	"data:P(0,11)",64,0,85,28
+ 531               	.global	transmitByte_down
+ 532               		.type	transmitByte_down, @function
+ 533               	transmitByte_down:
+ 534               		.stabd	46,0,0
+  85:lib/usart.c   **** void transmitByte_down(unsigned char data){
+ 535               		.stabn	68,0,85,.LM58-.LFBB12
+ 536               	.LM58:
+ 537               	.LFBB12:
+ 538 0122 CF93      		push r28
+ 539               	/* prologue: function */
+ 540               	/* frame size = 0 */
+ 541               	/* stack size = 1 */
+ 542               	.L__stack_usage = 1
+ 543 0124 C82F      		mov r28,r24
+ 544               	.L45:
+  87:lib/usart.c   ****     while ( !( UCSR1A & (1<<UDRE1)) );
+ 545               		.stabn	68,0,87,.LM59-.LFBB12
+ 546               	.LM59:
+ 547 0126 8091 C800 		lds r24,200
+ 548 012a 85FF      		sbrs r24,5
+ 549 012c 00C0      		rjmp .L45
+  90:lib/usart.c   ****     UDR1 = data;
+ 550               		.stabn	68,0,90,.LM60-.LFBB12
+ 551               	.LM60:
+GAS LISTING /tmp/ccASTGQS.s 			page 14
+
+
+ 552 012e C093 CE00 		sts 206,r28
+  92:lib/usart.c   **** 	if(responseError_down()){
+ 553               		.stabn	68,0,92,.LM61-.LFBB12
+ 554               	.LM61:
+ 555 0132 0E94 0000 		call responseError_down
+ 556 0136 892B      		or r24,r25
+ 557 0138 01F4      		brne .L45
+ 558               	/* epilogue start */
+  95:lib/usart.c   **** }
+ 559               		.stabn	68,0,95,.LM62-.LFBB12
+ 560               	.LM62:
+ 561 013a CF91      		pop r28
+ 562 013c 0895      		ret
+ 563               		.size	transmitByte_down, .-transmitByte_down
+ 564               	.Lscope12:
+ 565               		.stabs	"",36,0,0,.Lscope12-.LFBB12
+ 566               		.stabd	78,0,0
+ 567               		.stabs	"checkUSARTflag:F(0,1)",36,0,167,checkUSARTflag
+ 568               	.global	checkUSARTflag
+ 569               		.type	checkUSARTflag, @function
+ 570               	checkUSARTflag:
+ 571               		.stabd	46,0,0
+ 165:lib/usart.c   **** 
+ 166:lib/usart.c   **** /* Returns 1 if there is something in the receivebuffer */
+ 167:lib/usart.c   **** int checkUSARTflag(){
+ 572               		.stabn	68,0,167,.LM63-.LFBB13
+ 573               	.LM63:
+ 574               	.LFBB13:
+ 575               	/* prologue: function */
+ 576               	/* frame size = 0 */
+ 577               	/* stack size = 0 */
+ 578               	.L__stack_usage = 0
+ 168:lib/usart.c   **** 	return (UCSR1A & (1<<RXC1));
+ 579               		.stabn	68,0,168,.LM64-.LFBB13
+ 580               	.LM64:
+ 581 013e 8091 C800 		lds r24,200
+ 582 0142 8078      		andi r24,lo8(-128)
+ 169:lib/usart.c   **** }
+ 583               		.stabn	68,0,169,.LM65-.LFBB13
+ 584               	.LM65:
+ 585 0144 90E0      		ldi r25,0
+ 586 0146 0895      		ret
+ 587               		.size	checkUSARTflag, .-checkUSARTflag
+ 588               	.Lscope13:
+ 589               		.stabs	"",36,0,0,.Lscope13-.LFBB13
+ 590               		.stabd	78,0,0
+ 591               		.stabs	"",100,0,0,.Letext0
+ 592               	.Letext0:
+ 593               		.ident	"GCC: (GNU) 4.8.2"
+GAS LISTING /tmp/ccASTGQS.s 			page 15
 
 
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 usart.c
-     /tmp/ccLnLhK1.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/ccLnLhK1.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/ccLnLhK1.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/ccLnLhK1.s:5      *ABS*:000000000000003b __RAMPZ__
-     /tmp/ccLnLhK1.s:6      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/ccLnLhK1.s:7      *ABS*:0000000000000001 __zero_reg__
-     /tmp/ccLnLhK1.s:108    .text:0000000000000000 init_USART_up
-     /tmp/ccLnLhK1.s:146    .text:0000000000000020 init_USART_down
-     /tmp/ccLnLhK1.s:184    .text:0000000000000040 receiveByte_up
-     /tmp/ccLnLhK1.s:222    .text:000000000000005a receiveByte_in
-     /tmp/ccLnLhK1.s:261    .text:0000000000000074 transmitByte_up
-     /tmp/ccLnLhK1.s:288    .text:0000000000000082 transmitByte_in
+     /tmp/ccASTGQS.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccASTGQS.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccASTGQS.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccASTGQS.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccASTGQS.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccASTGQS.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccASTGQS.s:108    .text:0000000000000000 init_USART_up
+     /tmp/ccASTGQS.s:140    .text:0000000000000018 init_USART_down
+     /tmp/ccASTGQS.s:172    .text:0000000000000030 transmitOK_up
+     /tmp/ccASTGQS.s:199    .text:0000000000000040 transmitERROR_up
+     /tmp/ccASTGQS.s:226    .text:0000000000000050 receiveByte_up
+     /tmp/ccASTGQS.s:287    .text:000000000000007a transmitOK_down
+     /tmp/ccASTGQS.s:314    .text:000000000000008a receiveByte_down
+     /tmp/ccASTGQS.s:367    .text:00000000000000ae transmitERROR_down
+     /tmp/ccASTGQS.s:394    .text:00000000000000be responseError_up
+     /tmp/ccASTGQS.s:447    .text:00000000000000e4 transmitByte_up
+     /tmp/ccASTGQS.s:484    .text:0000000000000100 responseError_down
+     /tmp/ccASTGQS.s:533    .text:0000000000000122 transmitByte_down
+     /tmp/ccASTGQS.s:570    .text:000000000000013e checkUSARTflag
 
 NO UNDEFINED SYMBOLS
