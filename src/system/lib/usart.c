@@ -1,9 +1,9 @@
 #include "usart.h"
 
 /* Initialize USART. */
-void init_USART_up(){
+void init_USART_up(unsigned int baud){
 	
-	unsigned int baud = 7;
+	//unsigned int baud = 7;
 	
 	/* Set baud rate */
 	UBRR0H = (unsigned char)(baud>>8);
@@ -12,17 +12,21 @@ void init_USART_up(){
 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
 	 USBS0 as 0 gives 1 stopbit */
 	UCSR0C = (1<<UPM01)|(1<<UPM00)|(0<<UCSZ00)|(1<<UCSZ01)|(0<<USBS0)|(0<<UMSEL01) | (0<<UMSEL00);
+	
+	UCSR0A = (0<<U2X0);
 
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR0B = (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
 }
 
-void init_USART_down(){
-	unsigned int baud = 7;
+void init_USART_down(unsigned int baud){
+	//unsigned int baud = 7;
 	
 	/* Set baud rate */
 	UBRR1H = (unsigned char)(baud>>8);
 	UBRR1L = (unsigned char)baud;
+	
+	UCSR1A = (0<<U2X1);
 
 	/* UCSZn0,1,2 as 010 gives 7 bit frame size, UPMn0,1 as 01 gives enabled even parity
 	 USBS0 as 0 gives 1 stopbit */
@@ -92,6 +96,8 @@ void transmitByte_down(unsigned char data){
 	if(responseError_down()){
 		transmitByte_down(data);
 	}
+	
+	UCSR1A |= 0x40;
 }
 
 /* Transmits an ok of parity to the module above. */

@@ -13,31 +13,30 @@
 
 int main(void)
 {
-	init_USART_up();
-	init_USART_down();
+	init_USART_up(7);
+	init_USART_down(7);
 
     while (1) 
     {
-<<<<<<< HEAD
 		unsigned char data = receiveByte_up();
-		//PORTA = data;
+		//testcase1();
+		//data &= 0x7F;
 		transmitByte_down(data);
-		
-=======
-		//unsigned char data = receiveByte_up();
-		//transmitByte_down(data);
-		testcase1();
->>>>>>> d2fe86ce1a657419012b5d108ac31e0d308453df
-
     }
 }
 
+void USART_Flush( void )
+{
+	unsigned char dummy;
+	while ( UCSR1A & (1<<RXC1) ) dummy = UDR1;
+}
+
 void testcase1(){
-	unsigned char data = receiveByte_up;
-	data &= 7F;
-	if (data == 06){
+	unsigned char data = receiveByte_up();
+	data &= 0x7F;
+	if (data == 0x06){
 		// right down
-		transmitByte_down(06); // exakt en byte
+		transmitByte_down(0x06); // exakt en byte
 		//transmitByte_down(data); // oklart om den innehåller parity och typ stoppbitar
 	}
 }
