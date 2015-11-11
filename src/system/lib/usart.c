@@ -43,6 +43,7 @@ unsigned char receiveByte_up()
 	if (!(UCSR0A & (1<<UPE0))){
 		/* Get and return received data from buffer */
 		unsigned char data = UDR0;
+		PORTA = data;
 		transmitOK_up();
 		return data;
 	}

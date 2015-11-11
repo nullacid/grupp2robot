@@ -21,7 +21,7 @@ uint8_t dir_right = 1;
 uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
 uint8_t button_autonom = 0; // 0 om manuellt läge, 1 om autonomt läge
-uint8_t message = 1;
+
 uint8_t activeDirs = 0;
 bool new_message = false;
 
@@ -102,7 +102,6 @@ int main(){
 uint8_t decide_if_repeated(uint8_t msg){
 	
 	bool answer = false;
-
 	switch(msg){
 		case (0): //pil UPP trycks ner	
 			answer = activeDirs	&& 1; // 1 om kommandot är repeatat annars 0
@@ -142,26 +141,24 @@ uint8_t decide_if_repeated(uint8_t msg){
 }
 
 void handle_messages(){
-
 	if(checkUSARTflag()){
-		message = receiveByte_up();
 	
-
-		uint8_t message_cpy = message;
-		
+		uint8_t message = receiveByte_up();	
+		uint8_t message_cpy = message >> 1;
+		//PORTA = message_cpy;
 		//plocka ut OP-koden
 		message_cpy &= 31;
-		
-		uint8_t repeated = decide_if_repeated(message_cpy);
-
+		//PORTA = activeDirs;
+		//uint8_t repeated = decide_if_repeated(message_cpy);
+		uint8_t repeated = false;
 		
 		if (button_autonom == 0){ //Manuellt läge
 			if (!repeated){
 				switch(message_cpy){
 					case (0): //pil UPP trycks ner
 
-					dir_left = 1;
-					dir_right = 1;
+					dir_left = FORWARD;
+					dir_right = FORWARD;
 					spd_left = spd_left + 50;
 					spd_right = spd_right + 50;
 					break;
@@ -176,29 +173,30 @@ void handle_messages(){
 					spd_right = spd_right - 50;
 					break;
 					case (4): //pil NER trycks ner
-					dir_left = 0;
-					dir_right = 0;
+					dir_left = BACK;
+					dir_right = BACK;
 					spd_left = spd_left + 50;
 					spd_right = spd_right + 50;
 					break;
 					case(5): //pil NER släpps
-					dir_left = 1;
-					dir_right = 1;
 					spd_left = spd_left - 50;
 					spd_right = spd_right - 50;
+					dir_left = FORWARD;
+					dir_right = FORWARD;
+
 					break;
 					case(6): //pil HÖGER trycks ner
 					spd_left = spd_left + 50;
 					break;
 					case(7): //pil HÖGER släpps
 					spd_left = spd_left - 50;
-					break;				
+					break;			
 				}
 			}
 			setSpeed(spd_left,spd_right,dir_left,dir_right);
 		}
 
-		switch(message_cpy){
+		/*switch(message_cpy){
 			
 			case (0x08):
 				//lägg lidardata i send-buffern
@@ -313,7 +311,7 @@ void handle_messages(){
 				transmitByte_up(kartdata_temp_y);
 			break;
 
-		}
+		}*/
 	}		
 }
 
