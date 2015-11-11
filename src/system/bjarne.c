@@ -145,10 +145,10 @@ void handle_messages(){
 	
 		uint8_t message = receiveByte_up();	
 		uint8_t message_cpy = message >> 1;
-		//PORTA = message_cpy;
+		PORTA = message_cpy;
 		//plocka ut OP-koden
 		message_cpy &= 31;
-		//PORTA = activeDirs;
+		PORTA = activeDirs;
 		//uint8_t repeated = decide_if_repeated(message_cpy);
 		uint8_t repeated = false;
 		
