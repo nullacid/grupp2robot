@@ -20,8 +20,6 @@ int main(void)
     while (1) 
     {
 		unsigned char data = receiveByte_up();
-		//testcase1();
-		//data &= 0x7F;
 		transmitByte_down(data);
     }
 }

@@ -47,7 +47,6 @@ unsigned char receiveByte_up()
 	if (!(UCSR0A & (1<<UPE0))){
 		/* Get and return received data from buffer */
 		unsigned char data = UDR0;
-		PORTA = data;
 		transmitOK_up();
 		return data;
 	}
@@ -96,8 +95,6 @@ void transmitByte_down(unsigned char data){
 	if(responseError_down()){
 		transmitByte_down(data);
 	}
-	
-	UCSR1A |= 0x40;
 }
 
 /* Transmits an ok of parity to the module above. */
