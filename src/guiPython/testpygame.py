@@ -92,34 +92,42 @@ def handle_quit():
 def left_down():
 	global harald
 	harald.sendData(b'\x02')
+	#harald.receiveData(1)
 
 def back_down():
 	global harald
 	harald.sendData(b'\x04')
+	#harald.receiveData(1)
 
 def forward_down():
 	global harald
 	harald.sendData(b'\x80')
+	#harald.receiveData(1)
 
 def right_down():
 	global harald
 	harald.sendData(b'\x86')
+	#harald.receiveData(1)
 
 def left_up():
 	global harald
 	harald.sendData(b'\x83')
+	#harald.receiveData(1)
 
 def back_up():
 	global harald
 	harald.sendData(b'\x85')
+	#harald.receiveData(1)
 
 def forward_up():
 	global harald
 	harald.sendData(b'\x01')
+	#harald.receiveData(1)
 
 def right_up():
 	global harald
 	harald.sendData(b'\x07')
+	#harald.receiveData(1)
 
 def handle_BACKSPACE():
 	global harald
@@ -130,7 +138,7 @@ def handle_SPACE():
 	global harald
 	harald.sendData(b'\x01')
 	data = harald.receiveData(1)
-	print("Data received: " + hex(data[0]));
+	#print("Data received: " + hex(data[0]));
 	
 	
 #dictionary of key bindings

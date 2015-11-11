@@ -19,7 +19,9 @@ int main(void)
     while (1) 
     {
 		unsigned char data = receiveByte_up();
+		//PORTA = data;
 		transmitByte_down(data);
+		
 
     }
 }

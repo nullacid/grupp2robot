@@ -65,6 +65,7 @@ class Harald():
 			if self.__sendConfirmation(data):
 				tja = False
 		if self.__checkIntegrity(data):
+			print("Data Received: " + hex(data[0]))
 			return data
 		else:
 			print("Integrity error, resending request")
