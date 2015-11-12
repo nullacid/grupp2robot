@@ -21,8 +21,8 @@ int main(void)
     {
 		unsigned char data = receiveByte_up();
 		transmitByte_down(data);
-		unsigned char returnData= receiveByte_down();
-		transmitByte_up(returnData);
+		//unsigned char returnData= receiveByte_down();
+		//transmitByte_up(returnData);
     }
 }
 
