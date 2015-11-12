@@ -8,7 +8,6 @@
 #define F_CPU 14.7456E6
 #define BAUD 7
 #include <avr/io.h>
-#include <util/delay.h>
 #include "lib\usart.h"
 
 
@@ -22,21 +21,17 @@ int main(void)
     while (1) 
     {
 		unsigned char data = receiveByte_up();
-		unsigned int datalength = data & 0x60; //removes data and parity
+		unsigned int datalength = data & 0xC0; //removes data and parity
 		datalength = (datalength >> 5);
-		unsigned int i = 0;
+		
 		transmitByte_down(data);
 
-		while(datalength != 0){
-			returnDataArray[i] = receiveByte_down();
-			datalength--;
-			i++;
-		}
+		unsigned int i = 0;
+
+		i = waitForResponse(&returnDataArray);
 		
-		do{
-			transmitByte_up(returnDataArray[2 - i]);
-			i--;
-		}while(i != 0);
+		transmitBytes_up(returnDataArray, i);
+
     }
 }
 
@@ -44,6 +39,23 @@ void USART_Flush( void )
 {
 	unsigned char dummy;
 	while ( UCSR1A & (1<<RXC1) ) dummy = UDR1;
+}
+
+unsigned int waitForResponse(unsigned char* returnDataArray, unsigned int datalength){
+	unsigned int i = 0;
+	while(datalength != 0){
+		returnDataArray[i] = receiveByte_down();
+		datalength--;
+		i++;
+	}
+	return i;
+}
+
+void transmitBytes_up(unsigned char returnDataArray, unsigned int i){
+	do{
+		transmitByte_up(returnDataArray[2 - i]);
+		i--;
+	}while(i != 0);
 }
 
 
