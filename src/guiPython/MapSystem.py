@@ -1,6 +1,6 @@
 
 
-class MapSystem(self):
+class MapSystem():
 	def __init__(self):
 		self.arrayMap = [["UNEXPLORED" for x in range(15)] for x in range(15)]
 		self.dataIndex = 0
@@ -14,14 +14,15 @@ class MapSystem(self):
 						6 : "Lidar (token)",
 						7 : "Parallel Right",
 						8 : "Parallel Left",
-						9 : "IRrightFront (token)",
-						10 : "IRrightBack (token)",
-						11 : "IRleftFront (token)",
-						12 : "IRleftBack (token)",
-						13 : "Steering data",
-						14 : "Update Map",
-						15 : "System Position",
-						16 : "Steering Decision"		
+						9 : "Gyro (token)",
+						10 : "IRrightFront (token)",
+						11 : "IRrightBack (token)",
+						12 : "IRleftFront (token)",
+						13 : "IRleftBack (token)",
+						14 : "Steering data",
+						15 : "Update Map",
+						16 : "System Position",
+						17 : "Steering Decision"		
 		}
 		self.dataDict = {
 						"Lidar" : 0,
@@ -33,6 +34,7 @@ class MapSystem(self):
 						"Lidar (token)" : 0,
 						"Parallel Right" : 0,
 						"Parallel Left" : 0,
+						"Gyro (token)" : 0,
 						"IRrightFront (token)" : 0,
 						"IRrightBack (token)" : 0,
 						"IRleftFront (token)" : 0,
@@ -42,4 +44,9 @@ class MapSystem(self):
 						"System Position" : 0,
 						"Steering Decision" : 0			
 		}
+	#Increments index and loops it at 17
+	def incIndex(self):
+		self.dataIndex += 1
+		if self.dataIndex > 17:
+			self.dataIndex = 0
 		

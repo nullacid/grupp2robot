@@ -4,6 +4,9 @@ from time import *
 #Import bluetooth class
 from Harald import *
 
+#Import map system class
+from MapSystem import *
+
 #from pygame.locals import *
 from pygame import *
 import sys, os, traceback
@@ -50,97 +53,125 @@ MAGENTA = (255,0,255)
 YELLOW = (255,255,0)
 
 
-
-class RobotMap():
-	def __init__(self):
-		self.arrayMap = [["UNEXPLORED" for x in range(15)] for x in range(15)]	
+def paintText():
+	font = pygame.font.Font(None, 36)
+	text = font.render("tjabba", 0, WHITE)
+	surface.blit(text, ((7*screenWidth)/9, screenHeight/2))
 		
-	def paintMap(self):
-		for i in range(0,15):
-			for j in range(0,15):
-				self.__paintSquare(robotMap.arrayMap[i][j], i, j)
-		pygame.display.flip()
-		
-	def paintText(self):
-		font = pygame.font.Font(None, 36)
-		text = font.render("tjabba", 0, WHITE)
-		surface.blit(text, ((7*screenWidth)/9, screenHeight/2))
-		
-		
-	def __paintSquare(self, squareType, i , j):
-		colour = BLACK
-		if squareType == "UNEXPLORED":
-			colour = WHITE
-		elif squareType == "OPEN":
-			colour = BLUE
-		elif squareType == "WALL":
-			colour = MAGENTA
-		pygame.draw.rect(surface, colour, [i*squareWidth, j*squareHeight, squareWidth, squareHeight])
-		
-	def clearMap(self):
-		self.arrayMap = [["UNEXPLORED" for x in range(15)] for x in range(15)]	
+def paintMap(mapSystem):
+	for i in range(0,15):
+		for j in range(0,15):
+			paintSquare(mapSystem.arrayMap[i][j], i, j)
+	pygame.display.flip()
+			
+def paintSquare(tileType, xCoord, yCoord):
+	colour = BLACK
+	if tileType == "UNEXPLORED":
+		colour = WHITE
+	elif tileType == "OPEN":
+		colour = BLUE
+	elif tileType == "WALL":
+		colour = MAGENTA
+	pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
 					
 #key binding handles
 def handle_quit():
 	global crayRunning
-	global harald
 	harald.ourSocket.close()
 	crayRunning = False
 	
 	pygame.quit()
 	
+#Functions for steering the system (called with keybindings)
 def left_down():
-	global harald
 	harald.sendData(b'\x02')
-	#harald.receiveData(1)
 
 def back_down():
-	global harald
 	harald.sendData(b'\x04')
-	#harald.receiveData(1)
 
 def forward_down():
-	global harald
 	harald.sendData(b'\x00')
-	#harald.receiveData(1)
 
 def right_down():
-	global harald
 	harald.sendData(b'\x06')
-	#harald.receiveData(1)
 
 def left_up():
-	global harald
 	harald.sendData(b'\x03')
-	#harald.receiveData(1)
 
 def back_up():
-	global harald
 	harald.sendData(b'\x05')
-	#harald.receiveData(1)
 
 def forward_up():
-	global harald
 	harald.sendData(b'\x01')
-	#harald.receiveData(1)
 
 def right_up():
-	global harald
 	harald.sendData(b'\x07')
-	#harald.receiveData(1)
 
 def handle_BACKSPACE():
-	global harald
 	harald.sendData(b'\x09')
-	print("Received data: " + harald.waitToReceive(1))
+	harald.receiveData(1)
 	
 def handle_SPACE():
-	global harald
 	harald.sendData(b'\x09')
 	harald.receiveData(1)
 	
 	
-#dictionary of key bindings
+#Functions for getting data from the system (called autonomously)
+def getLidar():
+	harald.sendData(b'\x88')
+	
+def getIRRF():
+	harald.sendData(b'\x49')
+
+def getIRRB():
+	harald.sendData(b'\x4A')
+
+def getIRLF():
+	harald.sendData(b'\x4B')
+
+def getIRLB():
+	harald.sendData(b'\x4C')
+
+def getGyro():
+	harald.sendData(b'\x8D')
+
+def getLidarToken():
+	harald.sendData(b'\x4F')
+
+def getParallelRight():
+	harald.sendData(b'\x50')
+
+def getParallelLeft():
+	harald.sendData(b'\x51')
+	
+def getGyroToken():
+	harald.sendData(b'\x52')
+
+def getIRRFtoken():
+	harald.sendData(b'\x53')
+
+def getIRRBtoken():
+	harald.sendData(b'\x54')
+
+def getIRLFtoken():
+	harald.sendData(b'\x55')
+
+def getIRLBtoken():
+	harald.sendData(b'\x56')
+
+def getSteering():
+	harald.sendData(b'\x59')
+
+def getMap():
+	harald.sendData(b'\x98')
+
+def getPosition():
+	harald.sendData(b'\x9A')
+
+def getDecision():
+	harald.sendData(b'\x5B')
+	
+#dictionary of key bindings for keydown
 handle_dictionary_down = {
 	K_ESCAPE: handle_quit,
 	K_a: left_down,
@@ -151,6 +182,7 @@ handle_dictionary_down = {
 	K_SPACE: handle_SPACE
 }
 
+#dictionary for key bindings for keyup
 handle_dictionary_up = {
 	K_w: forward_up,
 	K_a: left_up,
@@ -158,13 +190,46 @@ handle_dictionary_up = {
 	K_d: right_up
 }
 
-robotMap = RobotMap();
+#dictionary for binding functions to names of sensor data we want to get, see MapSystem
+handle_dictionary_data = {
+	"Lidar" : getLidar,
+	"IRrightFront" : getIRRF,
+	"IRrightBack" : getIRRB,
+	"IRleftFront" : getIRLF,
+	"IRleftBack" : getIRLB,
+	"Gyro" : getGyro,
+	"Lidar (token)" : getLidarToken,
+	"Parallel Right" : getParallelRight,
+	"Parallel Left" : getParallelLeft,
+	"Gyro (token)" : getGyroToken,
+	"IRrightFront (token)" : getIRRFtoken,
+	"IRrightBack (token)" : getIRRBtoken,
+	"IRleftFront (token)" : getIRLFtoken,
+	"IRleftBack (token)" : getIRLBtoken,
+	"Steering data" : getSteering,
+	"Update Map" : getMap,
+	"System Position" : getPosition,
+	"Steering Decision" : getDecision		
+}
+
+mapSystem = MapSystem();
+
+def getData():
+	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
+	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
+	
+	#This is essently dataIndex++ but it loops it at 17
+	mapSystem.incIndex() 
 
 while(crayRunning):
-	robotMap.paintMap()
-	robotMap.paintText()
+	paintMap(mapSystem)
+	paintText()
+	
+	#getData()
+	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
 			handle_dictionary_down[event.key]()
 		if event.type == pygame.KEYUP and event.key in handle_dictionary_up:
 			handle_dictionary_up[event.key]()
+	
