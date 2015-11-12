@@ -17,12 +17,27 @@ int main(void)
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
 
+	unsigned char returnDataArray[3];
+
     while (1) 
     {
 		unsigned char data = receiveByte_up();
+		unsigned int datalength = data & 0x60; //removes data and parity
+		datalength = (datalength >> 5);
+		unsigned int i = 0;
 		transmitByte_down(data);
-		unsigned char returnData= receiveByte_down();
-		transmitByte_up(returnData);
+
+		while(datalength != 0){
+			returnDataArray[i] = receiveByte_down();
+			datalength--;
+			i++;
+		}
+		
+		do{
+			transmitByte_up(returnDataArray[2 - i]);
+			i--;
+		}while(i != 0)
+		
     }
 }
 
@@ -30,16 +45,6 @@ void USART_Flush( void )
 {
 	unsigned char dummy;
 	while ( UCSR1A & (1<<RXC1) ) dummy = UDR1;
-}
-
-void testcase1(){
-	unsigned char data = receiveByte_up();
-	data &= 0x7F;
-	if (data == 0x06){
-		// right down
-		transmitByte_down(0x06); // exakt en byte
-		//transmitByte_down(data); // oklart om den innehåller parity och typ stoppbitar
-	}
 }
 
 

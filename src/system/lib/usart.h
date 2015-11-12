@@ -23,6 +23,9 @@ void transmitByte_up(unsigned char data);
 void transmitByte_down(unsigned char data);
 
 /* Returns 1 if there is data in receivebuffer */
-int checkUSARTflag(void);
+int checkUSARTflag_up(void);
+
+/* Returns 1 if there is data in receivebuffer */
+int checkUSARTflag_down(void);
 
 #endif
