@@ -2,9 +2,6 @@
 
 /* Initialize USART. */
 void init_USART_up(unsigned int baud){
-	
-	//unsigned int baud = 7;
-	
 	/* Set baud rate */
 	UBRR0H = (unsigned char)(baud>>8);
 	UBRR0L = (unsigned char)baud;
@@ -22,8 +19,6 @@ void init_USART_up(unsigned int baud){
 }
 
 void init_USART_down(unsigned int baud){
-	//unsigned int baud = 7;
-	
 	/* Set baud rate */
 	UBRR1H = (unsigned char)(baud>>8);
 	UBRR1L = (unsigned char)baud;
@@ -164,7 +159,7 @@ int responseError_up(){
 
 /* Waits for response (regarding parity) from module below. */
 int responseError_down(){
-		while (!(UCSR1A & (1<<RXC1)));
+	while (!(UCSR1A & (1<<RXC1)));
 	/* If upe0=0 parity check failed */
 	if (!(UCSR1A & (1<<UPE1))){
 		
@@ -175,6 +170,7 @@ int responseError_down(){
 		}
 	return 1;
 	}
+	return 1;
 }
 
 /* Returns 1 if there is something in the receivebuffer */

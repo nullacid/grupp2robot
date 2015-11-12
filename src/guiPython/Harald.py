@@ -54,22 +54,24 @@ class Harald():
 			self.ourSocket.send(data)
 			self.lastCommand = data
 			print("sent data: " + str(hex(data[0])))
-			if self.__recConfirmation():
-				print("Data Error, resending command")
-				self.sendData(data)
+			#if self.__recConfirmation():
+			#	print("Data Error, resending command")
+			#	self.sendData(data)
 			
 	def receiveData(self, numBytes):
-		tja = True
-		while tja:
-			data = self.__waitToReceive(numBytes)
-			if self.__sendConfirmation(data):
-				tja = False
-		if self.__checkIntegrity(data):
-			print("Data Received: " + hex(data[0]))
-			return data
-		else:
-			print("Integrity error, resending request")
-			self.sendData(self.lastCommand)
+		#tja = True
+		#while tja:
+		data = self.__waitToReceive(numBytes)
+		print("Data Received: " + str(hex(data[0])))
+		return data
+		#	if self.__sendConfirmation(data):
+		#		tja = False
+		#if self.__checkIntegrity(data):
+		#	print("Data Received: " + hex(data[0]))
+		#	return data
+		#else:
+		#	print("Integrity error, resending request")
+		#	self.sendData(self.lastCommand)
 			
 	def __sendConfirmation(self, data):
 		if self.__checkIntegrity(data):

@@ -101,22 +101,22 @@ def back_down():
 
 def forward_down():
 	global harald
-	harald.sendData(b'\x80')
+	harald.sendData(b'\x00')
 	#harald.receiveData(1)
 
 def right_down():
 	global harald
-	harald.sendData(b'\x86')
+	harald.sendData(b'\x06')
 	#harald.receiveData(1)
 
 def left_up():
 	global harald
-	harald.sendData(b'\x83')
+	harald.sendData(b'\x03')
 	#harald.receiveData(1)
 
 def back_up():
 	global harald
-	harald.sendData(b'\x85')
+	harald.sendData(b'\x05')
 	#harald.receiveData(1)
 
 def forward_up():
@@ -131,7 +131,7 @@ def right_up():
 
 def handle_BACKSPACE():
 	global harald
-	harald.sendData(b'\x89')
+	harald.sendData(b'\x09')
 	print("Received data: " + harald.waitToReceive(1))
 	
 def handle_SPACE():
