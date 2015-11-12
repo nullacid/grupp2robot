@@ -15,7 +15,6 @@ void init_USART_up(unsigned int baud){
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR0B = (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
 
-	DDRB = (1 << DDB4);
 }
 
 void init_USART_down(unsigned int baud){
@@ -32,11 +31,6 @@ void init_USART_down(unsigned int baud){
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);
 
-	DDRD = (1 << DDD4);
-
-
-	
-	
 }
 
 /* Returns the value in the receivebuffer if the paritybit is correct, 0xFF otherwise */
@@ -44,37 +38,16 @@ unsigned char receiveByte_up()
 {
 	while (!(UCSR0A & (1<<RXC0)));
 	
-	/* If upe0=1 parity check failed */
-	/* if (!(UCSR0A & (1<<UPE0))){
-		/* Get and return received data from buffer */
-	/*
-		unsigned char data = UDR0;
-		transmitOK_up();
-		return data;
-	}
-	else{
-		transmitERROR_up();
-	}
-	return 0xFF;
-	*/
-	return UDR0;
+	unsigned char data = UDR0;
+	return data;
 }
 
 unsigned char receiveByte_down()
 {
 	while (!(UCSR1A & (1<<RXC1)));
 	
-	/* If upe0=1 parity check failed */
-	//if (!(UCSR1A & (1<<UPE1))){
-		/* Get and return received data from buffer */
-	/*	unsigned char data = UDR1;
-		transmitOK_down();
-		return data;
-	}
-	return 0xFF;
-	transmitERROR_down();
-	*/
-	return UDR1;
+	unsigned char data = UDR1;
+	return data;
 }
 
 /* Transmit data to the module above */
@@ -85,9 +58,6 @@ void transmitByte_up(unsigned char data){
     /* Put data into buffer, sends the data */
     UDR0 = data;
 	
-	/*if(responseError_up()){
-		transmitByte_up(data);
-	}*/
 }
 
 /* Transmit data to the module below */
@@ -97,10 +67,6 @@ void transmitByte_down(unsigned char data){
     
     /* Put data into buffer, sends the data */
     UDR1 = data;
-	/*
-	if(responseError_down()){
-		transmitByte_down(data);
-	}*/
 }
 
 /* Transmits an ok of parity to the module above. */
