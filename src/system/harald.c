@@ -28,9 +28,20 @@ int main(void)
 
 		unsigned int i = 0;
 
-		i = waitForResponse(&returnDataArray);
+		while(datalength != 0){
+		returnDataArray[i] = receiveByte_down();
+		datalength--;
+		i++;
+		}
+
+		do{
+		transmitByte_up(returnDataArray[2 - i]);
+		i--;
+		}while(i != 0);
+
+		//i = waitForResponse(&returnDataArray);
 		
-		transmitBytes_up(returnDataArray, i);
+		//transmitBytes_up(returnDataArray, i);
 
     }
 }
