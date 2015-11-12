@@ -36,8 +36,7 @@ int main(void)
 		do{
 			transmitByte_up(returnDataArray[2 - i]);
 			i--;
-		}while(i != 0)
-		
+		}while(i != 0);
     }
 }
 
