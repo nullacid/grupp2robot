@@ -50,58 +50,111 @@ int16_t adc_to_cm(int16_t value){
 	return cm_values[value];
 }
 
-/* Transits 2 dummy bytes (LIDAR size is 2 bytes)*/
+
+/* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
+
+/* Transmits data from LIDAR. 2 bytes. */
 void transmitLidar(){
 	transmitByte_up(0x05);
 	transmitByte_up(0x08);
 }
-
+/* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
 	transmitByte_up(0x5d);
 }
+/* Transmits data from the right back IR sensor. 1 byte. */
+void transmitIRRB(){
+	transmitByte_up(0x73);
+}
+/* Transmits data from the left front sensor. 1 byte. */
+void transmitIRLF(){
+	transmitByte_up(0x34);
+}
+/* Transmits data from the left back IR sensor. 1 byte. */
+void transmitIRLB(){
+	transmitByte_up(0x23);
+}
+/* Transmits data from the Gyro. 2 bytes. */
+void transmitGyro(){
+	transmitByte_up(0x21);
+	transmitByte_up(0x22);
+}
 
+void transmitLidarT(){
+	transmitByte_up(0x99);
+}
+
+void transmitParallelR(){
+	transmitByte_up(0x5A);
+}
+
+void transmitParallelL(){
+	transmitByte_up(0x5B);
+}
+
+void transmitGyroT(){
+	transmitByte_up(0xAB);
+}
+
+void transmitIRRFT(){
+	transmitByte_up(0x0A);
+}
+
+void transmitIRRBT(){
+	transmitByte_up(0x0B);
+}
+
+void transmitIRLFT(){
+	transmitByte_up(0x0C);
+}
+
+void transmitIRLBT(){
+	transmitByte_up(0x0D);
+}
+
+/* Translates the command code into the corresponding function. */
 void processCommand(unsigned char data){
 	if(data == 0x08){
 		transmitLidar();
 	}
 	else if(data == 0x09){
-		//IRRF
+		transmitIRRF();
 	}
 	else if(data == 0x0A){
-		//IRRB
+		transmitIRRB();
 	}
 	else if(data == 0x0B){
-		//IRLF
+		transmitIRLF();
 	}
 	else if(data == 0x0C){
-		//IRLB
+		transmitIRLB();
 	}
 	else if(data == 0x0D){
-		//GYRO
+		transmitGyro();
 	}
 	else if(data == 0x0F){
-		//LIDAR TOKEN
+		transmitLidarT();
 	}
 	else if(data == 0x10){
-		//PARALLEL RIGHT
+		transmitParallelR();
 	}
 	else if(data == 0x11){
-		//PARALLEL LEFT
+		transmitParallelL();
 	}
 	else if(data == 0x12){
-		//GYRO TOKEN
+		transmitGyroT();
 	}
 	else if(data == 0x13){
-		//IRRF token
+		transmitIRRFT();
 	}
 	else if(data == 0x14){
-		//IRRB token
+		transmitIRRBT();
 	}
 	else if(data == 0x15){
-		//IRLF token
+		transmitIRLFT();
 	}
 	else if(data == 0x16){
-		//IRLB token
+		transmitIRLBT();
 	}
 }
 
