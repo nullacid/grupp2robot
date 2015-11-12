@@ -22,10 +22,10 @@ void transmitByte_up(unsigned char data);
 /* Transmits a byte to the downward module. */
 void transmitByte_down(unsigned char data);
 
-/* Returns 1 if there is data in receivebuffer */
+/* Returns 1 if there is data in receivebuffer from usart0 */
 int checkUSARTflag_up(void);
 
-/* Returns 1 if there is data in receivebuffer */
+/* Returns 1 if there is data in receivebuffer from usart1 */
 int checkUSARTflag_down(void);
 
 #endif
