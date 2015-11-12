@@ -79,9 +79,21 @@ int main(){
 	init_USART_up(10);
 	init_USART_down(10);
 	init_motors();
-	
-	while(1){
 		
+
+
+
+
+
+
+	while(1){
+
+		
+
+		button_autonom = (PINA & 1);
+
+
+
 		handle_messages();
 		//update_sensor_data();
 
@@ -141,17 +153,16 @@ uint8_t decide_if_repeated(uint8_t msg){
 }
 
 void handle_messages(){
-	if(checkUSARTflag()){
-	
+
+
+	if(checkUSARTflag()){	
+
 		uint8_t message = receiveByte_up();	
-		uint8_t message_cpy = message >> 1;
-		PORTA = message_cpy;
+		uint8_t message_cpy = message;
 		//plocka ut OP-koden
 		message_cpy &= 31;
-		PORTA = activeDirs;
-		//uint8_t repeated = decide_if_repeated(message_cpy);
-		uint8_t repeated = false;
 		
+		uint8_t repeated = false; 
 		if (button_autonom == 0){ //Manuellt läge
 			if (!repeated){
 				switch(message_cpy){
@@ -195,8 +206,8 @@ void handle_messages(){
 			}
 			setSpeed(spd_left,spd_right,dir_left,dir_right);
 		}
-
-		/*switch(message_cpy){
+/*
+		switch(message_cpy){
 			
 			case (0x08):
 				//lägg lidardata i send-buffern
@@ -347,9 +358,10 @@ void update_sensor_data(){
 
 void init_motors(){
 	
+
 	PORTB=0x00; //Reset any output
 	PORTA=0x00; //Port A sets dir of motors (PA6, PA7)
-	DDRA |=(1 << DDA6) | (1 << DDA7);
+	DDRA |=(1 << DDA6) | (1 << DDA7) | (0<<DDA0) | (1 << DDA1);
 	DDRB|=(1 << DDB6 );//set OC3A as output.
 	DDRD|=(1 << DDD5 );//set OC1A as output.
 	
