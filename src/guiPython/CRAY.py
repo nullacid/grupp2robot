@@ -24,20 +24,34 @@ harald = Harald()
 pygame.display.init()
 pygame.font.init()
 
-#Set up a window
-screenWidth = 600
-screenHeight = 405
+"""#FULLSCREEN MODE
+screenWidth = 1600
+screenHeight = 900
 squareWidth = screenHeight/15
 squareHeight = screenHeight/15
 
 screen_size = [screenWidth,screenHeight]
+
+surface = pygame.display.set_mode(screen_size, FULLSCREEN)
+offset = -150"""
+
+#SMALLSCREEN MODE
+screenWidth = 615
+screenHeight = 405
+squareWidth = screenHeight/15
+squareHeight = screenHeight/15
+
+screen_size = [screenWidth, screenHeight]
+
+surface = pygame.display.set_mode(screen_size)
+offset = 0
+
+
 #A blank icon
 icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
 pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
-#Make the windowing surface!
-#surface = pygame.display.set_mode(screen_size, FULLSCREEN)
-surface = pygame.display.set_mode(screen_size)
+
 
 #Global variable for when the game is running
 crayRunning = True
@@ -47,19 +61,20 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 BLUE = (0,0,255)
 GREEN = (0,255,0)
+H4xx0R = (173,255,47)
 RED = (255,0,0)
 CYAN = (0,255,255)
 MAGENTA = (255,0,255)
 YELLOW = (255,255,0)
 
 
-def paintText():
-	font = pygame.font.Font(None, 36)
-	text = font.render("tjabba", 0, WHITE)
-	surface.blit(text, ((7*screenWidth)/9, screenHeight/2))
 	
 def paintData(mapSystem):
-	pass
+	font = pygame.font.Font(None, int((2*squareHeight)/3))
+	for i in range(0,17):
+		textString = mapSystem.indexDict[i] + ": "
+		text = font.render(textString, 0, H4xx0R)
+		surface.blit(text, ((6*screenWidth)/9 + offset, i * squareHeight + 10))
 		
 def paintMap(mapSystem):
 	for i in range(0,15):
@@ -263,8 +278,7 @@ def getData():
 while(crayRunning):
 	paintMap(mapSystem)
 	paintData(mapSystem)
-	paintText()
-	
+		
 	#getData()
 	
 	for event in pygame.event.get():
