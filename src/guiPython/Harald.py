@@ -62,8 +62,8 @@ class Harald():
 			self.lastCommand = data
 			print("sent data: " + str(hex(data[0])))
 			
-	def receiveData(self, numBytes):
-		data = self.__waitToReceive(numBytes)
+	def receiveData(self):
+		data = self.__waitToReceive()
 		print("Data Received: " + str(hex(data[0])))
 		return data
 			
@@ -81,10 +81,10 @@ class Harald():
 			return True
 		return False
 	
-	def __waitToReceive(self, numBytes):
+	def __waitToReceive(self):
 		if self.targetDevice != None:
 			while True:
-				return self.ourSocket.recv(numBytes)
+				return self.ourSocket.recv(1)
 			
 				
 	def __checkIntegrity(self, data):

@@ -16,29 +16,32 @@ int main(void)
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
 
-	unsigned char returnDataArray[3];
+	
 
     while (1) 
     {
 		unsigned char data = receiveByte_up();
-		unsigned int datalength = data & 0xC0; //removes data and parity
-		datalength = (datalength >> 5);
+		uint8_t datalength = data & 0xC0; //removes data
+		datalength = (datalength >> 6);
+		
+		unsigned char returnDataArray[3];
 		
 		transmitByte_down(data);
 
 		unsigned int i = 0;
 
 		while(datalength != 0){
-		returnDataArray[i] = receiveByte_down();
-		datalength--;
-		i++;
+			//returnDataArray[i] = receiveByte_down();
+			returnDataArray[i]= 1;
+			datalength--;
+			i++;
 		}
-
-		do{
-		transmitByte_up(returnDataArray[2 - i]);
-		i--;
-		}while(i != 0);
-
+		if(datalength != 0){
+			do{
+				transmitByte_up(returnDataArray[2 - i]);
+				i--;
+			}while(i != 0);
+		}
 		//i = waitForResponse(&returnDataArray);
 		
 		//transmitBytes_up(returnDataArray, i);
@@ -52,7 +55,7 @@ void USART_Flush( void )
 	while ( UCSR1A & (1<<RXC1) ) dummy = UDR1;
 }
 
-unsigned int waitForResponse(unsigned char* returnDataArray, unsigned int datalength){
+/*unsigned int waitForResponse(unsigned char* returnDataArray, unsigned int datalength){
 	unsigned int i = 0;
 	while(datalength != 0){
 		returnDataArray[i] = receiveByte_down();
@@ -67,6 +70,6 @@ void transmitBytes_up(unsigned char returnDataArray, unsigned int i){
 		transmitByte_up(returnDataArray[2 - i]);
 		i--;
 	}while(i != 0);
-}
+}*/
 
 

@@ -42,7 +42,7 @@ surface = pygame.display.set_mode(screen_size)
 #Global variable for when the game is running
 crayRunning = True
 
-#Define colours used
+#Define RGB colours
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 BLUE = (0,0,255)
@@ -57,6 +57,9 @@ def paintText():
 	font = pygame.font.Font(None, 36)
 	text = font.render("tjabba", 0, WHITE)
 	surface.blit(text, ((7*screenWidth)/9, screenHeight/2))
+	
+def paintData(mapSystem):
+	pass
 		
 def paintMap(mapSystem):
 	for i in range(0,15):
@@ -113,63 +116,97 @@ def handle_BACKSPACE():
 	
 def handle_SPACE():
 	harald.sendData(b'\x09')
-	harald.receiveData(1)
+	harald.receiveData()
 	
 	
 #Functions for getting data from the system (called autonomously)
+#They get data from the system and formats it into data that makes sense for humans.
+
+#Så här kan man göra om en byte till int :)
+#print(int(b'\x54'[0]))
+
 def getLidar():
 	harald.sendData(b'\x88')
+	dataArray =[]
+	dataArray.append(harald.receiveData())
+	dataArray.append(harald.receiveData())
+	#return dataArray
 	
 def getIRRF():
 	harald.sendData(b'\x49')
+	data = harald.receiveData()
+	return data
 
 def getIRRB():
 	harald.sendData(b'\x4A')
+	data = harald.receiveData()
 
 def getIRLF():
 	harald.sendData(b'\x4B')
+	data = harald.receiveData()
 
 def getIRLB():
 	harald.sendData(b'\x4C')
+	data = harald.receiveData()
 
 def getGyro():
 	harald.sendData(b'\x8D')
+	dataArray = []
+	dataArray.append(harald.receiveData())
+	dataArray.append(harald.receiveData())
 
 def getLidarToken():
 	harald.sendData(b'\x4F')
+	data = harald.receiveData()
 
 def getParallelRight():
 	harald.sendData(b'\x50')
+	data = harald.receiveData()
 
 def getParallelLeft():
 	harald.sendData(b'\x51')
+	data = harald.receiveData()
 	
 def getGyroToken():
 	harald.sendData(b'\x52')
+	data = harald.receiveData()
 
 def getIRRFtoken():
 	harald.sendData(b'\x53')
+	data = harald.receiveData()
 
 def getIRRBtoken():
 	harald.sendData(b'\x54')
+	data = harald.receiveData()
 
 def getIRLFtoken():
 	harald.sendData(b'\x55')
+	data = harald.receiveData()
 
 def getIRLBtoken():
 	harald.sendData(b'\x56')
+	data = harald.receiveData()
 
 def getSteering():
 	harald.sendData(b'\x59')
+	data = harald.receiveData()
 
 def getMap():
+	global mapSystem
 	harald.sendData(b'\x98')
+	dataArray = []
+	dataArray.append(harald.receiveData())
+	dataArray.append(harald.receiveData())
 
 def getPosition():
 	harald.sendData(b'\x9A')
+	dataArray = []
+	dataArray.append(harald.receiveData())
+	dataArray.append(harald.receiveData())
 
 def getDecision():
 	harald.sendData(b'\x5B')
+	data = harald.receiveData()
 	
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
@@ -218,11 +255,14 @@ def getData():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	
-	#This is essently dataIndex++ but it loops it at 17
-	mapSystem.incIndex() 
+	mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
 
+	
+
+	
 while(crayRunning):
 	paintMap(mapSystem)
+	paintData(mapSystem)
 	paintText()
 	
 	#getData()
