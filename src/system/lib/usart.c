@@ -30,7 +30,6 @@ void init_USART_down(unsigned int baud){
 
 	//RXEN0=1 enables receive and TXEN0=1 enables transmit
 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);
-
 }
 
 /* Returns the value in the receivebuffer if the paritybit is correct, 0xFF otherwise */

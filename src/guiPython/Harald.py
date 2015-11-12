@@ -1,8 +1,5 @@
 import bluetooth
 import sys, os, traceback
-import struct
-
-from time import *
 
 #Mac Address of our firefly module
 fireflyMacAddr = '00:06:66:03:A6:96'
@@ -14,7 +11,7 @@ class Harald():
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 		self.lastCommand = b'0xff'
 		
-		while not self.establishConnection():
+		while not self.establishDirectConnection():
 			pass
 		
 	def establishConnection(self):
@@ -48,30 +45,27 @@ class Harald():
 		else:
 			print("Failed to connect to firefly module, reattemping to connect")
 			return False
+			
+	def establishDirectConnection(self):
+		self.targetDevice = fireflyMacAddr
+		try:
+			self.ourSocket.connect((self.targetDevice, self.port))
+			print("Connected to firefly module")
+			return True
+		except IOError:
+			print("Failed to connect to firefly module, reattempting to connect")
+			return False
 				
 	def sendData(self, data):	
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
 			self.lastCommand = data
 			print("sent data: " + str(hex(data[0])))
-			#if self.__recConfirmation():
-			#	print("Data Error, resending command")
-			#	self.sendData(data)
 			
 	def receiveData(self, numBytes):
-		#tja = True
-		#while tja:
 		data = self.__waitToReceive(numBytes)
 		print("Data Received: " + str(hex(data[0])))
 		return data
-		#	if self.__sendConfirmation(data):
-		#		tja = False
-		#if self.__checkIntegrity(data):
-		#	print("Data Received: " + hex(data[0]))
-		#	return data
-		#else:
-		#	print("Integrity error, resending request")
-		#	self.sendData(self.lastCommand)
 			
 	def __sendConfirmation(self, data):
 		if self.__checkIntegrity(data):
