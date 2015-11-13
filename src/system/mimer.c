@@ -53,7 +53,7 @@ int16_t adc_to_cm(int16_t value){
 
 /* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
 
-/* Transmits data from LIDAR. 2 bytes. */
+/* Transmits data from LIDAR. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitLidar(){
 	transmitByte_up(0x05);
 	transmitByte_up(0x08);
@@ -74,7 +74,7 @@ void transmitIRLF(){
 void transmitIRLB(){
 	transmitByte_up(0x23);
 }
-/* Transmits data from the Gyro. 2 bytes. */
+/* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitGyro(){
 	transmitByte_up(0x21);
 	transmitByte_up(0x22);
