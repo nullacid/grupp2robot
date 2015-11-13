@@ -25,24 +25,24 @@ class MapSystem():
 						17 : "Steering Decision"		
 		}
 		self.dataDict = {
-						"Lidar" : 0,
-						"IRrightFront" : 0,
-						"IRrightBack" : 0,
-						"IRleftFront" : 0,
-						"IRleftBack" : 0,
-						"Gyro" : 0,
-						"Lidar (token)" : 0,
-						"Parallel Right" : 0,
-						"Parallel Left" : 0,
-						"Gyro (token)" : 0,
-						"IRrightFront (token)" : 0,
-						"IRrightBack (token)" : 0,
-						"IRleftFront (token)" : 0,
-						"IRleftBack (token)" : 0,
-						"Steering data" : 0,
-						"Update Map" : 0,
-						"System Position" : 0,
-						"Steering Decision" : 0			
+						"Lidar" : 1,
+						"IRrightFront" : 1,
+						"IRrightBack" : 1,
+						"IRleftFront" : 1,
+						"IRleftBack" : 1,
+						"Gyro" : 1,
+						"Lidar (token)" : 1,
+						"Parallel Right" : 1,
+						"Parallel Left" : 1,
+						"Gyro (token)" : 1,
+						"IRrightFront (token)" : 1,
+						"IRrightBack (token)" : 1,
+						"IRleftFront (token)" : 1,
+						"IRleftBack (token)" : 1,
+						"Steering data" : 1,
+						"Update Map" : 1,
+						"System Position" : 1,
+						"Steering Decision" : 1			
 		}
 	#Increments index and loops it at 17
 	def incIndex(self):

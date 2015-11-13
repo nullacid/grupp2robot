@@ -31,20 +31,16 @@ int main(void)
 		unsigned int i = 0;
 
 		while(datalength != 0){
-			//returnDataArray[i] = receiveByte_down();
-			returnDataArray[i]= 1;
+			returnDataArray[i] = receiveByte_down();
 			datalength--;
 			i++;
 		}
-		if(datalength != 0){
+		if(i != 0){
 			do{
 				transmitByte_up(returnDataArray[2 - i]);
 				i--;
 			}while(i != 0);
 		}
-		//i = waitForResponse(&returnDataArray);
-		
-		//transmitBytes_up(returnDataArray, i);
 
     }
 }
@@ -54,22 +50,5 @@ void USART_Flush( void )
 	unsigned char dummy;
 	while ( UCSR1A & (1<<RXC1) ) dummy = UDR1;
 }
-
-/*unsigned int waitForResponse(unsigned char* returnDataArray, unsigned int datalength){
-	unsigned int i = 0;
-	while(datalength != 0){
-		returnDataArray[i] = receiveByte_down();
-		datalength--;
-		i++;
-	}
-	return i;
-}
-
-void transmitBytes_up(unsigned char returnDataArray, unsigned int i){
-	do{
-		transmitByte_up(returnDataArray[2 - i]);
-		i--;
-	}while(i != 0);
-}*/
 
 

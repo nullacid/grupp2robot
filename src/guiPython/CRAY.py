@@ -24,7 +24,7 @@ harald = Harald()
 pygame.display.init()
 pygame.font.init()
 
-"""#FULLSCREEN MODE
+""""#FULLSCREEN MODE
 screenWidth = 1600
 screenHeight = 900
 squareWidth = screenHeight/15
@@ -70,6 +70,7 @@ YELLOW = (255,255,0)
 
 	
 def paintData(mapSystem):
+	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((2*squareHeight)/3))
 	for i in range(0,17):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
@@ -145,12 +146,12 @@ def getLidar():
 	dataArray =[]
 	dataArray.append(harald.receiveData())
 	dataArray.append(harald.receiveData())
-	#return dataArray
+	return b'\x01'
 	
 def getIRRF():
 	harald.sendData(b'\x49')
 	data = harald.receiveData()
-	return data
+	return int(data[0])
 
 def getIRRB():
 	harald.sendData(b'\x4A')
@@ -163,6 +164,7 @@ def getIRLF():
 def getIRLB():
 	harald.sendData(b'\x4C')
 	data = harald.receiveData()
+	return data
 
 def getGyro():
 	harald.sendData(b'\x8D')
@@ -273,13 +275,12 @@ def getData():
 	mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
 
 	
-
 	
 while(crayRunning):
 	paintMap(mapSystem)
 	paintData(mapSystem)
 		
-	#getData()
+	getData()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
