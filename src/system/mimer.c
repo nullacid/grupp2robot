@@ -192,7 +192,7 @@ int main()
 		
 		if(checkUSARTflag_up()){
 			data = receiveByte_up();
-			data &= 0x6F	//Maska ut kommandot
+			data &= 0x3F	//Maska ut kommandot
 			processCommand(data);
 		}
 		
