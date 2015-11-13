@@ -112,6 +112,26 @@ void transmitIRLBT(){
 	transmitByte_up(0x0D);
 }
 
+/* Transmits all sensor data. */
+/* Transmitted data order will be LIDAR1 -> LIDAR2 -> IRRF -> IRRB -> IRLF -> GYRO1 -> GYRO2 -> LIDAR token -> Parallel Right -> Parallel Left -> Gyro token -> IRRF token -> IRRB token ->
+	-> IRLF token -> IRLB token. */
+void transmitALL(){
+	transmitLidar();
+	transmitIRRF();
+	transmitIRRB();
+	transmitIRLF();
+	transmitIRLB();
+	transmitGyro();
+	transmitLidarT();
+	transmitParallelR();
+	transmitParallelL();
+	transmitGyroT();
+	transmitIRRFT();
+	transmitIRRBT();
+	transmitIRLFT();
+	transmitIRLBT();
+}
+
 /* Translates the command code into the corresponding function. */
 void processCommand(unsigned char data){
 	if(data == 0x08){
@@ -155,6 +175,9 @@ void processCommand(unsigned char data){
 	}
 	else if(data == 0x16){
 		transmitIRLBT();
+	}
+	else if(data == 0x1D){
+		transmitALL();
 	}
 }
 

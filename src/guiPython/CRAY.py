@@ -72,7 +72,7 @@ YELLOW = (255,255,0)
 def paintData(mapSystem):
 	font = pygame.font.Font(None, int((2*squareHeight)/3))
 	for i in range(0,17):
-		textString = mapSystem.indexDict[i] + ": "
+		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, ((6*screenWidth)/9 + offset, i * squareHeight + 10))
 		
