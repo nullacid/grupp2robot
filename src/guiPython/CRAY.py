@@ -287,4 +287,3 @@ while(crayRunning):
 			handle_dictionary_down[event.key]()
 		if event.type == pygame.KEYUP and event.key in handle_dictionary_up:
 			handle_dictionary_up[event.key]()
-	
