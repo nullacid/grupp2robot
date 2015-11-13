@@ -21,13 +21,13 @@ int main(void)
     while (1) 
     {
 		unsigned char data = receiveByte_up();
+		transmitByte_down(data);
+		
 		uint8_t datalength = data & 0xC0; //removes data
 		datalength = (datalength >> 6);
 		
 		unsigned char returnDataArray[3];
 		
-		transmitByte_down(data);
-
 		unsigned int i = 0;
 
 		while(datalength != 0){
