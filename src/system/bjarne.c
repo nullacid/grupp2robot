@@ -26,6 +26,8 @@ uint8_t activeDirs = 0;
 bool new_message = false;
 
 
+uint8_t clk = 0;
+
 
 //-----SENSOR DB------------
 
@@ -82,6 +84,18 @@ int main(){
 		
 	while(1){
 
+		if(clk){
+
+			clk = 0;
+			PORTA &= 0xF7;
+		}
+		else{
+
+			clk = 1;
+			PORTA |= (1 << PORTA3);
+
+		}
+
 		
 
 		if(button_autonom != (PINA & 1)){
@@ -121,9 +135,7 @@ void handle_messages(){
 		//plocka ut OP-koden
 		message_cpy &= 31;
 		
-		PORTA = message_cpy;
 
-		uint8_t repeated = false; 
 		if (button_autonom == 0){ //Manuellt läge
 			
 				switch(message_cpy){
@@ -139,6 +151,7 @@ void handle_messages(){
 					spd_right = spd_right - 50;
 					break;
 					case(2): //pil VÄNSTER trycks ner
+					dir_left = FORWARD;
 					spd_right = spd_right + 50;
 					break;
 					case(3): //pil VÄNSTER släpps
@@ -158,6 +171,7 @@ void handle_messages(){
 
 					break;
 					case(6): //pil HÖGER trycks ner
+					dir_right = FORWARD;
 					spd_left = spd_left + 50;
 					break;
 					case(7): //pil HÖGER släpps
@@ -167,7 +181,7 @@ void handle_messages(){
 			
 			setSpeed(spd_left,spd_right,dir_left,dir_right);
 		}
-/*
+
 		switch(message_cpy){
 			
 			case (0x08):
@@ -277,19 +291,19 @@ void handle_messages(){
 				transmitByte_up(posalgoritm);
 			break;
 			
-			case (0x1C):
+			case (0x1fC):
 			//lägg tempKartdata i send-buffern
 				transmitByte_up(kartdata_temp_x);
 				transmitByte_up(kartdata_temp_y);
 			break;
 
-		}*/
+		}
 	}		
 }
 
 void update_sensor_data(){
 	//från 08 ---> 1 7 rader
-	transmitByte_down(0x1D); //fråg efter all data
+	transmitByte_down(0x1D); //fråga efter all data
 
 	s_LIDAR_u = receiveByte_down();
 	s_LIDAR_l = receiveByte_down();
@@ -299,7 +313,7 @@ void update_sensor_data(){
 	s_ir_v_b = receiveByte_down();
 	s_gyro_u = receiveByte_down();
 	s_gyro_l = receiveByte_down();
-	s_reflex = receiveByte_down();
+	//s_reflex = receiveByte_down();
 
 
 	t_LIDAR = receiveByte_down();
@@ -310,8 +324,8 @@ void update_sensor_data(){
 	t_vagg_h_b = receiveByte_down();
 	t_vagg_v_f = receiveByte_down();
 	t_vagg_v_b = receiveByte_down();
-	t_reflex_u = receiveByte_down();
-	t_reflex_l = receiveByte_down();
+	//t_reflex_u = receiveByte_down();
+	//t_reflex_l = receiveByte_down();
 
 
 	return;
@@ -322,7 +336,7 @@ void init_motors(){
 
 	PORTB=0x00; //Reset any output
 	PORTA=0x00; //Port A sets dir of motors (PA6, PA7)
-	DDRA |=(1 << DDA6) | (1 << DDA7) | (0<<DDA0) | (1 << DDA1);
+	DDRA |=(1 << DDA6) | (1 << DDA7) | (0<<DDA0) | (1 << DDA1 | (1 << DDA3));
 	DDRB|=(1 << DDB6 );//set OC3A as output.
 	DDRD|=(1 << DDD5 );//set OC1A as output.
 	
@@ -337,7 +351,29 @@ void init_motors(){
 
 void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
 	
-	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 är vänster, DDA6 är höger 	
+		if(ldir){
+			PORTA |= (1 << DDA7);
+			
+		}
+		else{
+
+			
+			PORTA &= 0x7F;
+
+		}
+
+		if(rdir){
+
+			PORTA |= (1 << DDA6);
+		}
+		else{
+
+			
+			PORTA &= 0xBF;
+		}
+
+
+//	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 är vänster, DDA6 är höger 	
 	OCR1A = 10*rspeed;//set the duty cycle(out of 1023) Höger	
 	OCR3A = 10*lspeed;//set the duty cycle(out of 1023) Vänster
 	
