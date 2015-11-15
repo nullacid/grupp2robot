@@ -1,5 +1,4 @@
 import pygame
-from time import *
 
 #Import bluetooth class
 from Harald import *
@@ -11,6 +10,7 @@ from MapSystem import *
 from pygame import *
 import sys, os, traceback
 
+from time import *
 
 
 #Center the screen
@@ -125,10 +125,6 @@ def forward_up():
 
 def right_up():
 	harald.sendData(b'\x07')
-
-def handle_BACKSPACE():
-	harald.sendData(b'\x09')
-	harald.receiveData(1)
 	
 def handle_SPACE():
 	harald.sendData(b'\x09')
@@ -232,7 +228,6 @@ handle_dictionary_down = {
 	K_s: back_down,
 	K_w: forward_down,
 	K_d: right_down,
-	K_BACKSPACE: handle_BACKSPACE,
 	K_SPACE: handle_SPACE
 }
 
@@ -266,13 +261,20 @@ handle_dictionary_data = {
 	"Steering Decision" : getDecision		
 }
 
-mapSystem = MapSystem();
+mapSystem = MapSystem()
 
+lastTimeStamp = 0
+
+#Gets one data value from the system (decided by dataIndex in mapSystem)
+#Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
-	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
+	global lastTimeStamp
+	if lastTimeStamp + 0.1 < time():
+		currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
+		mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	
-	mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
+		mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
+		lastTimeStamp = time()
 
 	
 	
