@@ -3,6 +3,7 @@
 #define F_CPU 20000000
 #include <util/delay.h>
 #include "lib/usart.h"
+#include "lib/mem.h"
 
 #define FORWARD 1
 #define BACK 0
@@ -61,9 +62,6 @@ uint8_t t_reflex_u = 0;
 uint8_t t_reflex_l = 0;
 //----------------------------
 
-
-
-
 //------KARTA DB--------------
 uint8_t kartdata_x = 0;
 uint8_t kartdata_y = 0;
@@ -108,7 +106,7 @@ int main(){
 
 
 		handle_messages();
-		//update_sensor_data();
+		update_sensor_data();
 
 		if (button_autonom == 1){
 			
@@ -132,6 +130,7 @@ void handle_messages(){
 
 		uint8_t message = receiveByte_up();	
 		uint8_t message_cpy = message;
+
 		//plocka ut OP-koden
 		message_cpy &= 31;
 		
@@ -291,7 +290,7 @@ void handle_messages(){
 				transmitByte_up(posalgoritm);
 			break;
 			
-			case (0x1fC):
+			case (0x1C):
 			//lägg tempKartdata i send-buffern
 				transmitByte_up(kartdata_temp_x);
 				transmitByte_up(kartdata_temp_y);
@@ -313,7 +312,6 @@ void update_sensor_data(){
 	s_ir_v_b = receiveByte_down();
 	s_gyro_u = receiveByte_down();
 	s_gyro_l = receiveByte_down();
-	//s_reflex = receiveByte_down();
 
 
 	t_LIDAR = receiveByte_down();
@@ -324,8 +322,6 @@ void update_sensor_data(){
 	t_vagg_h_b = receiveByte_down();
 	t_vagg_v_f = receiveByte_down();
 	t_vagg_v_b = receiveByte_down();
-	//t_reflex_u = receiveByte_down();
-	//t_reflex_l = receiveByte_down();
 
 
 	return;
