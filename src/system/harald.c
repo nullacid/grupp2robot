@@ -51,10 +51,4 @@ int main(void)
     }
 }
 
-void USART_Flush( void )
-{
-	unsigned char dummy;
-	while ( UCSR1A & (1<<RXC1) ) dummy = UDR1;
-}
-
 
