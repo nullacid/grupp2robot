@@ -25,10 +25,10 @@ pygame.display.init()
 pygame.font.init()
 
 """"#FULLSCREEN MODE
-screenWidth = 1600
-screenHeight = 900
-squareWidth = screenHeight/15
-squareHeight = screenHeight/15
+screenWidth = 1584
+screenHeight = 891
+squareWidth = screenHeight/33
+squareHeight = screenHeight/33
 
 screen_size = [screenWidth,screenHeight]
 
@@ -36,15 +36,15 @@ surface = pygame.display.set_mode(screen_size, FULLSCREEN)
 offset = -150"""
 
 #SMALLSCREEN MODE
-screenWidth = 615
-screenHeight = 405
-squareWidth = screenHeight/15
-squareHeight = screenHeight/15
+screenWidth = 990
+screenHeight = 660
+squareWidth = screenHeight/33
+squareHeight = screenHeight/33
 
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
-offset = 0
+offset = 5
 
 
 #A blank icon
@@ -71,15 +71,15 @@ YELLOW = (255,255,0)
 	
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
-	font = pygame.font.Font(None, int((2*squareHeight)/3))
+	font = pygame.font.Font(None, int((3*squareHeight)/2))
 	for i in range(0,17):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
-		surface.blit(text, ((6*screenWidth)/9 + offset, i * squareHeight + 10))
+		surface.blit(text, ((6*screenWidth)/9 + offset, i * (5 * squareHeight)/3 + 10))
 		
 def paintMap(mapSystem):
-	for i in range(0,15):
-		for j in range(0,15):
+	for i in range(0,33):
+		for j in range(0,33):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 	pygame.display.flip()
 			
@@ -139,10 +139,10 @@ def handle_SPACE():
 
 def getLidar():
 	harald.sendData(b'\x88')
-	dataArray =[]
-	dataArray.append(harald.receiveData())
-	dataArray.append(harald.receiveData())
-	return b'\x01'
+	msByte = harald.receiveData()
+	lsByte = harald.receiveData()
+	data = int(msByte[0])*256 + int(lsByte[0])
+	return data
 	
 def getIRRF():
 	harald.sendData(b'\x49')
@@ -152,57 +152,69 @@ def getIRRF():
 def getIRRB():
 	harald.sendData(b'\x4A')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getIRLF():
 	harald.sendData(b'\x4B')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getIRLB():
 	harald.sendData(b'\x4C')
 	data = harald.receiveData()
-	return data
+	return int(data[0])
 
 def getGyro():
 	harald.sendData(b'\x8D')
-	dataArray = []
-	dataArray.append(harald.receiveData())
-	dataArray.append(harald.receiveData())
+	msByte = harald.receiveData()
+	lsByte = harald.receiveData()
+	data = int(msByte[0])*256 + int(lsByte[0])
+	return data
 
 def getLidarToken():
 	harald.sendData(b'\x4F')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getParallelRight():
 	harald.sendData(b'\x50')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getParallelLeft():
 	harald.sendData(b'\x51')
 	data = harald.receiveData()
+	return int(data[0])
 	
 def getGyroToken():
 	harald.sendData(b'\x52')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getIRRFtoken():
 	harald.sendData(b'\x53')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getIRRBtoken():
 	harald.sendData(b'\x54')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getIRLFtoken():
 	harald.sendData(b'\x55')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getIRLBtoken():
 	harald.sendData(b'\x56')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getSteering():
 	harald.sendData(b'\x59')
 	data = harald.receiveData()
+	return int(data[0])
 
 def getMap():
 	global mapSystem
@@ -220,6 +232,7 @@ def getPosition():
 def getDecision():
 	harald.sendData(b'\x5B')
 	data = harald.receiveData()
+	return int(data[0])
 	
 #dictionary of key bindings for keydown
 handle_dictionary_down = {

@@ -16,8 +16,8 @@ int main(void)
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
     
-    uint_8 mapData[];
-    mapSize = 0;
+    uint8_t mapData[16];
+    uint8_t mapSize = 0;
 
 	
 
@@ -38,8 +38,8 @@ int main(void)
             returnDataArray[i] = receiveByte_down();
                 // if mapdata, store it for debugging
                 if (data == 0x58){
-                    mapData[size] = returnDataArray[i];
-                    size++;
+                    mapData[mapSize] = returnDataArray[i];
+                    mapSize++;
                 }
             datalength--;
             i++;
