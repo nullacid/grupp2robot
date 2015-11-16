@@ -16,7 +16,7 @@ int main(void)
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
     
-    uint8_t mapData[16];
+    uint8_t mapData[1156];
     uint8_t mapSize = 0;
 
 	
