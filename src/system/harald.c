@@ -44,11 +44,9 @@ int main(void)
             datalength--;
             i++;
 		}
-		if(i != 0){
-			do{
-				transmitByte_up(returnDataArray[2 - i]);
-				i--;
-			}while(i != 0);
+        while(datalength != i){
+            transmitByte_up(returnDataArray[datalength]);
+            datalength++;
 		}
     }
 }
