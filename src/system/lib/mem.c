@@ -1,13 +1,13 @@
-#include <avr/io.h>
-#include <avr/interrupt.h>
+
 #include "mem.h"
 
-//----------------Prototypes-----------------------------------
-void wmem(uint8_t data, uint8_t x, uint8_t y); 		//Write to map-memory
-uint8_t rmem(uint8_t x, uint8_t y); 				//Read from map-memory
-uint8_t pstack(uint8_t x, uint8_t y, uint8_t t);	//Put data on change stack
-mapchange gstack(); 								//Get data from stack
+
+//----------------Variables------------------------------------
+uint8_t mapmem[33][33];				//The map memory 34x34 tiles large
+mapchange change_stack[99]; //A stack where changes to the map will be waiting to be sent
+int8_t stack_top = -1; 				//The top of the stack
 //-------------------------------------------------------------
+
 
 //----------------Constants------------------------------------
 uint8_t UNEXP 		= 1;	//Tile: Unexplored
@@ -18,19 +18,7 @@ uint8_t STACK_MAX 	= 100;  //Size of stack
 
 //-------------------------------------------------------------
 
-//----------------Variables------------------------------------
-uint8_t mapmem[33][33];				//The map memory 34x34 tiles large
-mapchange change_stack[99]; //A stack where changes to the map will be waiting to be sent
-int8_t stack_top = -1; 				//The top of the stack
-//-------------------------------------------------------------
 
-/*
-typedef struct mapchange{
-	uint8_t x;
-	uint8_t y;
-	uint8_t t;
-};
-*/
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 
 	if(stack_top == (STACK_MAX-1)){
@@ -78,5 +66,6 @@ uint8_t rmem(uint8_t x, uint8_t y){
 void wmem(uint8_t data, uint8_t x, uint8_t y){
 
 	mapmem[x][y] = data;
+	
 
 }

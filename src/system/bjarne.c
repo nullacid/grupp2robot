@@ -25,7 +25,7 @@ uint8_t button_autonom = 0; // 0 om manuellt läge, 1 om autonomt läge
 
 uint8_t activeDirs = 0;
 bool new_message = false;
-
+mapchange temp = {.x = 0, .y = 0, .t = 0};
 
 uint8_t clk = 0;
 
@@ -69,8 +69,8 @@ uint8_t styrdata = 0;
 uint8_t posdata_x = 0;
 uint8_t posdata_y = 0;
 uint8_t posalgoritm = 0;
-uint8_t kartdata_temp_x = 0;
-uint8_t kartdata_temp_y = 0;
+uint8_t kartdata_temp_h = 0;
+uint8_t kartdata_temp_l = 0;
 
 //----------------------------
 
@@ -92,9 +92,7 @@ int main(){
 			clk = 1;
 			PORTA |= (1 << PORTA3);
 
-		}
-
-		
+		}		
 
 		if(button_autonom != (PINA & 1)){
 			spd_right = 0;
@@ -270,12 +268,14 @@ void handle_messages(){
 			
 			case (0x18):
 			//lägg kartdata i send-buffern
-				transmitByte_up(kartdata_x);
-				transmitByte_up(kartdata_y);
+				temp = gstack();
+				transmitByte_up(temp.x);
+				transmitByte_up(temp.y | (temp.t<<6));
 			break;
 			
 			case (0x19):
 			//senaste styrbeslut i send-buffern
+				styrdata = dir_left | (dir_right << 1);
 				transmitByte_up(styrdata);
 			break;
 
@@ -292,8 +292,8 @@ void handle_messages(){
 			
 			case (0x1C):
 			//lägg tempKartdata i send-buffern
-				transmitByte_up(kartdata_temp_x);
-				transmitByte_up(kartdata_temp_y);
+
+
 			break;
 
 		}
