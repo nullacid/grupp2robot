@@ -15,6 +15,9 @@ int main(void)
 {
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
+    
+    uint_8 mapData[];
+    mapSize = 0;
 
 	
 
@@ -23,17 +26,23 @@ int main(void)
 		unsigned char data = receiveByte_up();
 		transmitByte_down(data);
 		
-		uint8_t datalength = data & 0xC0; //removes data
+        // Removes data and shifts it down
+		uint8_t datalength = data & 0xC0;
 		datalength = (datalength >> 6);
 		
 		unsigned char returnDataArray[3];
 		
 		unsigned int i = 0;
 
-		while(datalength != 0){
-			returnDataArray[i] = receiveByte_down();
-			datalength--;
-			i++;
+        while(datalength != 0){
+            returnDataArray[i] = receiveByte_down();
+                // if mapdata, store it for debugging
+                if (data == 0x58){
+                    mapData[size] = returnDataArray[i];
+                    size++;
+                }
+            datalength--;
+            i++;
 		}
 		if(i != 0){
 			do{
@@ -41,7 +50,6 @@ int main(void)
 				i--;
 			}while(i != 0);
 		}
-
     }
 }
 
