@@ -66,6 +66,7 @@ RED = (255,0,0)
 CYAN = (0,255,255)
 MAGENTA = (255,0,255)
 YELLOW = (255,255,0)
+GREY = (139, 137, 137)
 
 
 	
@@ -91,6 +92,8 @@ def paintSquare(tileType, xCoord, yCoord):
 		colour = BLUE
 	elif tileType == "WALL":
 		colour = MAGENTA
+	elif tileType == "OUTSIDE":
+		colour = GREY
 	pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
 					
 #key binding handles
@@ -219,9 +222,25 @@ def getSteering():
 def getMap():
 	global mapSystem
 	harald.sendData(b'\x98')
-	dataArray = []
-	dataArray.append(harald.receiveData())
-	dataArray.append(harald.receiveData())
+	msByte = harald.receiveData()
+	lsByte = harald.receiveData()
+	xCoord = int(msByte[0])
+	yCoord = int(lsByte[0] & b'\x1F'[0])
+	tileType = int(lsByte[0] >> 5)
+	if tileType == 1:
+		tileType = "UNEXPLORED"
+	elif tileType == 2:
+		tileType = "OPEN"
+	elif tileType == 3:
+		tileType = "WALL"
+	elif tileType == 4:
+		tileType = "OUTSIDE"
+	
+	mapSystem.arrayMap[xCoord][yCoord] = tileType
+	
+	
+		
+	
 
 def getPosition():
 	harald.sendData(b'\x9A')
