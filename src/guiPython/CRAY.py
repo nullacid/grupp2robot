@@ -18,13 +18,13 @@ if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
 	
 #Create bluetooth object
-harald = Harald()
+#harald = Harald()
 	
 #Initialize
 pygame.display.init()
 pygame.font.init()
 
-""""#FULLSCREEN MODE
+"""#FULLSCREEN MODE
 screenWidth = 1598
 screenHeight = 884
 squareWidth = screenHeight/34
@@ -33,10 +33,10 @@ squareHeight = screenHeight/34
 screen_size = [screenWidth,screenHeight]
 
 surface = pygame.display.set_mode(screen_size, FULLSCREEN)
-offset = -170
-#dataOffset = 300"""
+offset = -15
+#dataOffset = 300
 
-#SMALLSCREEN MODE
+"""#SMALLSCREEN MODE
 screenWidth = 1020
 screenHeight = 680
 squareWidth = screenHeight/34
@@ -45,8 +45,8 @@ squareHeight = screenHeight/34
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
-offset = 5
-#dataOffset = 220
+offset = -10
+#dataOffset = 220"""
 
 
 #A blank icon
@@ -78,15 +78,30 @@ def paintData(mapSystem):
 	for i in range(0,17):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
-		surface.blit(text, ((6*screenWidth)/9 + offset, i * (5 * squareHeight)/3 + 10))
-		"""dataString = str(mapSystem.dataDict[mapSystem.indexDict[i]])
-		text = font.render(dataString, 0, H4xx0R)
-		surface.blit(text, ((6*screenWidth)/9 + offset + dataOffset, i * (5 * squareHeight)/3 + 10))"""
+		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
+	#Start Position Circle
+	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(18 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	text = "Start Position"
+	text = font.render(text, 0 , WHITE)
+	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
+	
+	#Current Position Circle
+	pygame.draw.circle(surface, MAGENTA, [int(35 * squareWidth), int(19 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	text = "Current Position"
+	text = font.render(text, 0 , WHITE)
+	surface.blit(text, (36 * squareWidth, 19 * (5 * squareHeight) / 3))
+	
 def paintMap(mapSystem):
 	for i in range(0,34):
 		for j in range(0,34):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
+	#Draw startPosition
+	pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
+	
+	#Draw currentPosition
+	
+	
 	pygame.display.flip()
 			
 def paintSquare(tileType, xCoord, yCoord):
@@ -326,8 +341,7 @@ while(crayRunning):
 	paintMap(mapSystem)
 	paintData(mapSystem)
 		
-	getData()
-	getMap()
+	#getData()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
