@@ -2,8 +2,8 @@
 #include <avr/interrupt.h>
 #define F_CPU 20000000
 #include <util/delay.h>
-#include "lib/usart.h"
-#include "lib/mem.h"
+#include "usart.h"
+#include "mem.h"
 
 #define FORWARD 1
 #define BACK 0
