@@ -25,26 +25,28 @@ pygame.display.init()
 pygame.font.init()
 
 """"#FULLSCREEN MODE
-screenWidth = 1584
-screenHeight = 891
-squareWidth = screenHeight/33
-squareHeight = screenHeight/33
+screenWidth = 1598
+screenHeight = 884
+squareWidth = screenHeight/34
+squareHeight = screenHeight/34
 
 screen_size = [screenWidth,screenHeight]
 
 surface = pygame.display.set_mode(screen_size, FULLSCREEN)
-offset = -150"""
+offset = -170
+#dataOffset = 300"""
 
 #SMALLSCREEN MODE
-screenWidth = 990
-screenHeight = 660
-squareWidth = screenHeight/33
-squareHeight = screenHeight/33
+screenWidth = 1020
+screenHeight = 680
+squareWidth = screenHeight/34
+squareHeight = screenHeight/34
 
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
 offset = 5
+#dataOffset = 220
 
 
 #A blank icon
@@ -77,23 +79,26 @@ def paintData(mapSystem):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, ((6*screenWidth)/9 + offset, i * (5 * squareHeight)/3 + 10))
+		"""dataString = str(mapSystem.dataDict[mapSystem.indexDict[i]])
+		text = font.render(dataString, 0, H4xx0R)
+		surface.blit(text, ((6*screenWidth)/9 + offset + dataOffset, i * (5 * squareHeight)/3 + 10))"""
 		
 def paintMap(mapSystem):
-	for i in range(0,33):
-		for j in range(0,33):
+	for i in range(0,34):
+		for j in range(0,34):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 	pygame.display.flip()
 			
 def paintSquare(tileType, xCoord, yCoord):
 	colour = BLACK
 	if tileType == "UNEXPLORED":
-		colour = WHITE
-	elif tileType == "OPEN":
-		colour = BLUE
-	elif tileType == "WALL":
-		colour = MAGENTA
-	elif tileType == "OUTSIDE":
 		colour = GREY
+	elif tileType == "OPEN":
+		colour = WHITE
+	elif tileType == "WALL":
+		colour = GREEN
+	elif tileType == "OUTSIDE":
+		colour = MAGENTA
 	pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
 					
 #key binding handles
@@ -130,8 +135,7 @@ def right_up():
 	harald.sendData(b'\x07')
 	
 def handle_SPACE():
-	harald.sendData(b'\x09')
-	harald.receiveData()
+	pass
 	
 	
 #Functions for getting data from the system (called autonomously)
@@ -217,7 +221,16 @@ def getIRLBtoken():
 def getSteering():
 	harald.sendData(b'\x59')
 	data = harald.receiveData()
-	return int(data[0])
+	if int(data[0]) == 0:
+		return 0
+	elif int(data[0]) == 1:
+		return 1
+	elif int(data[0]) == 2:
+		return 2
+	elif int(data[0]) == 3:
+		return 3
+	elif int(data[0]) == 4:
+		return 4
 
 def getMap():
 	global mapSystem
@@ -225,21 +238,19 @@ def getMap():
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
 	xCoord = int(msByte[0])
-	yCoord = int(lsByte[0] & b'\x1F'[0])
-	tileType = int(lsByte[0] >> 5)
-	if tileType == 1:
-		tileType = "UNEXPLORED"
-	elif tileType == 2:
-		tileType = "OPEN"
-	elif tileType == 3:
-		tileType = "WALL"
-	elif tileType == 4:
-		tileType = "OUTSIDE"
+	yCoord = int(lsByte[0] & b'\x3F'[0])
+	tileType = int(lsByte[0] >> 6)
+	if tileType != 0:
+		if tileType == 1:
+			tileType = "UNEXPLORED"
+		elif tileType == 2:
+			tileType = "OPEN"
+		elif tileType == 3:
+			tileType = "WALL"
 	
-	mapSystem.arrayMap[xCoord][yCoord] = tileType
-	
-	
-		
+		mapSystem.arrayMap[xCoord][yCoord] = tileType
+		return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+	return mapSystem.dataDict["Update Map"]
 	
 
 def getPosition():
@@ -297,16 +308,17 @@ mapSystem = MapSystem()
 
 lastTimeStamp = 0
 
+
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
 	global lastTimeStamp
-	if lastTimeStamp + 0.1 < time():
-		currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
-		mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
+	#if lastTimeStamp + 0.1 < time():
+	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
+	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	
-		mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
-		lastTimeStamp = time()
+	mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
+	lastTimeStamp = time()
 
 	
 	
@@ -315,6 +327,7 @@ while(crayRunning):
 	paintData(mapSystem)
 		
 	getData()
+	getMap()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
