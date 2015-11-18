@@ -2,8 +2,8 @@
 #include <avr/interrupt.h>
 #define F_CPU 20000000
 #include <util/delay.h>
-#include "usart.h"
-#include "mem.h"
+#include "lib/usart.h"
+#include "lib/mem.h"
 
 #define FORWARD 1
 #define BACK 0
@@ -101,10 +101,10 @@ int main(){
 		}
 		button_autonom = (PINA & 1);
 
-
-
-		handle_messages();
 		update_sensor_data();
+		handle_messages();
+		
+
 
 		if (button_autonom == 1){
 			
@@ -312,7 +312,6 @@ void update_sensor_data(){
 	s_ir_v_b = receiveByte_down();
 	s_gyro_u = receiveByte_down();
 	s_gyro_l = receiveByte_down();
-
 
 	t_LIDAR = receiveByte_down();
 	t_p_h = receiveByte_down();;

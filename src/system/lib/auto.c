@@ -1,17 +1,6 @@
 #include "auto.h"
 
 
-//------------------Constants----------------
-// ÄR INTE DESSA KONSTANTER BARA TOKENVÄRDEN????
-// SEnsorenheten borde göra beräkningarna
-uint8_t IR_OFFSET = 7;
-uint8_t OK_DISTANCE_TO_WALL = 20;
-uint8_t LIDAR_OFFSET;
-uint8_t FLUFF = 1;
-uint8_t 90DEG;
-
-//-------------------------------------------
-
 // VI BORDE TA IN DESSA:
 
 //	sensor/token_sensor_fram/bak/vänster/höger upper/lower

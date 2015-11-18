@@ -1,6 +1,9 @@
 #ifndef AUTO_H
 #define AUTO_H
 
-//#include <avr/io.h>
+uint8_t next_step();
 
-void autonom ();
+//------------CONSTANTS-----------
+
+
+#endif
