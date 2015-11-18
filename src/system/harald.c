@@ -37,10 +37,10 @@ int main(void)
         while(datalength != 0){
             returnDataArray[i] = receiveByte_down();
                 // if mapdata, store it for debugging
-                if (data == 0x58){
-                    mapData[mapSize] = returnDataArray[i];
-                    mapSize++;
-                }
+                //if (data == 0x58){
+                  //  mapData[mapSize] = returnDataArray[i];
+                  //  mapSize++;
+                //}
             datalength--;
             i++;
 		}

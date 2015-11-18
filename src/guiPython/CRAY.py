@@ -18,7 +18,7 @@ if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
 	
 #Create bluetooth object
-#harald = Harald()
+harald = Harald()
 	
 #Initialize
 pygame.display.init()
@@ -341,7 +341,7 @@ while(crayRunning):
 	paintMap(mapSystem)
 	paintData(mapSystem)
 		
-	#getData()
+	getData()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:

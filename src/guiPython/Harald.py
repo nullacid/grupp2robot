@@ -9,7 +9,7 @@ class Harald():
 		self.targetDevice = None
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-		self.lastCommand = b'0xff'
+		#self.lastCommand = b'0xff'
 		
 		while not self.establishDirectConnection():
 			pass
@@ -59,7 +59,7 @@ class Harald():
 	def sendData(self, data):	
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
-			self.lastCommand = data
+			#self.lastCommand = data
 			print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
