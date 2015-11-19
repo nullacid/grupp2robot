@@ -11,6 +11,9 @@ void dfs(uint8_t startx, uint8_t starty, target_tile);
 
 uint8_t follow_wall = 1;
 uint8_t startup = 1;
+//För DFS
+uint8_t check = 0;
+uint8_t visted[32][32]; //Är detta ok utan initialisering?
 
 
 void think(){
@@ -75,8 +78,35 @@ void bfs_t(uint8_t startx, uint8_t starty, uint8_t target_tile){
 	return;
 }
 
-void dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
+uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 //Används för att kolla om väggen runt är sluten.	
+	//Return 1 om sökning lyckades, 0 om ingen väg finns
+	
+	/*	uint8_t UNEXP 		= 1;	//Tile: Unexplored
+		uint8_t FLOOR 		= 2;	//Tile: Floor
+		uint8_t WALL 		= 3;	//Tile: Wall
+		uint8_t OUTSIDE 	= 4;	//Tile: Outside*/
 
-	return;
+	if (visted[startx][starty] != 1){
+
+		if (rmem(startx, starty) == target_tile){
+			return 1;
+		}
+		else if(rmem(startx, starty) == WALL){
+			return 0;
+		}
+		else{
+			check = dfs(startx-1, starty, target_title);
+			if (check == 1){return 1;}
+			check = dfs(startx, starty+1, target_title);
+			if (check == 1){return 1;}
+			check = dfs(startx+1, starty, target_title);
+			if (check == 1){return 1;}
+			check = dfs(startx, starty-1, target_title);
+			if (check == 1){return 1;}
+			return 0;
+		}
+		visted[startx][starty] = 1;
+	}
+	return 0;
 }
