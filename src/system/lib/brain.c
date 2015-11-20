@@ -61,7 +61,9 @@ void find_next_wall(){
 
 void find_empty_tile(){
 
+
 //Hitta en unexplored tile vi kan åka til
+	bfs_t(startx, starty, target_tile);
 
 	return;
 }
