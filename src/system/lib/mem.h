@@ -21,9 +21,17 @@ typedef struct {
 	uint8_t t;
 } mapchange;
 
+typedef struct node{
+		uint8_t x;
+		uint8_t y;
+		node* parent;
+		//uint8_t visited;
+		uint8_t tileType;
+} node;
+
 void wmem(uint8_t data, uint8_t x, uint8_t y); 		//Write to map-memory
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y);
-uint8_t rmem(uint8_t x, uint8_t y); 				//Read from map-memory
+node* rmem(uint8_t x, uint8_t y); 				//Read from map-memory
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t);	//Put data on change stack
 mapchange gstack(); 
 

@@ -32,7 +32,7 @@ void init_mem(){
 	target_x = 0; //Target tile
 	target_y = 0;
 	dir = 0;
-
+	//OKÄND SKA VARA 1, fixa
 	return;
 
 }
@@ -77,15 +77,15 @@ mapchange gstack(){
 	return;
 }
 
-uint8_t rmem(uint8_t x, uint8_t y){
+node* rmem(uint8_t x, uint8_t y){
 
-	return mapmem[x][y];
+	return &mapmem[x][y];
 
 }
 
 void wmem(uint8_t data, uint8_t x, uint8_t y){
 
-	mapmem[x][y] = data;
+	mapmem[x][y]->tileType = data;
 	
 	return;
 }
@@ -93,9 +93,9 @@ void wmem(uint8_t data, uint8_t x, uint8_t y){
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
 
 	//Denna kallar auto på, lägger till i change-stacken om ny data
-	if (mapmem[x][y] != data){ //NY DATA, ska skickas upp
+	if (mapmem[x][y]->tileType != data){ //NY DATA, ska skickas upp
 		
-		mapmem[x][y] = data;
+		mapmem[x][y]->tileType = data;
 		pstack(x, y, data);
 	}
 	return;
