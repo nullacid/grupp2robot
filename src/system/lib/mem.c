@@ -3,7 +3,7 @@
 
 
 //----------------Variables------------------------------------
-uint8_t mapmem[32][32];		//The map memory 33x33 tiles large
+node mapmem[32][32];		//The map memory 33x33 tiles large
 mapchange change_stack[99];	//A stack where changes to the map will be waiting to be sent
 int8_t c_stack_top = -1; 		//The top of the stack
 
@@ -85,7 +85,7 @@ node* rmem(uint8_t x, uint8_t y){
 
 void wmem(uint8_t data, uint8_t x, uint8_t y){
 
-	mapmem[x][y]->tileType = data;
+	mapmem[x][y].tileType = data;
 	
 	return;
 }
@@ -93,9 +93,9 @@ void wmem(uint8_t data, uint8_t x, uint8_t y){
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
 
 	//Denna kallar auto på, lägger till i change-stacken om ny data
-	if (mapmem[x][y]->tileType != data){ //NY DATA, ska skickas upp
+	if (mapmem[x][y].tileType != data){ //NY DATA, ska skickas upp
 		
-		mapmem[x][y]->tileType = data;
+		mapmem[x][y].tileType = data;
 		pstack(x, y, data);
 	}
 	return;

@@ -1,7 +1,6 @@
 #include "auto.h"
 #include "usart.h"
 #include "mem.h"
-#include "bjarne.c" //BLIR KONSTIGT? HUR SKA VI ANNARS KUNNA ANROPA setSpeed?
 #include <avr/io.h>
 
 uint8_t cur_action = 0;
@@ -101,7 +100,7 @@ void autonom (){
 		case (FORWARD):
 			if (first_time){
 				distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l - 40; //LIDAR distance - 40 cm
-				first_time = 0
+				first_time = 0;
 			}
 
 			if (t_p_h == 0){ //Parallellt
@@ -164,7 +163,7 @@ void autonom (){
 		case(BACKWARD):
 			if (first_time){
 				distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l + 40; //LIDAR distance + 40 cm
-				first_time = 0
+				first_time = 0;
 			}
 			//Kolla så vi åker typ parallellt
 
@@ -195,10 +194,10 @@ void action_done(){
 	//------------UPPDATERA KARTDATA ----------------
 	//Räknat med 0,0 i övre högra hörnet
 	switch(dir){
+		int i;
 		case (0): //LIDAR to the NORTH
 			wmem_auto(WALL, robot_pos_x, robot_pos_y - t_LIDAR); //LIDAR WALL
-
-			for (int i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
+			for (i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y - i);
 			}
 
@@ -225,8 +224,7 @@ void action_done(){
 		break;
 		case (1): //LIDAR to the EAST
 			wmem_auto(WALL, robot_pos_x + t_LIDAR, robot_pos_y); //LIDAR WALL
-
-			for (int i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
+			for (i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
 				wmem_auto(FLOOR, robot_pos_x + i, robot_pos_y);
 			}
 
@@ -253,8 +251,7 @@ void action_done(){
 		break;
 		case (2): //LIDAR to the SOUTH
 			wmem_auto(WALL, robot_pos_x, robot_pos_y + t_LIDAR); //LIDAR WALL
-
-			for (int i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
+			for (i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + i);
 			}
 
@@ -280,8 +277,7 @@ void action_done(){
 		break;
 		case (3): //LIDAR to the WEST
 			wmem_auto(WALL, robot_pos_x - t_LIDAR, robot_pos_y); //LIDAR WALL
-
-			for (int i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
+			for (i = 1; i < t_LIDAR; i++){ //LIDAR SEES FLOOR
 				wmem_auto(FLOOR, robot_pos_x - i, robot_pos_y);
 			}
 
@@ -308,3 +304,32 @@ void action_done(){
 
 }
 	
+void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
+	
+		if(ldir){
+			PORTA |= (1 << DDA7);
+			
+		}
+		else{
+
+			
+			PORTA &= 0x7F;
+
+		}
+
+		if(rdir){
+
+			PORTA |= (1 << DDA6);
+		}
+		else{
+
+			
+			PORTA &= 0xBF;
+		}
+
+
+//	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 är vänster, DDA6 är höger 	
+	OCR1A = 10*rspeed;//set the duty cycle(out of 1023) Höger	
+	OCR3A = 10*lspeed;//set the duty cycle(out of 1023) Vänster
+	
+}

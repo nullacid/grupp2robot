@@ -7,6 +7,8 @@ uint8_t next_step();
 void update_sensor_data(); 
 void init_auto();
 void autonom();
+void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir, uint8_t rdir);
+
 
 uint8_t s_LIDAR_u;
 uint8_t s_LIDAR_l;

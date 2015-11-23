@@ -13,7 +13,6 @@
 #define true 1
 #define bool uint8_t
 
-void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir, uint8_t rdir);
 void init_motors();
 void handle_messages();
 uint8_t decide_if_repeated(uint8_t msg);
@@ -272,34 +271,6 @@ void init_motors(){
 	TCCR3B |= (1 << WGM32) | (1 << CS31) | (1 << CS30);
 }
 
-void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
-	
-		if(ldir){
-			PORTA |= (1 << DDA7);
-			
-		}
-		else{
 
-			
-			PORTA &= 0x7F;
-
-		}
-
-		if(rdir){
-
-			PORTA |= (1 << DDA6);
-		}
-		else{
-
-			
-			PORTA &= 0xBF;
-		}
-
-
-//	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 är vänster, DDA6 är höger 	
-	OCR1A = 10*rspeed;//set the duty cycle(out of 1023) Höger	
-	OCR3A = 10*lspeed;//set the duty cycle(out of 1023) Vänster
-	
-}
 
 

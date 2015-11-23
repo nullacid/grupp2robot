@@ -7,7 +7,8 @@ void find_empty_tile();
 
 void bfs(uint8_t startx, uint8_t starty, uint8_t targetx, uint8_t targety);
 void bfs_t(uint8_t startx, uint8_t starty, uint8_t target_tile);
-void dfs(uint8_t startx, uint8_t starty, target_tile);
+uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile);
+uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile);
 
 uint8_t follow_wall = 1;
 uint8_t startup = 1;
@@ -72,8 +73,8 @@ void find_next_wall(){
 		switch(dir){
 		case (0): //LIDAR to the NORTH
 			if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL){ //Vägg till öster
-				if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL)) { // vägg till norr
-					if (rmem(robot_pos_x -1 , robot_pos_y)->tileType == WALL)){ // vägg till väst
+				if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL) { // vägg till norr
+					if (rmem(robot_pos_x -1 , robot_pos_y)->tileType == WALL){ // vägg till väst
 						paction(SPIN_180);
 						paction(FORWARD);
 					}
@@ -94,8 +95,8 @@ void find_next_wall(){
 		break;
 		case (1): //LIDAR to the EAST
 			if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL){ //Vägg till söder
-				if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL)) { // vägg till öster
-					if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL)){ // vägg till norr
+				if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL) { // vägg till öster
+					if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL){ // vägg till norr
 						paction(SPIN_180);
 						paction(FORWARD);
 					}
@@ -115,8 +116,8 @@ void find_next_wall(){
 		break;
 		case (2): //LIDAR to the SOUTH
 			if (rmem(robot_pos_x - 1, robot_pos_y)->tileType == WALL){ //Vägg till väster
-				if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL)) { // vägg till south
-					if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL)){ // vägg till öster
+				if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL){ // vägg till south
+					if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL){ // vägg till öster
 						paction(SPIN_180);
 						paction(FORWARD);
 					}
@@ -136,8 +137,8 @@ void find_next_wall(){
 		break;
 		case (3): //LIDAR to the WEST
 			if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL){ //Vägg till norr
-				if (rmem(robot_pos_x - 1 , robot_pos_y)->tileType == WALL)) { // vägg till väster
-					if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL)){ // vägg till söder
+				if (rmem(robot_pos_x - 1 , robot_pos_y)->tileType == WALL){ // vägg till väster
+					if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL){ // vägg till söder
 						paction(SPIN_180);
 						paction(FORWARD);
 					}
@@ -186,6 +187,9 @@ void bfs_t(uint8_t startx, uint8_t starty, uint8_t target_tile){
 	return;
 }
 
+
+uint8_t visited[32][32];
+
 uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 //Används för att kolla om väggen runt är sluten.	
 	//Return 1 om sökning lyckades, 0 om ingen väg finns
@@ -195,16 +199,16 @@ uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 		uint8_t WALL 		= 3;	//Tile: Wall
 		uint8_t OUTSIDE 	= 4;	//Tile: Outside*/
 
-	uint8_t visted[32][32];
+
 	uint8_t temp = 0;
-	temp = dfs_help(startx, starty, target_tile, visited);
+	temp = dfs_help(startx, starty, target_tile);
 	return temp;
 	
 	
 }
 
-uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile, uint8_t visited[32][32]){
-	if (visted[startx][starty] != 1){
+uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile){
+	if(visited[startx][starty] != 1){
 
 		if (rmem(startx, starty)->tileType == target_tile){
 			return 1;
@@ -214,17 +218,17 @@ uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile, uint8_t vi
 			return 0;
 		}
 		else{
-			check = dfs_help(startx-1, starty, target_title);
+			check = dfs_help(startx-1, starty, target_tile);
 			if (check == 1){return 1;}
-			check = dfs_help(startx, starty+1, target_title);
+			check = dfs_help(startx, starty+1, target_tile);
 			if (check == 1){return 1;}
-			check = dfs_help(startx+1, starty, target_title);
+			check = dfs_help(startx+1, starty, target_tile);
 			if (check == 1){return 1;}
-			check = dfs_help(startx, starty-1, target_title);
+			check = dfs_help(startx, starty-1, target_tile);
 			if (check == 1){return 1;}
 			return 0;
 		}
-		visted[startx][starty] = 1;
+		visited[startx][starty] = 1;
 	}
 	return 0;
 

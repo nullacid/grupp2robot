@@ -21,13 +21,15 @@ typedef struct {
 	uint8_t t;
 } mapchange;
 
-typedef struct node{
+typedef struct node node;
+
+struct node{
 		uint8_t x;
 		uint8_t y;
 		node* parent;
 		//uint8_t visited;
 		uint8_t tileType;
-} node;
+};
 
 void wmem(uint8_t data, uint8_t x, uint8_t y); 		//Write to map-memory
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y);
