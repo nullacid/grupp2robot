@@ -66,25 +66,94 @@ void find_next_wall(){
 #define SPIN_L		3 //Turn 90 left
 #define	SPIN_180 	4 //Turn 180 left
 #define PARALLELIZE	5 //Turn until parallel with wall on right side
-#define	BACK		6 //Back-up one tile
+#define	BACKWARD	6 //Back-up one tile
 
 		*/
 		switch(dir){
 		case (0): //LIDAR to the NORTH
-			if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL){ //Vägg till höger
+			if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL){ //Vägg till öster
+				if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL)) { // vägg till norr
+					if (rmem(robot_pos_x -1 , robot_pos_y)->tileType == WALL)){ // vägg till väst
+						paction(SPIN_180);
+						paction(FORWARD);
+					}
+					else{
+					paction(SPIN_L);
+					paction(FORWARD);
+					}
+				}
+				else{
 				paction(FORWARD); //Kör framåt
+				}
 			}
-			else if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == FLOOR){ //Öppet till höger
+			else if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == FLOOR){ //Öppet till öster
 				paction(SPIN_R);
 				paction(FORWARD);//Snurra 90 grader och åk framåt
 			} 
 
 		break;
 		case (1): //LIDAR to the EAST
+			if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL){ //Vägg till söder
+				if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL)) { // vägg till öster
+					if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL)){ // vägg till norr
+						paction(SPIN_180);
+						paction(FORWARD);
+					}
+					else{
+					paction(SPIN_L);
+					paction(FORWARD);
+					}
+				}
+				else{
+				paction(FORWARD); //Kör framåt
+				}
+			}
+			else if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == FLOOR){ //Öppet till söder
+				paction(SPIN_R);
+				paction(FORWARD);//Snurra 90 grader och åk framåt
+			} 
 		break;
 		case (2): //LIDAR to the SOUTH
+			if (rmem(robot_pos_x - 1, robot_pos_y)->tileType == WALL){ //Vägg till väster
+				if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL)) { // vägg till south
+					if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL)){ // vägg till öster
+						paction(SPIN_180);
+						paction(FORWARD);
+					}
+					else{
+					paction(SPIN_L);
+					paction(FORWARD);
+					}
+				}
+				else{
+				paction(FORWARD); //Kör framåt
+				}
+			}
+			else if (rmem(robot_pos_x - 1, robot_pos_y)->tileType == FLOOR){ //Öppet till väster
+				paction(SPIN_R);
+				paction(FORWARD);//Snurra 90 grader och åk framåt
+			} 
 		break;
 		case (3): //LIDAR to the WEST
+			if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == WALL){ //Vägg till norr
+				if (rmem(robot_pos_x - 1 , robot_pos_y)->tileType == WALL)) { // vägg till väster
+					if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == WALL)){ // vägg till söder
+						paction(SPIN_180);
+						paction(FORWARD);
+					}
+					else{
+					paction(SPIN_L);
+					paction(FORWARD);
+					}
+				}
+				else{
+				paction(FORWARD); //Kör framåt
+				}
+			}
+			else if (rmem(robot_pos_x, robot_pos_y - 1)->tileType == FLOOR){ //Öppet till norr
+				paction(SPIN_R);
+				paction(FORWARD);//Snurra 90 grader och åk framåt
+			} 
 		break;
 
 		}
