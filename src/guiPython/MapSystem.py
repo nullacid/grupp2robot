@@ -1,7 +1,7 @@
 
 class MapSystem():
 	def __init__(self):
-		self.arrayMap = [["UNEXPLORED" for x in range(34)] for x in range(34)]
+		self.arrayMap = [["UNEXPLORED" for x in range(33)] for x in range(33)]
 		self.startPosition = (16,16)
 		self.dataIndex = 0
 		self.arrayMap[16][16] = "OPEN"
@@ -20,6 +20,12 @@ class MapSystem():
 		self.arrayMap[18][15] = "WALL"
 		self.arrayMap[18][16] = "WALL"
 		self.arrayMap[18][17] = "WALL"
+		self.arrayMap[15][18] = "WALL"
+		self.arrayMap[16][18] = "WALL"
+		self.arrayMap[17][18] = "WALL"
+		self.arrayMap[14][15] = "WALL"
+		self.arrayMap[14][16] = "WALL"
+		self.arrayMap[14][17] = "WALL"
 		
 		self.indexDict = {
 						0 : "Lidar",

@@ -25,10 +25,10 @@ pygame.display.init()
 pygame.font.init()
 
 """#FULLSCREEN MODE
-screenWidth = 1598
-screenHeight = 884
-squareWidth = screenHeight/34
-squareHeight = screenHeight/34
+screenWidth = 1584
+screenHeight = 891
+squareWidth = screenHeight/33
+squareHeight = screenHeight/33
 
 screen_size = [screenWidth,screenHeight]
 
@@ -37,10 +37,10 @@ offset = -15
 #dataOffset = 300
 
 """#SMALLSCREEN MODE
-screenWidth = 1020
-screenHeight = 680
-squareWidth = screenHeight/34
-squareHeight = screenHeight/34
+screenWidth = 990
+screenHeight = 660
+squareWidth = screenHeight/33
+squareHeight = screenHeight/33
 
 screen_size = [screenWidth, screenHeight]
 
@@ -93,8 +93,8 @@ def paintData(mapSystem):
 	surface.blit(text, (36 * squareWidth, 19 * (5 * squareHeight) / 3))
 	
 def paintMap(mapSystem):
-	for i in range(0,34):
-		for j in range(0,34):
+	for i in range(0,33):
+		for j in range(0,33):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 	#Draw startPosition
 	pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
@@ -234,6 +234,7 @@ def getIRLBtoken():
 	return int(data[0])
 
 def getSteering():
+	"""
 	harald.sendData(b'\x59')
 	data = harald.receiveData()
 	if int(data[0]) == 0:
@@ -246,8 +247,12 @@ def getSteering():
 		return 3
 	elif int(data[0]) == 4:
 		return 4
+	"""
+	pass
 
+#Gets data from the map update stack in bjarne and updates the map graphically
 def getMap():
+	"""
 	global mapSystem
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
@@ -266,18 +271,26 @@ def getMap():
 		mapSystem.arrayMap[xCoord][yCoord] = tileType
 		return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
 	return mapSystem.dataDict["Update Map"]
+	"""
+	pass
 	
 
 def getPosition():
+	"""
 	harald.sendData(b'\x9A')
 	dataArray = []
 	dataArray.append(harald.receiveData())
 	dataArray.append(harald.receiveData())
+	"""
+	pass
 
 def getDecision():
+	"""
 	harald.sendData(b'\x5B')
 	data = harald.receiveData()
 	return int(data[0])
+	"""
+	pass
 	
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
@@ -332,7 +345,7 @@ def getData():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	
-	mapSystem.incIndex()	#This is essently dataIndex++ but it loops it at 17
+	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	lastTimeStamp = time()
 
 	
