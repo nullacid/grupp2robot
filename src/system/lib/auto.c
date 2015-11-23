@@ -1,9 +1,12 @@
 #include "auto.h"
 #include "usart.h"
 #include "mem.h"
+#include "bjarne.c" //BLIR KONSTIGT? HUR SKA VI ANNARS KUNNA ANROPA setSpeed?
 #include <avr/io.h>
 
 uint8_t cur_action = 0;
+int distance_LIDAR;
+uint8_t first_time;
 
 
 void update_sensor_data(); 
@@ -12,6 +15,8 @@ void action_done();
 
 
 void init_auto(){
+	distance_LIDAR = 0;
+	first_time = 1;
 	s_LIDAR_u = 0;
 	s_LIDAR_l = 0;
 	t_LIDAR = 0;	//Antal 40 cm rutor till vägg 0 - 20 cm   1 - 20+40cm   2 20+80cm
@@ -23,8 +28,8 @@ void init_auto(){
 
 	//	Token parallell vänster/höger
 
-	t_p_h = 0;	// 0- ej parallell, 1 - parallell
-	t_p_v = 0;	// 0- ej parallell, 1 - parallell
+	t_p_h = 0;	// 0- parallell, 1- lite off , 2- mer off , FF - ej användbart
+	t_p_v = 0;	// 0- parallell, 1- lite off , 2- mer off , FF - aj användbart
 
 	t_vagg_h_f = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
 	t_vagg_h_b = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
@@ -67,42 +72,127 @@ void update_sensor_data(){
 
 void autonom (){
 
+	
+
+
 	if(cur_action == EMPTY){ //Om vi inte har en order, kolla om det finns någon ny
 
 		cur_action = read_a_top();
+	}
+	
+	/* 
+	#define EMPTY		0 //The a_stack was empty //Stand still
+	#define FORWARD 	1 //Go forward 1 tile
+	#define	SPIN_R		2 //Turn 90 right
+	#define SPIN_L		3 //Turn 90 left
+	#define	SPIN_180 	4 //Turn 180 left
+	#define PARALLELIZE	5 //Turn until parallel with wall on right side
+	#define	BACKWARD	6 //Back-up one tile
 
+	void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir, uint8_t rdir);
+	*/
+
+	switch(cur_action){
+		case (EMPTY):
+			setSpeed(0, 0, 0, 0);
+			action_done();
+		break;
+
+		case (FORWARD):
+			if (first_time){
+				distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l - 40; //LIDAR distance - 40 cm
+				first_time = 0
+			}
+
+			if (t_p_h == 0){ //Parallellt
+				setSpeed(100, 100, 1, 1);
+			}	
+			else if (t_p_h == 1){ //påväg från väggen
+				setSpeed(100, 95, 1, 1);
+			}	
+			else if (t_p_h == 2){ //påväg från väggen
+				setSpeed(100, 80, 1, 1);
+			}	
+			else if (t_p_h == 3){ //påväg in i väggen
+				setSpeed(95, 100, 1, 1);
+			}	
+			else if (t_p_h == 4){ //påväg in i väggen
+				setSpeed(80, 100, 1, 1);
+			}	
+			else{ //vet inte hur vi står riktigt
+				//HÄR HAMNAR VI NÄR VI ÅKER FRITT 
+				//VAD GÖR VI HÄR??
+			}
+			
+			if ((s_LIDAR_u*256 + s_LIDAR_l) <= distance_LIDAR) {
+				first_time = 1;
+				action_done();
+			}
+		break;
+
+		case (SPIN_R):
+			//GER GYROT VÄRDEN PER SEKUND???
+			setSpeed(100, 100, 1, 0); //Höger hjulpar bakåt
+		break;
+
+		case (SPIN_L):
+			//GER GYROT VÄRDEN PER SEKUND???
+			setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
+		break;
+
+		case (SPIN_180):
+			//GER GYROT VÄRDEN PER SEKUND???
+			setSpeed(100, 100, 1, 0);
+		break;
+
+		case(PARALLELIZE):
+			if (t_p_h == 0){ //Parallellt
+				setSpeed(0, 0, 1, 0);
+				action_done();
+			}	
+			else if (t_p_h == 1 || t_p_h == 2){ //påväg från väggen
+				setSpeed(40 * t_p_h, 40 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
+			}	
+			else if (t_p_h == 3 || t_p_h == 4){ //påväg in i väggen
+				setSpeed(40 * (t_p_h - 2), 40 * (t_p_h -2), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
+			}
+			else{ //vet inte hur vi står riktigt
+				setSpeed(100, 100, 1, 0);
+			}
+		break;
+
+		case(BACKWARD):
+			if (first_time){
+				distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l + 40; //LIDAR distance + 40 cm
+				first_time = 0
+			}
+			//Kolla så vi åker typ parallellt
+
+			setSpeed(100, 100, 0, 0);
+			if ((s_LIDAR_u*256 + s_LIDAR_l) >= distance_LIDAR) {
+				first_time = 1;
+				action_done();
+			}
+		break;
 	}
 
 	//Läs actionstack och utför;
-	//uppdatera kartan m.h.a. sensortokens
+	// UPPDATERA KARTA
 	//när action är utförd, poppa stack
 
-
+	
 
 	return;
 }
 
 void action_done(){
-
+	uint8_t old_action = cur_action;
 	pop_a_stack(); //Ta bort actionen från actionstacken
 	cur_action = read_a_top();	//Ta in actionen under
-
-	/*	uint8_t UNEXP 		= 1;	//Tile: Unexplored
-		uint8_t FLOOR 		= 2;	//Tile: Floor
-		uint8_t WALL 		= 3;	//Tile: Wall
-		uint8_t OUTSIDE 	= 4;	//Tile: Outside
-
-		t_LIDAR = 0; //Antal 40 cm rutor till vägg 0 - 20 cm   1 - 20+40cm   2 20+80cm
-		t_vagg_h_f = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-		t_vagg_h_b = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-		t_vagg_v_f = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-		t_vagg_v_b = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-
-
-		uint8_t robot_pos_x;	// Start in the middle of the map
-		uint8_t robot_pos_y;
-	*/
-
+	if (old_action != cur_action){ 
+		setSpeed(0, 0, 1, 1); //Stanna om vi inte ska fortsätta i samma riktning
+	}
+	//------------UPPDATERA KARTDATA ----------------
 	//Räknat med 0,0 i övre högra hörnet
 	switch(dir){
 		case (0): //LIDAR to the NORTH
@@ -214,7 +304,7 @@ void action_done(){
 			}
 
 		break;
-	
+	}
 
 }
 	

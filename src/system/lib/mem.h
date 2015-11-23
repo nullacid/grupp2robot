@@ -7,7 +7,7 @@
 #define SPIN_L		3 //Turn 90 left
 #define	SPIN_180 	4 //Turn 180 left
 #define PARALLELIZE	5 //Turn until parallel with wall on right side
-#define	BACK		6 //Back-up one tile
+#define	BACKWARD	6 //Back-up one tile
 
 #define NORTH	0
 #define	EAST	1
