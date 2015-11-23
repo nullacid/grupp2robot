@@ -101,7 +101,6 @@ def paintMap(mapSystem):
 	
 	#Draw currentPosition
 	
-	
 	pygame.display.flip()
 			
 def paintSquare(tileType, xCoord, yCoord):
