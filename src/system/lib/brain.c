@@ -77,7 +77,7 @@ void find_next_wall(){
 			else if (rmem(robot_pos_x, robot_pos_y + 1)->tileType == FLOOR){ //Öppet till höger
 				paction(SPIN_R);
 				paction(FORWARD);//Snurra 90 grader och åk framåt
-			}
+			} 
 
 		break;
 		case (1): //LIDAR to the EAST
