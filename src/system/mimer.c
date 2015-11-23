@@ -18,6 +18,17 @@ uint8_t IRLF = 0x01;
 uint8_t IRLB = 0x02;
 uint8_t IRRF = 0x03;
 uint8_t IRRB = 0x04;
+
+uint8_t IRLFT = 0x0a;
+uint8_t IRLBT = 0x0b;
+uint8_t IRRFT = 0x0c;
+uint8_t IRRBT = 0x0d;
+
+uint8_t parallelL = 0xa0;
+uint8_t parallelR = 0xb0;
+
+uint8_t lidarT = 0x45;
+
 uint8_t LIDAR_H = 0xa0;
 uint8_t LIDAR_L = 0xa1;
 
@@ -68,9 +79,93 @@ int16_t adc_read(int16_t ch)
 
 int16_t adc_to_cm(int16_t value){
 	if (value > 120)
-		return 0;
+		return 1;
 	return cm_values[value];
 }
+
+/* Calculates the token values for the IR sensors. A 1 represents a value between 1 and 32 (a wall within 1 square), 2 represents a value between 32 and 89 ( a wall within 2 squares). */
+void calcTokensIR(){	
+	calcTokenIR(&IRLB, &IRLBT);
+	calcTokenIR(&IRLF, &IRLFT);
+	calcTokenIR(&IRRB, &IRRBT);
+	calcTokenIR(&IRRF, &IRRFT);
+}
+
+void calcLidarT(){
+	uint16_t lidarValue = LIDAR_H*256 + LIDAR_L;
+	lidarT = lidarValue / 40;
+}
+
+/* Calculates the token values for parallelity by taking the quotient of the front and back sensors. 0 represents parallelity. 
+   1 and 2 represents a positive offset in the front sensor (front sensor is further away from the wall, turn right to fix this).
+   3 and 4 represents a negative offset in the front sensor (front sensor is closer to the wall, turn left to fix this).
+   The lower value represents a smaller offset. 
+   Will return 0xFF if there is not a wall within one square. */
+void calcParallel(){
+	//Calculates parallelity for the right sensors.
+	if(IRRFT == 1 && IRRBT == 1){
+		double floatingIRRF = IRRF;
+		double floatingIRRB = IRRB;
+		double quotient = 1 - (floatingIRRF/floatingIRRB);
+		uint8_t offset = 0;
+		//Negative quotient means that IRRF > IRRB ((1 - >1) < 0). Sets offset to 2 so that the token values will be set to 3 and 4 instead of 1 and 2.
+		if(quotient > 0){
+			offset = 2;
+			quotient = fabs(quotient); //Takes the absolute value of quotient to make calculations easier.
+		}
+		
+		if(quotient < 0.1){
+			parallelR = 0x00;
+		}
+		else if(quotient < 0.2){
+			parallelR = offset + 0x01;
+		}
+		else if(quotient < 0.4){
+			parallelR = offset + 0x02;
+		}
+	}
+	else{
+		parallelR = 0xFF;
+	}
+	
+	//Calculates parallelity for the left sensors.
+	if(IRLFT == 1 && IRLBT == 1){
+		double floatingIRLF = IRLF;
+		double floatingIRLB = IRLB;
+		double quotient = 1 - (floatingIRLF/floatingIRLB);
+		uint8_t offset = 0;
+		if(quotient < 0){
+			offset = 2;
+			quotient = fabs(quotient);
+		}
+		if(quotient < 0.1){
+			parallelL = 0x00;
+		}
+		else if(quotient < 0.2){
+			parallelL = offset + 0x01;
+		}
+		else if(quotient < 0.4){
+			parallelL = offset + 0x02;
+		}
+	}
+	else{
+		parallelL = 0xFF;
+	}
+}
+
+/* Calculates the token value given pointers to the stored values. */
+void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
+	if(1 < *IRxx && *IRxx <= 32){
+		*IRxxT = 1;
+	}
+	else if(32 < *IRxx && *IRxx < 90){
+		*IRxxT = 2;
+	}
+	else{
+		*IRxxT = 0;
+	}
+}
+
 
 /* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
 
@@ -106,15 +201,15 @@ void transmitGyro(){
 }
 
 void transmitLidarT(){
-	transmitByte_up(0x99);
+	transmitByte_up(lidarT);
 }
 
 void transmitParallelR(){
-	transmitByte_up(0x5A);
+	transmitByte_up(parallelR);
 }
 
 void transmitParallelL(){
-	transmitByte_up(0x5B);
+	transmitByte_up(parallelL);
 }
 
 void transmitGyroT(){
@@ -122,19 +217,19 @@ void transmitGyroT(){
 }
 
 void transmitIRRFT(){
-	transmitByte_up(0x5c);
+	transmitByte_up(IRRFT);
 }
 
 void transmitIRRBT(){
-	transmitByte_up(0x5d);
+	transmitByte_up(IRRBT);
 }
 
 void transmitIRLFT(){
-	transmitByte_up(0x5e);
+	transmitByte_up(IRLFT);
 }
 
 void transmitIRLBT(){
-	transmitByte_up(0x5f);
+	transmitByte_up(IRLBT);
 }
 
 /* Transmits all sensor data. */
@@ -296,6 +391,10 @@ int main()
 		IRLB = adc_to_cm(adc_read(1));
 		IRRF = adc_to_cm(adc_read(2));
 		IRRB = adc_to_cm(adc_read(3));
+		
+		calcTokensIR();
+		calcParallel();
+		calcLidarT();
 		
 		PORTD = IRRB;
 	}
