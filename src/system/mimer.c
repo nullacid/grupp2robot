@@ -5,12 +5,34 @@
  *  Author: micso554
  */
 
+#define F_CPU 20000000UL
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
 #include "lib\usart.h"
 
 uint8_t cm_values[120] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 90, 85, 79, 75, 71, 67, 64, 61, 58, 55, 53, 51, 49, 47, 45, 43, 42, 40, 39, 38, 37, 35, 34, 33, 32, 31, 31, 30, 29, 28, 28, 27, 26, 26, 25, 24, 24, 23, 23, 22, 22, 21, 21, 20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9};
+	
+uint8_t IRLF = 0x01;
+uint8_t IRLB = 0x02;
+uint8_t IRRF = 0x03;
+uint8_t IRRB = 0x04;
+uint8_t LIDAR_H = 0xa0;
+uint8_t LIDAR_L = 0xa1;
+
+// current PWM-value
+int current = 0;
+
+void timer1_init(){
+	// reset registers and set prescaler to 1024
+	TCCR1A = 0;
+	TCCR1B = 0;
+	TCCR1B |= (1<<CS10)|(0<<CS11)|(1<<CS12);
+	
+	// reset timer
+	TCNT1 = 0;
+}
 
 void adc_init()
 {
@@ -19,7 +41,7 @@ void adc_init()
 	ADMUX = (1<<REFS0)|(1<<ADLAR);
 	
 	// ADC Enable and prescaler of 128
-	// 16000000/128 = 125000
+	// 20 000 000/128 = 156 250 Hz (50 kHz < 156 kHz < 200 kHz)
 	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
 }
 
@@ -55,24 +77,28 @@ int16_t adc_to_cm(int16_t value){
 
 /* Transmits data from LIDAR. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitLidar(){
-	transmitByte_up(0x05);
-	transmitByte_up(0x08);
+	transmitByte_up(LIDAR_H);
+	transmitByte_up(LIDAR_L);
 }
 /* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
-	transmitByte_up(0x5d);
+	transmitByte_up(IRRF);
+	//transmitByte_up(0xa1);
 }
 /* Transmits data from the right back IR sensor. 1 byte. */
 void transmitIRRB(){
-	transmitByte_up(0x73);
+	transmitByte_up(IRRB);
+	//transmitByte_up(0xa2);
 }
 /* Transmits data from the left front sensor. 1 byte. */
 void transmitIRLF(){
-	transmitByte_up(0x34);
+	transmitByte_up(IRLF);	
+	//transmitByte_up(0xa3);
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
-	transmitByte_up(0x23);
+	transmitByte_up(IRLB);
+	//transmitByte_up(0xa4);
 }
 /* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitGyro(){
@@ -97,19 +123,23 @@ void transmitGyroT(){
 }
 
 void transmitIRRFT(){
-	transmitByte_up(0x0A);
+	//transmitByte_up(0x0A);
+	transmitByte_up(0x5c);
 }
 
 void transmitIRRBT(){
-	transmitByte_up(0x0B);
+	//transmitByte_up(0x0B);
+	transmitByte_up(0x5d);
 }
 
 void transmitIRLFT(){
-	transmitByte_up(0x0C);
+	//transmitByte_up(0x0C);
+	transmitByte_up(0x5e);
 }
 
 void transmitIRLBT(){
-	transmitByte_up(0x0D);
+	//transmitByte_up(0x0D);
+	transmitByte_up(0x5f);
 }
 
 /* Transmits all sensor data. */
@@ -180,13 +210,76 @@ void processCommand(unsigned char data){
 		transmitALL();
 	}
 }
-
+uint16_t read_lidar(){
+	uint16_t cm;
+	int prev = 0;
+	uint16_t timeOfMyLife;
+	int positive_edge_triggered = 0;
+	
+	while(1){
+		
+		//lidar PWM PC1 (SDA PIN 22)
+		prev = current;
+		current = PINC && 0x02;
+		
+		if (prev == 0){
+			if (current == 1){
+				//reset timer
+				TCNT1 = 0;
+				prev = 1;
+				positive_edge_triggered = 1;
+			}
+		}
+			// negative edge trigger
+		else if (positive_edge_triggered == 1){
+			if (prev == 1){
+				if (current == 0){
+					// read timer value
+					uint8_t low  = TCNT1;
+					uint8_t high = TCNT1H;
+			
+					// timeOfMyLife = high + low;
+					timeOfMyLife = (high << 8) |low;
+			
+					// conversion to cm with number magic
+					cm = timeOfMyLife *200/39;
+			
+					//display cm on PORTD
+					//PORTD = cm;
+	
+					prev = 0;
+					 
+					positive_edge_triggered = 0;
+					
+					return cm;
+				}
+			}
+		}
+	}
+}
 int main()
 {
-	uint8_t i = 0;
+	uint8_t data;
+	//uint8_t x = 0;
 	
+	
+	// timer code 
+	timer1_init();
+	
+	//int prev = 0;
+	//int current = 0;
+	//uint16_t timeOfMyLife;
+	
+	//lidar code
+	uint16_t cm;
+	
+	/*
+	// adc code
+	uint8_t i = 0;
+	// not used atm
 	int16_t adc_res[4] = {0,0,0,0};
 	int16_t adc_median = 0;
+	*/
 	
 	// initialize adc
 	adc_init();
@@ -194,12 +287,14 @@ int main()
 	//Baud rate is 10
 	init_USART_up(10);
 	
-	_delay_ms(50);
+	_delay_ms(500);
 	
 	while(1)
 	{
 		// display adc value as cm on port D	
 		//PORTD = adc_to_cm(adc_read(0));
+		
+		// a try to calculate median, didn't work
 		/*
 		adc_res[i] = adc_to_cm(adc_read(0));
 		
@@ -212,16 +307,59 @@ int main()
 		i++;
 		*/
 		
+		/*
+		// lidar
+		//lidar PWM PC1 (SDA PIN 22)
+		current = PINC && 0x02;
 		
+		// positive edge trigger
+		if (prev == 0){
+			if (current == 1){
+				//reset timer
+				TCNT1 = 0;
+				prev = 1;
+			}
+		}
+		// negative edge trigger
+		else if (prev == 1){
+			if (current == 0){
+				// read timer value
+				uint8_t low  = TCNT1;
+				uint8_t high = TCNT1H;
+				
+				// timeOfMyLife = high + low;
+				timeOfMyLife = (high << 8) |low;
+				
+				// conversion to cm with number magic
+				cm = timeOfMyLife *200/39;
+				
+				//display cm on PORTD
+				//PORTD = cm;
+				LIDAR_L = cm & 0xff;
+				LIDAR_H = cm >> 8;
+				PORTD = LIDAR_H;
+				prev = 0;
+			}
+		}
+		*/
+				
+		// usart
 		if(checkUSARTflag_up()){
 			data = receiveByte_up();
-			data &= 0x3F	//Maska ut kommandot
+			data &= 0x3F;	//Maska ut kommandot
 			processCommand(data);
 		}
 		
+		cm = read_lidar();
+		LIDAR_L = cm & 0xff;
+		LIDAR_H = cm >> 8;		
 		
-		PORTD = adc_to_cm(adc_read(0));
-	
-		_delay_ms(50);
+		//adc
+		IRLF = adc_to_cm(adc_read(0));
+		IRLB = adc_to_cm(adc_read(1));
+		IRRF = adc_to_cm(adc_read(2));
+		IRRB = adc_to_cm(adc_read(3));
+
+		PORTD = IRRF;
 	}
 }
