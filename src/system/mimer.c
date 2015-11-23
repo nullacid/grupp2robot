@@ -72,7 +72,6 @@ int16_t adc_to_cm(int16_t value){
 	return cm_values[value];
 }
 
-
 /* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
 
 /* Transmits data from LIDAR. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
@@ -123,22 +122,18 @@ void transmitGyroT(){
 }
 
 void transmitIRRFT(){
-	//transmitByte_up(0x0A);
 	transmitByte_up(0x5c);
 }
 
 void transmitIRRBT(){
-	//transmitByte_up(0x0B);
 	transmitByte_up(0x5d);
 }
 
 void transmitIRLFT(){
-	//transmitByte_up(0x0C);
 	transmitByte_up(0x5e);
 }
 
 void transmitIRLBT(){
-	//transmitByte_up(0x0D);
 	transmitByte_up(0x5f);
 }
 
@@ -242,13 +237,8 @@ uint16_t read_lidar(){
 					timeOfMyLife = (high << 8) |low;
 			
 					// conversion to cm with number magic
-					cm = timeOfMyLife *200/39;
-			
-					//display cm on PORTD
-					//PORTD = cm;
-	
-					prev = 0;
-					 
+					cm = timeOfMyLife *200/39;	
+					prev = 0;					 
 					positive_edge_triggered = 0;
 					
 					return cm;
@@ -260,87 +250,33 @@ uint16_t read_lidar(){
 int main()
 {
 	uint8_t data;
-	//uint8_t x = 0;
-	
-	
-	// timer code 
-	timer1_init();
-	
-	//int prev = 0;
-	//int current = 0;
-	//uint16_t timeOfMyLife;
-	
-	//lidar code
 	uint16_t cm;
+
+	timer1_init();
+	adc_init();
+	init_USART_up(10); 	//Baud rate is 10
 	
 	/*
-	// adc code
+	// adc code.
 	uint8_t i = 0;
-	// not used atm
 	int16_t adc_res[4] = {0,0,0,0};
 	int16_t adc_median = 0;
 	*/
 	
-	// initialize adc
-	adc_init();
-	
-	//Baud rate is 10
-	init_USART_up(10);
-	
+	// waiting for something good to happen
 	_delay_ms(500);
 	
 	while(1)
-	{
-		// display adc value as cm on port D	
-		//PORTD = adc_to_cm(adc_read(0));
-		
-		// a try to calculate median, didn't work
+	{		
 		/*
+		//a try to calculate median, didn't work
 		adc_res[i] = adc_to_cm(adc_read(0));
 		
 		if (i == 3){
 			i = 0;
 			adc_median = (adc_res[0] + adc_res[1] + adc_res[2] + adc_res[3])/(4) ;
-		
-			PORTD = adc_median;
 		}
 		i++;
-		*/
-		
-		/*
-		// lidar
-		//lidar PWM PC1 (SDA PIN 22)
-		current = PINC && 0x02;
-		
-		// positive edge trigger
-		if (prev == 0){
-			if (current == 1){
-				//reset timer
-				TCNT1 = 0;
-				prev = 1;
-			}
-		}
-		// negative edge trigger
-		else if (prev == 1){
-			if (current == 0){
-				// read timer value
-				uint8_t low  = TCNT1;
-				uint8_t high = TCNT1H;
-				
-				// timeOfMyLife = high + low;
-				timeOfMyLife = (high << 8) |low;
-				
-				// conversion to cm with number magic
-				cm = timeOfMyLife *200/39;
-				
-				//display cm on PORTD
-				//PORTD = cm;
-				LIDAR_L = cm & 0xff;
-				LIDAR_H = cm >> 8;
-				PORTD = LIDAR_H;
-				prev = 0;
-			}
-		}
 		*/
 				
 		// usart
@@ -350,16 +286,17 @@ int main()
 			processCommand(data);
 		}
 		
+		// lidar
 		cm = read_lidar();
 		LIDAR_L = cm & 0xff;
 		LIDAR_H = cm >> 8;		
 		
-		//adc
+		// adc
 		IRLF = adc_to_cm(adc_read(0));
 		IRLB = adc_to_cm(adc_read(1));
 		IRRF = adc_to_cm(adc_read(2));
 		IRRB = adc_to_cm(adc_read(3));
-
-		PORTD = IRRF;
+		
+		PORTD = IRRB;
 	}
 }
