@@ -83,6 +83,19 @@ int16_t adc_to_cm(int16_t value){
 	return cm_values[value];
 }
 
+/* Calculates the token value given pointers to the stored values. */
+void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
+	if(1 < *IRxx && *IRxx <= 32){
+		*IRxxT = 1;
+	}
+	else if(32 < *IRxx && *IRxx < 90){
+		*IRxxT = 2;
+	}
+	else{
+		*IRxxT = 0;
+	}
+}
+
 /* Calculates the token values for the IR sensors. A 1 represents a value between 1 and 32 (a wall within 1 square), 2 represents a value between 32 and 89 ( a wall within 2 squares). */
 void calcTokensIR(){	
 	calcTokenIR(&IRLB, &IRLBT);
@@ -153,23 +166,12 @@ void calcParallel(){
 	}
 }
 
-/* Calculates the token value given pointers to the stored values. */
-void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
-	if(1 < *IRxx && *IRxx <= 32){
-		*IRxxT = 1;
-	}
-	else if(32 < *IRxx && *IRxx < 90){
-		*IRxxT = 2;
-	}
-	else{
-		*IRxxT = 0;
-	}
-}
+
 
 
 /* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
 
-/* Transmits data from LIDAR. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
+/* Transmits data from LIDAR. 2 bytes. */
 void transmitLidar(){
 	transmitByte_up(LIDAR_H);
 	transmitByte_up(LIDAR_L);
@@ -177,29 +179,25 @@ void transmitLidar(){
 /* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
 	transmitByte_up(IRRF);
-	//transmitByte_up(0xa1);
 }
 /* Transmits data from the right back IR sensor. 1 byte. */
 void transmitIRRB(){
 	transmitByte_up(IRRB);
-	//transmitByte_up(0xa2);
 }
 /* Transmits data from the left front sensor. 1 byte. */
 void transmitIRLF(){
 	transmitByte_up(IRLF);	
-	//transmitByte_up(0xa3);
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
 	transmitByte_up(IRLB);
-	//transmitByte_up(0xa4);
 }
 /* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitGyro(){
 	transmitByte_up(0x21);
 	transmitByte_up(0x22);
 }
-
+/* Lidar Token is the result of integer division between the Lidar value and 40. */
 void transmitLidarT(){
 	transmitByte_up(lidarT);
 }
