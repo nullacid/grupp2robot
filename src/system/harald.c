@@ -27,10 +27,10 @@ int main(void)
 		transmitByte_down(data);
 		
         // Removes data and shifts it down
-		uint8_t datalength = data & 0xC0;
-		datalength = (datalength >> 6);
+		uint8_t datalength = data & 0xE0;
+		datalength = (datalength >> 5);
 		
-		unsigned char returnDataArray[3];
+		unsigned char returnDataArray[7];
 		
 		unsigned int i = 0;
 
