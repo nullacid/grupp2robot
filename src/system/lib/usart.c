@@ -5,6 +5,8 @@ void init_USART_up(unsigned int baud){
 	/* Set baud rate */
 	UBRR0H = (unsigned char)(baud>>8);
 	UBRR0L = (unsigned char)baud;
+	
+	flushUSASRT_up();
 
 	/* UCSZn0,1,2 as 110 gives 8 bit frame size, UPMn0,1 as 00 disables parity
 	 USBS0 as 0 gives 1 stopbit, UMSELn as 00 asyncronus usart, UCPOLn as 0: triggered on positive flank */
@@ -21,6 +23,8 @@ void init_USART_down(unsigned int baud){
 	/* Set baud rate */
 	UBRR1H = (unsigned char)(baud>>8);
 	UBRR1L = (unsigned char)baud;
+	
+	flushUSART_down();
 	
 	UCSR1A = (0<<U2X1);
 
@@ -79,5 +83,15 @@ int checkUSARTflag_up(){
 /* Returns 1 if there is something in the receivebuffer */
 int checkUSARTflag_down(){
 	return (UCSR1A & (1<<RXC1));
+}
+
+void flushUSART_down(){
+	int dummy;
+	while ( UCSR1A & (1<<RXC0) ) dummy = UDR1;
+}
+
+void flushUSASRT_up(){
+	int dummy;
+	while ( UCSR0A & (1<<RXC0) ) dummy = UDR0;
 }
 
