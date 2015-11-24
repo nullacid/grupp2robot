@@ -77,7 +77,7 @@ void update_sensor_data(){
 
 	s_LIDAR = ((s_LIDAR_u << 8) + s_LIDAR_l);
 	s_gyro = ((s_gyro_u << 8) + s_gyro_l);
-	deviation_from_dir += (GYRO_NO_TURNING - s_gyro);
+//	deviation_from_dir += (GYRO_NO_TURNING - s_gyro);
 
 	return;
 }

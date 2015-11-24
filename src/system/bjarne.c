@@ -23,10 +23,10 @@ uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
 uint8_t button_autonom = 0; // 0 om manuellt läge, 1 om autonomt läge
 
-uint8_t b1 = 0;
-uint8_t b2 = 0;
-uint8_t b3 = 0;
-uint8_t b4 = 0;
+uint8_t b1 = 2;
+uint8_t b2 = 3;
+uint8_t b3 = 4;
+uint8_t b4 = 5;
 
 bool new_message = false;
 mapchange temp = {.x = 0, .y = 0, .t = 0};
@@ -64,17 +64,12 @@ int main(){
 		}
 		button_autonom = (PINA & 1);
 
-		//update_sensor_data();
+		update_sensor_data();
 		
 		
 		handle_messages();
 		//transmitByte_down(0x0D);
-		b1 = receiveByte_down();
-		b2 = receiveByte_down();
-		b3 = receiveByte_down();
-		b4 = receiveByte_down();
-
-
+	
 
 		if (button_autonom == 1){
 	
@@ -176,13 +171,9 @@ void handle_messages(){
 			
 			case (0x0D):
 			//lägg gyro-data i send-buffern
-				//transmitByte_up(s_gyro_u);
-				//transmitByte_up(s_gyro_l);
+				transmitByte_up(s_gyro_u);
+				transmitByte_up(s_gyro_l);
 
-				transmitByte_up(b1);
-				transmitByte_up(b2);
-				transmitByte_up(b3);
-				transmitByte_up(b4);
 			break;
 			
 			case (0x0E):

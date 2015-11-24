@@ -9,6 +9,9 @@ void bfs(uint8_t startx, uint8_t starty, uint8_t targetx, uint8_t targety);
 void bfs_t(uint8_t startx, uint8_t starty, uint8_t target_tile);
 uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile);
 uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile);
+void gen_adj_matrix();
+
+uint8_t adj_matrix[32][32];
 
 uint8_t follow_wall = 1;
 uint8_t startup = 1;
@@ -177,7 +180,7 @@ void find_empty_tile(){
 
 void bfs(uint8_t startx, uint8_t starty, uint8_t targetx, uint8_t targety){
 //Används när vi vill hitta närmsta vägen till känd position
-
+	gen_adj_matrix();
 	return;
 }
 
@@ -186,6 +189,83 @@ void bfs_t(uint8_t startx, uint8_t starty, uint8_t target_tile){
 
 	return;
 }
+
+typedef struct tuple tuple;
+
+struct tuple{
+		uint8_t x;
+		uint8_t y;
+};
+
+
+void gen_adj_matrix(){
+
+	uint8_t i;
+	uint8_t j;
+	uint8_t list_front = 0;
+	tuple adj_list[99];
+
+	for(i = 0; i < 0; i++){
+		for(j = 0; j < 0; j++){
+
+			uint8_t temp = rmem(i,j)->tileType;
+
+			if((temp == FLOOR) || (temp == UNEXP)){
+				tuple temptup = {.x = i, .y = j};
+				adj_list[list_front] = temptup;
+				list_front +=1;
+
+			}		
+		}
+	}
+
+	uint8_t target_found = 0;
+
+	while(!target_found){
+
+		int i;
+		for(i = 0; i < list_front; i++){
+			if(adj_list[i].x != 0){
+				uint8_t tempx = adj_list[i].x;
+				uint8_t tempy = adj_list[i].y;
+
+				uint8_t leftN = adj_matrix[tempx-1, tempy]; //Chack left
+				uint8_t leftR = adj_matrix[tempx+1, tempy]; //Check right
+				uint8_t leftU = adj_matrix[tempx, tempy-1]; //Check up
+				uint8_t leftD = adj_matrix[tempx, tempy+1]; //Check down
+				
+				uint8_t lowestN = leftN;
+
+				if((leftN != 254)||(leftR != 254)||(leftU != 254)||(leftD != 254)){
+
+					if((leftR != 254) && (leftR < lowestN)){
+						lowestN = leftR;
+					}
+					if((leftU != 254) && (leftU < lowestN)){
+						lowestN = leftU;
+					}
+					if((leftD != 254) && (leftD < lowestN)){
+						lowestN = leftR;
+					}
+					adj_matrix[tempx][tempy] = (lowestN +1);
+
+					if(rmem(tempx, tempy)->tileType == UNEXP){
+						target_x = tempx;
+						target_y = tempy;
+
+					}
+
+					adj_list[i].x = 0;
+					adj_list[i].y = 0;
+				}
+			}
+		}
+	}
+
+return;
+
+}
+
 
 
 uint8_t visited[32][32];
