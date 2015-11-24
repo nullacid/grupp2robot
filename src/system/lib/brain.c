@@ -202,12 +202,22 @@ uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 
 	uint8_t temp = 0;
 	temp = dfs_help(startx, starty, target_tile);
+
+
+	int i;
+	int j;
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+			visited[i][j] = 0;
+		} 		
+	} 
+
 	return temp;
 	
 	
 }
 
-uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile){
+uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile){ //Kanske behöver göras iterativt
 	if(visited[startx][starty] != 1){
 
 		if (rmem(startx, starty)->tileType == target_tile){

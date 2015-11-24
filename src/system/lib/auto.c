@@ -3,9 +3,16 @@
 #include "mem.h"
 #include <avr/io.h>
 
+#define MAX_SPEED_R 10 //1 to 10, 10 is highest
+#define MAX_SPEED_L 10
+#define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
+#define FOLlOW_WALL 0
+#define MAP_REST 1
+
 uint8_t cur_action = 0;
 int distance_LIDAR;
 uint8_t first_time;
+int8_t deviation_from_dir = 0;
 
 
 void update_sensor_data(); 
@@ -14,10 +21,12 @@ void action_done();
 
 
 void init_auto(){
+	state = FOLlOW_WALL ;
 	distance_LIDAR = 0;
 	first_time = 1;
 	s_LIDAR_u = 0;
 	s_LIDAR_l = 0;
+	s_LIDAR = 0;
 	t_LIDAR = 0;	//Antal 40 cm rutor till vägg 0 - 20 cm   1 - 20+40cm   2 20+80cm
 
 	s_ir_h_f = 0;
@@ -37,6 +46,7 @@ void init_auto(){
 
 	s_gyro_u = 0;
 	s_gyro_l = 0;
+	s_gyro = 0;
 	t_gyro = 0;		// bestäm vilka värden vi vill ha
 
 	
@@ -65,6 +75,9 @@ void update_sensor_data(){
 	t_vagg_v_f = receiveByte_down();
 	t_vagg_v_b = receiveByte_down();
 
+	s_LIDAR = ((s_LIDAR_u << 8) + s_LIDAR_l);
+	s_gyro = ((s_gyro_u << 8) + s_gyro_l);
+	deviation_from_dir += (GYRO_NO_TURNING - s_gyro);
 
 	return;
 }
@@ -99,54 +112,91 @@ void autonom (){
 
 		case (FORWARD):
 			if (first_time){
-				distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l - 40; //LIDAR distance - 40 cm
+				distance_LIDAR = s_LIDAR - 40; //LIDAR distance - 40 cm
 				first_time = 0;
 			}
-
-			if (t_p_h == 0){ //Parallellt
-				setSpeed(100, 100, 1, 1);
-			}	
-			else if (t_p_h == 1){ //påväg från väggen
-				setSpeed(100, 95, 1, 1);
-			}	
-			else if (t_p_h == 2){ //påväg från väggen
-				setSpeed(100, 80, 1, 1);
-			}	
-			else if (t_p_h == 3){ //påväg in i väggen
-				setSpeed(95, 100, 1, 1);
-			}	
-			else if (t_p_h == 4){ //påväg in i väggen
-				setSpeed(80, 100, 1, 1);
-			}	
+				if (t_p_h == 0){ //Parallellt
+					setSpeed(100, 100, 1, 1);
+				}	
+				else if (t_p_h == 1){ //påväg från väggen
+					setSpeed(100, 95, 1, 1);
+				}	
+				else if (t_p_h == 2){ //påväg från väggen
+					setSpeed(100, 80, 1, 1);
+				}	
+				else if (t_p_h == 3){ //påväg in i väggen
+					setSpeed(95, 100, 1, 1);
+				}	
+				else if (t_p_h == 4){ //påväg in i väggen
+					setSpeed(80, 100, 1, 1);
+				}	
 			else{ //vet inte hur vi står riktigt
-				//HÄR HAMNAR VI NÄR VI ÅKER FRITT 
-				//VAD GÖR VI HÄR??
+				
+				int scale_left;
+				int scale_right;
+
+				if(deviation_from_dir < 0){
+					scale_right = -deviation_from_dir;
+					scale_left = 0;
+				}
+				else{
+					scale_left = deviation_from_dir;
+					scale_right = 0;
+				}
+
+				
+
+				setSpeed(100-scale_left ,100-scale_right ,1,1);
 			}
 			
-			if ((s_LIDAR_u*256 + s_LIDAR_l) <= distance_LIDAR) {
+			if (s_LIDAR <= distance_LIDAR) {
 				first_time = 1;
 				action_done();
 			}
 		break;
-
+//---------------------------------SVÄNGA--------------------------------
 		case (SPIN_R):
 			//GER GYROT VÄRDEN PER SEKUND???
 			setSpeed(100, 100, 1, 0); //Höger hjulpar bakåt
+
+			//NÄR KLAR
+			dir = dir +=1;
+			deviation_from_dir = 0;
+			action_done();
 		break;
 
 		case (SPIN_L):
 			//GER GYROT VÄRDEN PER SEKUND???
+
+
+			if(dir == 0){
+				dir = 3;
+			}
+			else{
+				dir -=1;
+			}
+
+
+			deviation_from_dir = 0;
+			action_done();
 			setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
 		break;
 
 		case (SPIN_180):
 			//GER GYROT VÄRDEN PER SEKUND???
 			setSpeed(100, 100, 1, 0);
-		break;
 
+
+			deviation_from_dir = 0;
+			dir +=2;
+			action_done();
+
+		break;
+//------------------------------------------------------------------------
 		case(PARALLELIZE):
 			if (t_p_h == 0){ //Parallellt
 				setSpeed(0, 0, 1, 0);
+				dir = NORTH;
 				action_done();
 			}	
 			else if (t_p_h == 1 || t_p_h == 2){ //påväg från väggen
@@ -185,6 +235,11 @@ void autonom (){
 }
 
 void action_done(){
+
+	if(dir>3){
+		dir -=4;
+	}
+
 	uint8_t old_action = cur_action;
 	pop_a_stack(); //Ta bort actionen från actionstacken
 	cur_action = read_a_top();	//Ta in actionen under
@@ -327,9 +382,19 @@ void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
 			PORTA &= 0xBF;
 		}
 
+		uint16_t rdone = rspeed * MAX_SPEED_R;
+		uint16_t ldone = lspeed * MAX_SPEED_L;
+
+
+	if (rdone > 38){
+
+		rdone -= 38;
+
+	}
+
 
 //	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 är vänster, DDA6 är höger 	
-	OCR1A = 10*rspeed;//set the duty cycle(out of 1023) Höger	
-	OCR3A = 10*lspeed;//set the duty cycle(out of 1023) Vänster
+	OCR1A = rdone;//set the duty cycle(out of 1023) Höger	
+	OCR3A = ldone;//set the duty cycle(out of 1023) Vänster
 	
 }
