@@ -8,11 +8,13 @@
 #define F_CPU 14.7456E6
 #define BAUD 7
 #include <avr/io.h>
+#include <util/delay.h>
 #include "lib\usart.h"
 
 
 int main(void)
 {
+	_delay_ms(2000);
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
     
@@ -27,10 +29,10 @@ int main(void)
 		transmitByte_down(data);
 		
         // Removes data and shifts it down
-		uint8_t datalength = data & 0xE0;
-		datalength = (datalength >> 5);
+		uint8_t datalength = data & 0xC0;
+		datalength = (datalength >> 6);
 		
-		unsigned char returnDataArray[7];
+		unsigned char returnDataArray[3];
 		
 		unsigned int i = 0;
 

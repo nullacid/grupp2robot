@@ -189,7 +189,10 @@ def getGyro():
 	harald.sendData(b'\x8D')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
+	#byte3 = harald.receiveData()
+	#byte4 = harald.receiveData()
 	data = int(msByte[0])*256 + int(lsByte[0])
+	#data = str(hex(msByte[0])) + " " + str(hex(lsByte[0])) + " " +  str(hex(byte3[0])) + " " +  str(hex(byte4[0]))
 	return data
 
 def getLidarToken():
@@ -233,7 +236,7 @@ def getIRLBtoken():
 	return int(data[0])
 
 def getSteering():
-	"""
+	""""
 	harald.sendData(b'\x59')
 	data = harald.receiveData()
 	if int(data[0]) == 0:
@@ -246,12 +249,12 @@ def getSteering():
 		return 3
 	elif int(data[0]) == 4:
 		return 4
-	"""
+"""
 	pass
 
 #Gets data from the map update stack in bjarne and updates the map graphically
 def getMap():
-	"""
+	""""
 	global mapSystem
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
@@ -284,7 +287,7 @@ def getPosition():
 	pass
 
 def getDecision():
-	"""
+	""""
 	harald.sendData(b'\x5B')
 	data = harald.receiveData()
 	return int(data[0])
@@ -354,6 +357,7 @@ while(crayRunning):
 	paintData(mapSystem)
 		
 	getData()
+	#mapSystem.dataDict["Gyro"] = getGyro()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
