@@ -1,5 +1,6 @@
 import bluetooth
 import sys, os, traceback
+from time import *
 
 #Mac Address of our firefly module
 fireflyMacAddr = '00:06:66:03:A6:96'
@@ -63,56 +64,17 @@ class Harald():
 			print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
+		timeStamp = time()
 		data = self.__waitToReceive()
 		print("Data Received: " + str(hex(data[0])))
 		return data
 			
-	def __sendConfirmation(self, data):
-		if self.__checkIntegrity(data):
-			self.ourSocket.send(b'\xfe')
-			return True
-		else:
-			self.ourSocket.send(b'\xff')
-			return False
-		
-	def __recConfirmation(self):
-		data = self.__waitToReceive(1)
-		if hex(data[0]) == hex(int("7f", 16)):
-			return True
-		return False
-	
 	def __waitToReceive(self):
 		if self.targetDevice != None:
 			while True:
 				return self.ourSocket.recv(1)
 			
-				
-	def __checkIntegrity(self, data):
-		bitArray = []
-		for b in self.__convertToBits(data):
-			bitArray.insert(0, b)
-		return self.__checkParity(bitArray)
-		
-	def __convertToBits(self, data):
-		for b in data:
-			for i in range(8):
-				yield(b >> i) & 1
-				
-	def __checkParity(self, bitArray):
-		sum = 0
-		parity = 0
-		
-		for i in range(1, len(bitArray)):
-			if bitArray[i] == 1:
-				sum += 1
-				
-		if sum % 2 == 0:
-			parity = 1
-		
-		if parity == bitArray[0]:
-			return True
-			
-		return False
+
 		
 			
 			

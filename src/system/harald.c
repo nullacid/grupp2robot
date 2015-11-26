@@ -14,7 +14,6 @@
 
 int main(void)
 {
-	_delay_ms(2000);
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
     
