@@ -75,7 +75,7 @@ GREY = (139, 137, 137)
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
-	for i in range(0,17):
+	for i in range(0,18):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
@@ -254,7 +254,6 @@ def getSteering():
 
 #Gets data from the map update stack in bjarne and updates the map graphically
 def getMap():
-	""""
 	global mapSystem
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
@@ -273,8 +272,6 @@ def getMap():
 		mapSystem.arrayMap[xCoord][yCoord] = tileType
 		return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
 	return mapSystem.dataDict["Update Map"]
-	"""
-	pass
 	
 
 def getPosition():
@@ -293,6 +290,11 @@ def getDecision():
 	return int(data[0])
 	"""
 	pass
+	
+def getDebug():
+	harald.sendData(b'\x4E')
+	data = harald.receiveData()
+	return int(data[0])
 	
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
@@ -331,7 +333,8 @@ handle_dictionary_data = {
 	"Steering data" : getSteering,
 	"Update Map" : getMap,
 	"System Position" : getPosition,
-	"Steering Decision" : getDecision		
+	"Steering Decision" : getDecision,
+	"Debug" : getDebug
 }
 
 mapSystem = MapSystem()
@@ -358,7 +361,8 @@ while(crayRunning):
 		
 		
 	getData()
-	#mapSystem.dataDict["Gyro"] = getGyro()
+	getMap()
+	getMap()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:

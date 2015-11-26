@@ -4,7 +4,7 @@ class MapSystem():
 		self.arrayMap = [["UNEXPLORED" for x in range(33)] for x in range(33)]
 		self.startPosition = (16,16)
 		self.dataIndex = 0
-		self.arrayMap[16][16] = "OPEN"
+		"""self.arrayMap[16][16] = "OPEN"
 		self.arrayMap[17][17] = "OPEN"
 		self.arrayMap[16][17] = "OPEN"
 		self.arrayMap[17][16] = "OPEN"
@@ -25,7 +25,8 @@ class MapSystem():
 		self.arrayMap[17][18] = "WALL"
 		self.arrayMap[14][15] = "WALL"
 		self.arrayMap[14][16] = "WALL"
-		self.arrayMap[14][17] = "WALL"
+		self.arrayMap[14][17] = "WALL"""
+
 		
 		self.indexDict = {
 						0 : "Lidar",
@@ -45,7 +46,8 @@ class MapSystem():
 						14 : "Steering data",
 						15 : "Update Map",
 						16 : "System Position",
-						17 : "Steering Decision"		
+						17 : "Steering Decision",
+						18 : "Debug"
 		}
 		self.dataDict = {
 						"Lidar" : 1,
@@ -65,11 +67,12 @@ class MapSystem():
 						"Steering data" : 1,
 						"Update Map" : 1,
 						"System Position" : 1,
-						"Steering Decision" : 1		
+						"Steering Decision" : 1,
+						"Debug" : 1
 		}
 	#Increments index and loops it at 17
 	def incIndex(self):
 		self.dataIndex += 1
-		if self.dataIndex > 17:
+		if self.dataIndex > 18:
 			self.dataIndex = 0
 		

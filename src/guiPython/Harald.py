@@ -1,6 +1,9 @@
 import bluetooth
 import sys, os, traceback
 import select
+from coolthread import *
+from time import *
+
 
 #Mac Address of our firefly module
 fireflyMacAddr = '00:06:66:03:A6:96'
@@ -10,10 +13,12 @@ class Harald():
 		self.targetDevice = None
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-		
+
 		while not self.establishDirectConnection():
 			pass
 		
+	#Finds all nearby bluetooth devices and tries to connect to our firefly if it finds it
+	#Not used anymore.
 	def establishConnection(self):
 		print("performing inquiry...")
 		nearby_devices = []
@@ -45,7 +50,9 @@ class Harald():
 		else:
 			print("Failed to connect to firefly module, reattemping to connect")
 			return False
-			
+		
+	#Establishes a connection to our firefly module without looking for it first.
+	#Returns true if it connects, false otherwise.
 	def establishDirectConnection(self):
 		self.targetDevice = fireflyMacAddr
 		try:
@@ -56,23 +63,28 @@ class Harald():
 			print("Failed to connect to firefly module, reattempting to connect")
 			return False
 				
+	#Sends one byte of data to the bluetooth module
 	def sendData(self, data):	
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
-			#self.lastCommand = data
 			print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
-		ready = select.select([self.ourSocket], [], [], 5)
-		#if ready[0]:
-		data = self.__waitToReceive()
+		receiverThread = coolThread(1, "cool receiver mega thread", self.__waitToReceive)
+		receiverThread.start()
+		
+		timeStamp = time()
+		while not receiverThread.done:
+			if time() > timeStamp + 1:
+				print("timed out")
+				return b'\x00'
+				
+		data = receiverThread.returnValue
 		print("Data Received: " + str(hex(data[0])))
 		return data
-		print("Transmission Error")
 			
 	def __waitToReceive(self):
 		if self.targetDevice != None:
-			self.ourSocket.settimeout(1)
 			return self.ourSocket.recv(1)
 			
 
