@@ -392,9 +392,8 @@ void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
 
 	}
 
-
 //	PORTA |= (dir_left << DDA7) | (dir_right << DDA6); //DDA7 är vänster, DDA6 är höger 	
-	OCR1A = rdone;//set the duty cycle(out of 1023) Höger	
-	OCR3A = ldone;//set the duty cycle(out of 1023) Vänster
+	OCR1A = rdone;//set the duty cycle(out of 1023) Höger	(pin 19)
+	OCR3A = ldone;//set the duty cycle(out of 1023) Vänster (pin 7)
 	
 }
