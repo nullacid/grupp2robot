@@ -6,11 +6,10 @@
 node mapmem[32][32];		//The map memory 33x33 tiles large
 mapchange change_stack[99];	//A stack where changes to the map will be waiting to be sent
 int8_t c_stack_top = -1; 		//The top of the stack
-
+int8_t a_stack_top = -1;
 
 
 uint8_t action_s[50]; //The actions required to get to target
-int8_t a_stack_top = -1;
 
 //-------------------------------------------------------------
 
@@ -32,6 +31,7 @@ void init_mem(){
 	target_x = 0; //Target tile
 	target_y = 0;
 	dir = 0;
+
 	//OKÄND SKA VARA 1, fixa
 	return;
 
@@ -119,26 +119,9 @@ uint8_t paction(uint8_t action){
 	return 0;
 }
 
-uint8_t gaction(){
-
-	if (a_stack_top == -1){
-
-		return 0; //Return false, since the stack is empty
-
-	}
-	else{
-
-		uint8_t data = action_s[a_stack_top];
-		a_stack_top -= 1;
-		return data;
-
-	}
-	return 0;
-}
-
 uint8_t read_a_top(){ //Läs action stack top utn att ändra den
 
-	if((a_stack_top = -1)){
+	if((a_stack_top == -1)){
 
 		return 0; //Om stacken är tom, returna 0
 
