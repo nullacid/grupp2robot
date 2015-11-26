@@ -1,6 +1,6 @@
 import bluetooth
 import sys, os, traceback
-from time import *
+import select
 
 #Mac Address of our firefly module
 fireflyMacAddr = '00:06:66:03:A6:96'
@@ -10,7 +10,6 @@ class Harald():
 		self.targetDevice = None
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-		#self.lastCommand = b'0xff'
 		
 		while not self.establishDirectConnection():
 			pass
@@ -64,15 +63,17 @@ class Harald():
 			print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
-		timeStamp = time()
+		ready = select.select([self.ourSocket], [], [], 5)
+		#if ready[0]:
 		data = self.__waitToReceive()
 		print("Data Received: " + str(hex(data[0])))
 		return data
+		print("Transmission Error")
 			
 	def __waitToReceive(self):
 		if self.targetDevice != None:
-			while True:
-				return self.ourSocket.recv(1)
+			self.ourSocket.settimeout(1)
+			return self.ourSocket.recv(1)
 			
 
 		

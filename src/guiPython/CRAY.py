@@ -356,6 +356,7 @@ while(crayRunning):
 	paintMap(mapSystem)
 	paintData(mapSystem)
 		
+		
 	getData()
 	#mapSystem.dataDict["Gyro"] = getGyro()
 	
