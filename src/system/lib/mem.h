@@ -58,6 +58,9 @@ uint8_t STACK_MAX;  //Size of stack
 
 //-------------------------------------------------------------
 
+uint8_t home_x;
+uint8_t home_y;
+
 uint8_t robot_pos_x;	// Start in the middle of the map
 uint8_t robot_pos_y;
 
