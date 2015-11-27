@@ -9,6 +9,8 @@ class MapSystem():
 		self.lidarFile = open("logs/lidar.swag", 'w', 1)
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
 		self.ParallelRightFile = open("logs/parallel_right.swag", 'w', 1)
+		self.debugFile = open("logs/debug.swag", 'w', 1)
+		self.lidartokenfile = open("logs/lidartoken.swag", 'w', 1)
 
 		#Dictionary used for looping over data types
 		self.indexDict = {
@@ -28,6 +30,7 @@ class MapSystem():
 						13 : "Update Map",
 						14 : "System Position",
 						15 : "Steering Decision",
+						16 : "Debug"
 		}
 		#Store values for each data type
 		self.dataDict = {
@@ -47,18 +50,21 @@ class MapSystem():
 						"Update Map" : 1,
 						"System Position" : 1,
 						"Steering Decision" : 1,
+						"Debug" : 1
 		}
 		#Associates a data type name with a file
 		self.fileDict = {
 						"Lidar" : self.lidarFile,
 						"Gyro" : self.gyroFile,
 						"Steering Decision" : self.steeringDecisionFile,
-						"Parallel Right" : self.ParallelRightFile
+						"Parallel Right" : self.ParallelRightFile,
+						"Debug" : self.debugFile,
+						"Lidar (token)" : self.lidartokenfile
 		}
 	#Increments index and loops it at 17
 	def incIndex(self):
 		self.dataIndex += 1
-		if self.dataIndex > 15:
+		if self.dataIndex > 16:
 			self.dataIndex = 0
 	
 	#Writes the data currently mapped to the input data type to the data type's log file

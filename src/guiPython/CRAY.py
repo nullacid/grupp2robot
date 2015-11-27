@@ -82,7 +82,7 @@ GREY = (139, 137, 137)
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
-	for i in range(0,15):
+	for i in range(0,17):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
@@ -298,8 +298,14 @@ def getDecision():
 def getDebug():
 	harald.sendData(b'\x4E')
 	data = harald.receiveData()
-	return int(data[0])
+	out = twos_comp(int(hex(data[0]),16), 32)
+	return out
 	
+def twos_comp(val, bits):
+    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)        # compute negative value
+    return val                         # return positive value as is
+
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
 	K_ESCAPE: handle_quit,
