@@ -35,6 +35,7 @@ makefile
 *.pyc
 *.vs
 *.atsln
+*.atsuo
 *.cproj
 *.xml
 *.eep
