@@ -44,5 +44,7 @@ makefile
 *.mk
 *.srec
 
+*.swag
+
 # Debug files
 *.dSYM/

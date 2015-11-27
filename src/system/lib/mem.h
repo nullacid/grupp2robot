@@ -58,6 +58,8 @@ uint8_t STACK_MAX;  //Size of stack
 
 //-------------------------------------------------------------
 
+uint8_t debug;
+
 uint8_t home_x;
 uint8_t home_y;
 
@@ -68,6 +70,5 @@ uint8_t target_x; //Target tile
 uint8_t target_y;
 
 uint8_t dir;
-
 
 #endif

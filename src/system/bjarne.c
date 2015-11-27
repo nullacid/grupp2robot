@@ -39,9 +39,9 @@ int main(){
 	
 	init_USART_up(10);
 	init_USART_down(10);
+	init_mem();
 	init_motors();
 	init_auto();
-	init_mem();
 
 	while(1){
 
@@ -74,7 +74,7 @@ int main(){
 		if (button_autonom == 1){
 	
 			//think();		
-			//autonom();
+			autonom();
 			
 		}			
 	}
@@ -177,8 +177,8 @@ void handle_messages(){
 			break;
 			
 			case (0x0E):
-			//lägg reflexsensor-data i send-buffern
-				//transmitByte_up(s_reflex);
+			//lägg debug
+				transmitByte_up(debug);
 			break;
 			
 			case (0x0F):
@@ -218,6 +218,7 @@ void handle_messages(){
 			
 			case (0x16):
 			//lägg vägg vänster bak-token i send-buffern
+				//transmitByte_up(t_vagg_v_b);
 				transmitByte_up(t_vagg_v_b);
 			break;
 			
@@ -242,8 +243,8 @@ void handle_messages(){
 
 			case (0x1A):
 			//pos karta X och Y i send-buffern
-			//	transmitByte_up(posdata_x);
-			//	transmitByte_up(posdata_y);
+				transmitByte_up(robot_pos_x);
+				transmitByte_up(robot_pos_y);
 			break;
 			
 			case (0x1B):

@@ -49,8 +49,15 @@ void init_auto(){
 	s_gyro = 0;
 	t_gyro = 0;		// bestäm vilka värden vi vill ha
 
+	paction(FORWARD);
+	paction(FORWARD);
+
+	paction(FORWARD);
 	
-uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
+	paction(FORWARD);
+	
+
+	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
 	//----------------------------
 }
 void update_sensor_data(){
@@ -84,7 +91,7 @@ void update_sensor_data(){
 
 void autonom (){
 
-	
+	debug = read_a_top();
 
 
 	if(cur_action == EMPTY){ //Om vi inte har en order, kolla om det finns någon ny
@@ -115,36 +122,28 @@ void autonom (){
 				distance_LIDAR = s_LIDAR - 40; //LIDAR distance - 40 cm
 				first_time = 0;
 			}
-				if (t_p_h == 0){ //Parallellt
-					setSpeed(100, 100, 1, 1);
-				}	
-				else if (t_p_h == 1){ //påväg från väggen
-					setSpeed(100, 95, 1, 1);
-				}	
-				else if (t_p_h == 2){ //påväg från väggen
-					setSpeed(100, 80, 1, 1);
-				}	
-				else if (t_p_h == 3){ //påväg in i väggen
-					setSpeed(95, 100, 1, 1);
-				}	
-				else if (t_p_h == 4){ //påväg in i väggen
-					setSpeed(80, 100, 1, 1);
-				}	
+
+			if (t_p_h == 0){ //Parallellt
+				setSpeed(100, 100, 1, 1);
+			}	
+			else if (t_p_h == 3){ //påväg från väggen
+				setSpeed(100, 20, 1, 1);
+			}	
+			else if (t_p_h == 4){ //påväg från väggen
+				setSpeed(100, 0, 1, 1);
+			}	
+			else if (t_p_h == 1){ //påväg in i väggen
+				setSpeed(20, 100, 1, 1);
+			}	
+			else if (t_p_h == 2){ //påväg in i väggen
+				setSpeed(0, 100, 1, 1);
+			}	
 			else{ //vet inte hur vi står riktigt
-				
-				int scale_left;
-				int scale_right;
+			
+				int scale_left = 0;
+				int scale_right = 0;
 
-				if(deviation_from_dir < 0){
-					scale_right = -deviation_from_dir;
-					scale_left = 0;
-				}
-				else{
-					scale_left = deviation_from_dir;
-					scale_right = 0;
-				}
-
-				
+								
 
 				setSpeed(100-scale_left ,100-scale_right ,1,1);
 			}
