@@ -3,17 +3,24 @@
 #include "mem.h"
 #include <avr/io.h>
 
-#define MAX_SPEED_R 10 //1 to 10, 10 is highest
-#define MAX_SPEED_L 10
+#define MAX_SPEED_R 5 //1 to 10, 10 is highest
+#define MAX_SPEED_L 5
+#define STEERING_SCALE 20 //20
+#define DEV_SCALE 15 //15 is ok -ish
+
+
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
 #define FOLlOW_WALL 0
 #define MAP_REST 1
+#define PERFECT_DIST 27 //22
+
+
+
 
 uint8_t cur_action = 0;
 int distance_LIDAR;
 uint8_t first_time;
-int8_t deviation_from_dir = 0;
-
+uint8_t NODBROMS = 0;
 
 void update_sensor_data(); 
 void init_auto();
@@ -84,14 +91,20 @@ void update_sensor_data(){
 
 	s_LIDAR = ((s_LIDAR_u << 8) + s_LIDAR_l);
 	s_gyro = ((s_gyro_u << 8) + s_gyro_l);
-//	deviation_from_dir += (GYRO_NO_TURNING - s_gyro);
 
 	return;
 }
 
 void autonom (){
 
-	debug = read_a_top();
+	if ((s_LIDAR_u == 0) && (s_LIDAR_l < 10)){
+		NODBROMS = 1;
+		return;
+	}
+	else{
+		NODBROMS = 0;
+	}
+
 
 
 	if(cur_action == EMPTY){ //Om vi inte har en order, kolla om det finns någon ny
@@ -99,6 +112,7 @@ void autonom (){
 		cur_action = read_a_top();
 	}
 	
+
 	/* 
 	#define EMPTY		0 //The a_stack was empty //Stand still
 	#define FORWARD 	1 //Go forward 1 tile
@@ -122,7 +136,7 @@ void autonom (){
 				distance_LIDAR = s_LIDAR - 40; //LIDAR distance - 40 cm
 				first_time = 0;
 			}
-
+			/*
 			if (t_p_h == 0){ //Parallellt
 				setSpeed(100, 100, 1, 1);
 			}	
@@ -139,13 +153,37 @@ void autonom (){
 				setSpeed(0, 100, 1, 1);
 			}	
 			else{ //vet inte hur vi står riktigt
-			
-				int scale_left = 0;
-				int scale_right = 0;
+			}
+				*/
 
-								
+			if(t_vagg_h_f){
 
-				setSpeed(100-scale_left ,100-scale_right ,1,1);
+				uint8_t rspeed;
+				uint8_t lspeed;
+				debug = s_ir_h_f - PERFECT_DIST;
+				int8_t 	deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
+				//Neg om för nära väggen
+				if(t_p_h > 0){
+					rspeed = 100-(t_p_h*STEERING_SCALE);
+					rspeed -= deviation_from_wall*DEV_SCALE;
+
+					lspeed = 100;
+				}
+				else if (t_p_h < 0){
+					lspeed = 100-(t_p_h*STEERING_SCALE);
+					lspeed += deviation_from_wall*DEV_SCALE;
+
+					rspeed = 100;
+				}
+				else{
+					lspeed = 100;
+					rspeed = 100;
+				}
+				
+				setSpeed(lspeed , rspeed,1,1);
+			}
+			else{
+				setSpeed(100,100,1,1);
 			}
 			
 			if (s_LIDAR <= distance_LIDAR) {
@@ -160,7 +198,6 @@ void autonom (){
 
 			//NÄR KLAR
 			dir = dir +=1;
-			deviation_from_dir = 0;
 			action_done();
 		break;
 
@@ -176,7 +213,7 @@ void autonom (){
 			}
 
 
-			deviation_from_dir = 0;
+			
 			action_done();
 			setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
 		break;
@@ -186,7 +223,6 @@ void autonom (){
 			setSpeed(100, 100, 1, 0);
 
 
-			deviation_from_dir = 0;
 			dir +=2;
 			action_done();
 

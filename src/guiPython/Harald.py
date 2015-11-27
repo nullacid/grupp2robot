@@ -1,7 +1,6 @@
 import bluetooth
 import sys, os, traceback
 import select
-from coolthread import *
 from time import *
 
 
@@ -70,17 +69,8 @@ class Harald():
 			#print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
-		#receiverThread = coolThread(1, "cool receiver mega thread", self.__waitToReceive)
-		#receiverThread.start()
-		
-		#timeStamp = time()
-		#while not receiverThread.done:
-		#	if time() > timeStamp + 1:
-		#		print("timed out")
-		#		return b'\x00'
-		#data = receiverThread.returnValue
-		#print("Data Received: " + str(hex(data[0])))
 		data = self.__waitToReceive()
+		#print("Data Received: " + str(hex(data[0])))
 		return data
 			
 	def __waitToReceive(self):
