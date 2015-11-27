@@ -17,6 +17,10 @@ from time import *
 if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
 	
+mapsys = MapSystem()
+mapsys.updateLog("Gyro")
+print("tja")
+	
 #Create bluetooth object
 harald = Harald()
 	
@@ -349,6 +353,7 @@ def getData():
 	#if lastTimeStamp + 0.1 < time():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
+	mapSystem.updateLog(currentDataSlot)
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	lastTimeStamp = time()
@@ -358,7 +363,6 @@ def getData():
 while(crayRunning):
 	paintMap(mapSystem)
 	paintData(mapSystem)
-		
 		
 	getData()
 	getMap()

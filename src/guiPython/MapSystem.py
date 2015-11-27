@@ -4,30 +4,12 @@ class MapSystem():
 		self.arrayMap = [["UNEXPLORED" for x in range(33)] for x in range(33)]
 		self.startPosition = (16,16)
 		self.dataIndex = 0
-		"""self.arrayMap[16][16] = "OPEN"
-		self.arrayMap[17][17] = "OPEN"
-		self.arrayMap[16][17] = "OPEN"
-		self.arrayMap[17][16] = "OPEN"
-		self.arrayMap[15][16] = "OPEN"
-		self.arrayMap[16][15] = "OPEN"
-		self.arrayMap[15][15] = "OPEN"
-		self.arrayMap[15][17] = "OPEN"
-		self.arrayMap[17][15] = "OPEN"
 		
-		self.arrayMap[15][14] = "WALL"
-		self.arrayMap[16][14] = "WALL"
-		self.arrayMap[17][14] = "WALL"
-		self.arrayMap[18][15] = "WALL"
-		self.arrayMap[18][16] = "WALL"
-		self.arrayMap[18][17] = "WALL"
-		self.arrayMap[15][18] = "WALL"
-		self.arrayMap[16][18] = "WALL"
-		self.arrayMap[17][18] = "WALL"
-		self.arrayMap[14][15] = "WALL"
-		self.arrayMap[14][16] = "WALL"
-		self.arrayMap[14][17] = "WALL"""
+		self.gyroFile = open("logs/gyro.swag", 'w', 1)
+		self.lidarFile = open("logs/lidar.swag", 'w', 1)
+		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
 
-		
+		#Dictionary used for looping over data types
 		self.indexDict = {
 						0 : "Lidar",
 						1 : "IRrightFront",
@@ -49,6 +31,7 @@ class MapSystem():
 						17 : "Steering Decision",
 						18 : "Debug"
 		}
+		#Store values for each data type
 		self.dataDict = {
 						"Lidar" : 1,
 						"IRrightFront" : 1,
@@ -70,9 +53,20 @@ class MapSystem():
 						"Steering Decision" : 1,
 						"Debug" : 1
 		}
+		#Associates a data type name with a file
+		self.fileDict = {
+						"Lidar" : self.lidarFile,
+						"Gyro" : self.gyroFile,
+						"Steering Decision" : self.steeringDecisionFile
+		}
 	#Increments index and loops it at 17
 	def incIndex(self):
 		self.dataIndex += 1
 		if self.dataIndex > 18:
 			self.dataIndex = 0
+	
+	#Writes the data currently mapped to the input data type to the data type's log file
+	def updateLog(self, dataType):
+		if dataType in self.fileDict:
+			self.fileDict[dataType].write(str(self.dataDict[dataType]) + "\n")
 		
