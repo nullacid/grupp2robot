@@ -2,7 +2,9 @@
  * adc.c
  *
  * Created: i den spirande vårens tid anno 1734 i väntan på vår herre jesus kristus återkomst
- *  Author: Mikha'el and Eirikur
+ * Author: Mikha'el and Eirikur
+ * Det är lätt med facit i hand 
+ * ändå var det folk som failade på logiktentan
  */
 #ifndef F_CPU
 #define F_CPU 20000000
@@ -27,8 +29,8 @@ uint8_t IRLBT = 0x0b;
 uint8_t IRRFT = 0x0c;
 uint8_t IRRBT = 0x0d;
 
-uint8_t parallelL = 0xa0;
-uint8_t parallelR = 0xb0;
+int8_t parallelL = 0xa0;
+int8_t parallelR = 0xb0;
 
 /*lidar, normal and token values*/
 uint8_t LIDAR_H = 0xa0;
@@ -52,6 +54,8 @@ int current = 0;
 
 uint8_t usart_data;
 
+
+int gyrotime = 0;
 /* initializes timer for pwm reading */
 void timer1_init(){
 	// reset registers and set prescaler to 1024
@@ -304,10 +308,7 @@ void calcTokensIR(){
 	calcTokenIR(&IRRF, &IRRFT);
 }
 
-
-void calcGyroT(){
-	
-	
+void calcGyroT(){	
 	//gyro4 = (angular_sum & 0xf000) >> 24;
 	//gyro3 = (angular_sum & 0x0f00) >> 16;
 	//gyro2 = (angular_sum & 0x00f0) >> 8;
@@ -320,7 +321,7 @@ void calcGyroT(){
     3 and 4 represents a negative offset in the front sensor (front sensor is closer to the wall, turn left to fix this).
     The lower value represents a smaller offset. 
     Will return 0xFF if there is not a wall within one square. */
-void calcParallel(){
+void calcParallel_old(){
 	double floatingIRF;
 	double floatingIRB;
 	double quotient;
@@ -333,7 +334,7 @@ void calcParallel(){
         quotient = 1 - (floatingIRF/floatingIRB);
         offset = 0;
         //Negative quotient means that IRRF > IRRB ((1 - >1) < 0). Sets offset to 2 so that the token values will be set to 3 and 4 instead of 1 and 2.
-        if(quotient > 0){
+        if(quotient < 0){
                 offset = 2;
                 quotient = fabs(quotient); //Takes the absolute value of quotient to make calculations easier.
         }
@@ -375,6 +376,11 @@ void calcParallel(){
 	else{
 		parallelL = 0xFF;
 	}
+}
+
+void calcParallel(){
+	parallelR = IRRF - IRRB;
+	parallelL = IRLF - IRLB;
 }
 
 
@@ -427,11 +433,10 @@ uint16_t read_lidar(){
 }
 
 /*calculate middle point of gyro, called zero*/
-void calibrate_gyro(){
-		unsigned char data;                 //Received data stored here
+int calibrate_gyro(){
+		//unsigned char data;                 //Received data stored here
 		uint8_t res_adc1;
 		uint8_t res_adc2;
-		uint8_t angular_rate;
 
 		
 		// step1 put adc to the active mode if it wasn't
@@ -462,7 +467,7 @@ void calibrate_gyro(){
 
 		set_ss(1);
 		zero = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
-
+		return zero;
 }
 int single_measure(){
 	uint8_t res_adc1;
@@ -481,15 +486,21 @@ int single_measure(){
 	res_adc2 = spi_tranceiver(0x00);
 	set_ss(1);
 	
-	angular_rate = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
+	angular_rate = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
+	angular_rate >>= 4; // shift four bits right
+	angular_rate &= 0x00ff; // stores the MSB 8 bits	
+	
+	//angular_rate = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
+	
 	angular_sum = angular_sum + angular_rate-zero;
+	
 	
 	//gyro4 = (angular_sum & 0xf000) >> 24;
 	//gyro3 = (angular_sum & 0x0f00) >> 16;
-	return angular_sum;
+	return angular_sum; //angular_rate-zero; //(should be angular sum)
 }
 void startMeasure(){
-	unsigned char data;                 //Received data stored here
+	//unsigned char data;                 //Received data stored here
 	uint8_t res_adc1;
 	uint8_t res_adc2;
 	uint8_t angular_rate;
@@ -575,10 +586,8 @@ int main()
 	init_USART_up(10); 	//Baud rate is 10
 	
 	SPI_init();
-	calibrate_gyro();
-	
-	// Det är lätt med facit i hand//
-	// ändå var det folk som failade på logiktentan//
+	_delay_ms(500);
+	zero = calibrate_gyro();
 	
 	// waiting for something good to happen
 	while(1){		
@@ -606,18 +615,23 @@ int main()
 		usart_gogo();
 		
 		// adc	
-		IRRF = adc_to_cm(adc_read(0));
-		IRLF = adc_to_cm(adc_read(1));
-		IRRB = adc_to_cm(adc_read(2));
-		IRLB = adc_to_cm(adc_read(3));
-		
+		IRLB = adc_to_cm(adc_read(0));
+		IRRB = adc_to_cm(adc_read(1));
+		IRLF = adc_to_cm(adc_read(2));
+		IRRF = adc_to_cm(adc_read(3));
+		 
 		usart_gogo();
 		
-		int gyro_sum = single_measure();
-		gyro2 = (gyro_sum & 0x00f0) >> 8;
-		gyro1 = (gyro_sum & 0x000f);
-		//startMeasure();
+		//gyrotime++;
+		//if (gyrotime == 100){
+			int gyro_sum = single_measure();
+			gyro1 = (gyro_sum & 0x0f);
+			gyro2 = (gyro_sum & 0xf0)  >> 8;
+			//gyrotime = 0;
 		
+		//}
+		
+		// not needed 
 		calcTokensIR();
 		calcParallel();
 	

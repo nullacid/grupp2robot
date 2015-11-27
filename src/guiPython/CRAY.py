@@ -56,12 +56,10 @@ offset = -10
 
 
 
-
-
 #A blank icon
-#icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
+icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
-#pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
+pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 
 
 #Global variable for when the game is running
@@ -84,7 +82,7 @@ GREY = (139, 137, 137)
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
-	for i in range(0,18):
+	for i in range(0,17):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
@@ -110,6 +108,7 @@ def paintMap(mapSystem):
 	pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
 	#Draw currentPosition
+	pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
 	pygame.display.flip()
 			
@@ -281,13 +280,10 @@ def getMap():
 	
 
 def getPosition():
-	"""
 	harald.sendData(b'\x9A')
-	dataArray = []
-	dataArray.append(harald.receiveData())
-	dataArray.append(harald.receiveData())
-	"""
-	pass
+	mapSystem.sysPosX = int(harald.receiveData()[0])
+	mapSystem.sysPosY = int(harald.receiveData()[0])
+	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 def getDecision():
 	""""
@@ -300,8 +296,14 @@ def getDecision():
 def getDebug():
 	harald.sendData(b'\x4E')
 	data = harald.receiveData()
-	return int(data[0])
+	out = twos_comp(int(hex(data[0]),16), 32)
+	return out
 	
+def twos_comp(val, bits):
+    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)        # compute negative value
+    return val                         # return positive value as is
+
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
 	K_ESCAPE: handle_quit,
@@ -333,10 +335,8 @@ handle_dictionary_data = {
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
 	"Gyro (token)" : getGyroToken,
-	"IRrightFront (token)" : getIRRFtoken,
-	"IRrightBack (token)" : getIRRBtoken,
-	"IRleftFront (token)" : getIRLFtoken,
-	"IRleftBack (token)" : getIRLBtoken,
+	"IRright (token)" : getIRRFtoken,
+	"IRleft (token)" : getIRLFtoken,
 	"Steering data" : getSteering,
 	"Update Map" : getMap,
 	"System Position" : getPosition,
@@ -348,19 +348,17 @@ handle_dictionary_data = {
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	#global lastTimeStamp
-	#if lastTimeStamp + 0.1 < time():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
 	
-	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
-	
 	if mapSystem.dataIndex == 0:
 		paintMap(mapSystem)
 		paintData(mapSystem)
-
 	
+	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
+	
+
 
 while(crayRunning):
 	getData()
