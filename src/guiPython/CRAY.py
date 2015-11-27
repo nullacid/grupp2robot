@@ -56,12 +56,10 @@ offset = -10
 
 
 
-
-
 #A blank icon
-#icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
+icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
-#pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
+pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 
 
 #Global variable for when the game is running
@@ -84,7 +82,7 @@ GREY = (139, 137, 137)
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
-	for i in range(0,18):
+	for i in range(0,15):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
@@ -333,10 +331,8 @@ handle_dictionary_data = {
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
 	"Gyro (token)" : getGyroToken,
-	"IRrightFront (token)" : getIRRFtoken,
-	"IRrightBack (token)" : getIRRBtoken,
-	"IRleftFront (token)" : getIRLFtoken,
-	"IRleftBack (token)" : getIRLBtoken,
+	"IRright (token)" : getIRRFtoken,
+	"IRleft (token)" : getIRLFtoken,
 	"Steering data" : getSteering,
 	"Update Map" : getMap,
 	"System Position" : getPosition,
@@ -348,19 +344,17 @@ handle_dictionary_data = {
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	#global lastTimeStamp
-	#if lastTimeStamp + 0.1 < time():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
 	
-	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
-	
 	if mapSystem.dataIndex == 0:
 		paintMap(mapSystem)
 		paintData(mapSystem)
-
 	
+	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
+	
+
 
 while(crayRunning):
 	getData()

@@ -8,6 +8,7 @@ class MapSystem():
 		self.gyroFile = open("logs/gyro.swag", 'w', 1)
 		self.lidarFile = open("logs/lidar.swag", 'w', 1)
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
+		self.ParallelRightFile = open("logs/parallel_right.swag", 'w', 1)
 
 		#Dictionary used for looping over data types
 		self.indexDict = {
@@ -21,15 +22,12 @@ class MapSystem():
 						7 : "Parallel Right",
 						8 : "Parallel Left",
 						9 : "Gyro (token)",
-						10 : "IRrightFront (token)",
-						11 : "IRrightBack (token)",
-						12 : "IRleftFront (token)",
-						13 : "IRleftBack (token)",
-						14 : "Steering data",
-						15 : "Update Map",
-						16 : "System Position",
-						17 : "Steering Decision",
-						18 : "Debug"
+						10 : "IRright (token)",
+						11 : "IRleft (token)",
+						12 : "Steering data",
+						13 : "Update Map",
+						14 : "System Position",
+						15 : "Steering Decision",
 		}
 		#Store values for each data type
 		self.dataDict = {
@@ -43,30 +41,28 @@ class MapSystem():
 						"Parallel Right" : 1,
 						"Parallel Left" : 1,
 						"Gyro (token)" : 1,
-						"IRrightFront (token)" : 1,
-						"IRrightBack (token)" : 1,
-						"IRleftFront (token)" : 1,
-						"IRleftBack (token)" : 1,
+						"IRright (token)" : 1,
+						"IRleft (token)" : 1,
 						"Steering data" : 1,
 						"Update Map" : 1,
 						"System Position" : 1,
 						"Steering Decision" : 1,
-						"Debug" : 1
 		}
 		#Associates a data type name with a file
 		self.fileDict = {
 						"Lidar" : self.lidarFile,
 						"Gyro" : self.gyroFile,
-						"Steering Decision" : self.steeringDecisionFile
+						"Steering Decision" : self.steeringDecisionFile,
+						"Parallel Right" : self.ParallelRightFile
 		}
 	#Increments index and loops it at 17
 	def incIndex(self):
 		self.dataIndex += 1
-		if self.dataIndex > 18:
+		if self.dataIndex > 15:
 			self.dataIndex = 0
 	
 	#Writes the data currently mapped to the input data type to the data type's log file
 	def updateLog(self, dataType):
 		if dataType in self.fileDict:
-			self.fileDict[dataType].write(str(self.dataDict[dataType]) + " " + str(time.time()) + "\n")
+			self.fileDict[dataType].write(str(round(time.clock(), 1))+ " " + str(self.dataDict[dataType]) + "\n")
 		
