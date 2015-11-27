@@ -17,10 +17,7 @@ from time import *
 if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
 	
-mapsys = MapSystem()
-mapsys.updateLog("Gyro")
-print("tja")
-	
+
 #Create bluetooth object
 harald = Harald()
 	
