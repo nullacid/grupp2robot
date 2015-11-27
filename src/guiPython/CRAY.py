@@ -108,6 +108,7 @@ def paintMap(mapSystem):
 	pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
 	#Draw currentPosition
+	pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
 	pygame.display.flip()
 			
@@ -279,13 +280,10 @@ def getMap():
 	
 
 def getPosition():
-	"""
 	harald.sendData(b'\x9A')
-	dataArray = []
-	dataArray.append(harald.receiveData())
-	dataArray.append(harald.receiveData())
-	"""
-	pass
+	mapSystem.sysPosX = int(harald.receiveData()[0])
+	mapSystem.sysPosY = int(harald.receiveData()[0])
+	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 def getDecision():
 	""""

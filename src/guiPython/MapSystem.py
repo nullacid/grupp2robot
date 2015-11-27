@@ -3,6 +3,8 @@ class MapSystem():
 	def __init__(self):
 		self.arrayMap = [["UNEXPLORED" for x in range(33)] for x in range(33)]
 		self.startPosition = (16,16)
+		self.sysPosX = 16
+		self.sysPosY = 16
 		self.dataIndex = 0
 		
 		self.gyroFile = open("logs/gyro.swag", 'w', 1)
@@ -70,5 +72,5 @@ class MapSystem():
 	#Writes the data currently mapped to the input data type to the data type's log file
 	def updateLog(self, dataType):
 		if dataType in self.fileDict:
-			self.fileDict[dataType].write(str(round(time.clock(), 1))+ " " + str(self.dataDict[dataType]) + "\n")
+			self.fileDict[dataType].write(str(round(time.clock(), 1)) + "s " + str(self.dataDict[dataType]) + "\n")
 		
