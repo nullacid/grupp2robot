@@ -1,4 +1,4 @@
-
+import time
 class MapSystem():
 	def __init__(self):
 		self.arrayMap = [["UNEXPLORED" for x in range(33)] for x in range(33)]
@@ -68,5 +68,5 @@ class MapSystem():
 	#Writes the data currently mapped to the input data type to the data type's log file
 	def updateLog(self, dataType):
 		if dataType in self.fileDict:
-			self.fileDict[dataType].write(str(self.dataDict[dataType]) + "\n")
+			self.fileDict[dataType].write(str(self.dataDict[dataType]) + " " + str(time.time()) + "\n")
 		

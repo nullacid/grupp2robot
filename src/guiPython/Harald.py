@@ -67,7 +67,7 @@ class Harald():
 	def sendData(self, data):	
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
-			print("sent data: " + str(hex(data[0])))
+			#print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
 		receiverThread = coolThread(1, "cool receiver mega thread", self.__waitToReceive)
@@ -78,9 +78,8 @@ class Harald():
 			if time() > timeStamp + 1:
 				print("timed out")
 				return b'\x00'
-				
 		data = receiverThread.returnValue
-		print("Data Received: " + str(hex(data[0])))
+		#print("Data Received: " + str(hex(data[0])))
 		return data
 			
 	def __waitToReceive(self):

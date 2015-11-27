@@ -1,5 +1,5 @@
-import pygame
 
+import pygame
 #Import bluetooth class
 from Harald import *
 
@@ -8,6 +8,8 @@ from MapSystem import *
 
 #from pygame.locals import *
 from pygame import *
+
+
 import sys, os, traceback
 
 from time import *
@@ -20,10 +22,13 @@ if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
 #Create bluetooth object
 harald = Harald()
+
+mapSystem = MapSystem()
 	
 #Initialize
 pygame.display.init()
 pygame.font.init()
+
 
 """#FULLSCREEN MODE
 screenWidth = 1584
@@ -50,10 +55,13 @@ offset = -10
 #dataOffset = 220"""
 
 
+
+
+
 #A blank icon
-icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
+#icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
-pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
+#pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 
 
 #Global variable for when the game is running
@@ -97,6 +105,7 @@ def paintMap(mapSystem):
 	for i in range(0,33):
 		for j in range(0,33):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
+
 	#Draw startPosition
 	pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
@@ -115,13 +124,13 @@ def paintSquare(tileType, xCoord, yCoord):
 	elif tileType == "OUTSIDE":
 		colour = MAGENTA
 	pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
-					
+	
+	
 #key binding handles
 def handle_quit():
 	global crayRunning
 	harald.ourSocket.close()
 	crayRunning = False
-	
 	pygame.quit()
 	
 #Functions for steering the system (called with keybindings)
@@ -131,7 +140,7 @@ def left_down():
 def back_down():
 	harald.sendData(b'\x04')
 
-def forward_down():
+def forward_down(event):
 	harald.sendData(b'\x00')
 
 def right_down():
@@ -190,10 +199,7 @@ def getGyro():
 	harald.sendData(b'\x8D')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
-	#byte3 = harald.receiveData()
-	#byte4 = harald.receiveData()
 	data = int(msByte[0])*256 + int(lsByte[0])
-	#data = str(hex(msByte[0])) + " " + str(hex(lsByte[0])) + " " +  str(hex(byte3[0])) + " " +  str(hex(byte4[0]))
 	return data
 
 def getLidarToken():
@@ -237,7 +243,7 @@ def getIRLBtoken():
 	return int(data[0])
 
 def getSteering():
-	""""
+	"""
 	harald.sendData(b'\x59')
 	data = harald.receiveData()
 	if int(data[0]) == 0:
@@ -255,7 +261,6 @@ def getSteering():
 
 #Gets data from the map update stack in bjarne and updates the map graphically
 def getMap():
-	global mapSystem
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
@@ -307,6 +312,7 @@ handle_dictionary_down = {
 	K_SPACE: handle_SPACE
 }
 
+
 #dictionary for key bindings for keyup
 handle_dictionary_up = {
 	K_w: forward_up,
@@ -338,32 +344,26 @@ handle_dictionary_data = {
 	"Debug" : getDebug
 }
 
-mapSystem = MapSystem()
-
-lastTimeStamp = 0
-
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	global lastTimeStamp
+	#global lastTimeStamp
 	#if lastTimeStamp + 0.1 < time():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
-	lastTimeStamp = time()
+	
+	if mapSystem.dataIndex == 0:
+		paintMap(mapSystem)
+		paintData(mapSystem)
 
 	
-	
+
 while(crayRunning):
-	paintMap(mapSystem)
-	paintData(mapSystem)
-		
 	getData()
-	getMap()
-	getMap()
 	
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
