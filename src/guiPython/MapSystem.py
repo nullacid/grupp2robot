@@ -7,12 +7,18 @@ class MapSystem():
 		self.sysPosY = 16
 		self.dataIndex = 0
 		
+		
 		self.gyroFile = open("logs/gyro.swag", 'w', 1)
 		self.lidarFile = open("logs/lidar.swag", 'w', 1)
+		self.lidartokenFile = open("logs/lidartoken.swag", 'w', 1)
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
-		self.ParallelRightFile = open("logs/parallel_right.swag", 'w', 1)
+		self.steeringDataFile = open("logs/steering_data.swag", 'w', 1)
+		self.mapUpdateFile = open("logs/map_updates.swag", 'w', 1)
+		self.parallelRightFile = open("logs/parallel_right.swag", 'w', 1)
+		self.parallelLeftFile = open("logs/parallel_left.swag", 'w', 1)
 		self.debugFile = open("logs/debug.swag", 'w', 1)
-		self.lidartokenfile = open("logs/lidartoken.swag", 'w', 1)
+		self.irRightFile = open("logs/irRight.swag", 'w', 1)
+		
 
 		#Dictionary used for looping over data types
 		self.indexDict = {
@@ -59,9 +65,13 @@ class MapSystem():
 						"Lidar" : self.lidarFile,
 						"Gyro" : self.gyroFile,
 						"Steering Decision" : self.steeringDecisionFile,
-						"Parallel Right" : self.ParallelRightFile,
+						"Steering data" : self.steeringDataFile,
+						"Parallel Right" : self.parallelRightFile,
+						"Parallel Left" : self.parallelLeftFile,
 						"Debug" : self.debugFile,
-						"Lidar (token)" : self.lidartokenfile
+						"Lidar (token)" : self.lidartokenFile,
+						"Update Map" : self.mapUpdateFile,
+						"IRrightFront" : self.irRightFile
 		}
 	#Increments index and loops it at 17
 	def incIndex(self):

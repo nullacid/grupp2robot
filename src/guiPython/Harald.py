@@ -12,6 +12,8 @@ class Harald():
 		self.targetDevice = None
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+		
+		self.connectionstatus = 0
 
 		while not self.establishDirectConnection():
 			pass
@@ -71,6 +73,7 @@ class Harald():
 	def receiveData(self):
 		data = self.__waitToReceive()
 		#print("Data Received: " + str(hex(data[0])))
+		self.__inc_status()
 		return data
 			
 	def __waitToReceive(self):
@@ -78,6 +81,11 @@ class Harald():
 			return self.ourSocket.recv(1)
 			
 
+	def __inc_status(self):
+		if self.connectionstatus < 3:
+			self.connectionstatus += 1
+		else:
+			self.connectionstatus = 0
 		
 			
 			

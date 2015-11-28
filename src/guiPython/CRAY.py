@@ -99,6 +99,9 @@ def paintData(mapSystem):
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 19 * (5 * squareHeight) / 3))
 	
+	#Conneciton status
+	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
+	
 def paintMap(mapSystem):
 	for i in range(0,33):
 		for j in range(0,33):
@@ -241,22 +244,12 @@ def getIRLBtoken():
 	data = harald.receiveData()
 	return int(data[0])
 
+#First byte is left engine, second byte is right engine
 def getSteering():
-	"""
-	harald.sendData(b'\x59')
-	data = harald.receiveData()
-	if int(data[0]) == 0:
-		return 0
-	elif int(data[0]) == 1:
-		return 1
-	elif int(data[0]) == 2:
-		return 2
-	elif int(data[0]) == 3:
-		return 3
-	elif int(data[0]) == 4:
-		return 4
-"""
-	pass
+	harald.sendData(b'\x99')
+	leftEngine = int(harald.receiveData()[0])
+	rightEngine = int(harald.receiveData()[0])
+	return str(leftEngine) + "  " + str(rightEngine)
 
 #Gets data from the map update stack in bjarne and updates the map graphically
 def getMap():
