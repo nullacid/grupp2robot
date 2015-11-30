@@ -2,10 +2,11 @@
 #include "usart.h"
 #include "mem.h"
 #include <avr/io.h>
+#include <util/delay.h>
 
-#define MAX_SPEED_R 5 //1 to 10, 10 is highest
-#define MAX_SPEED_L 5
-#define DEV_SCALE 		5	//10 is ok -ish
+#define MAX_SPEED_R 6 //1 to 10, 10 is highest
+#define MAX_SPEED_L 6
+#define DEV_SCALE 		7	//10 is ok -ish
 #define PERFECT_DIST 	12 	//12
 
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
@@ -18,7 +19,6 @@ int distance_LIDAR;
 uint8_t first_time;
 uint8_t NODBROMS = 0;
 uint8_t parallell_cnt = 0;
-uint8_t spinning = 0;
 
 void update_sensor_data(); 
 void init_auto();
@@ -54,15 +54,15 @@ void init_auto(){
 	s_gyro = 0;
 	t_gyro = 0;		// bestäm vilka värden vi vill ha
 
-	//paction(PARALLELIZE);
-	//paction(FORWARD);
-	//paction(FORWARD);
+	spinning = 0;
 
 	//paction(FORWARD);
-	
-	paction(FORWARD);
-	
-	paction(PARALLELIZE);
+	//paction(FORWARD);	
+	//paction(FORWARD);
+	//paction(FORWARD);	
+	//paction(PARALLELIZE);
+	//paction(SPIN_L);
+	paction(SPIN_R);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
 	//----------------------------
@@ -204,10 +204,10 @@ void autonom (){
 				if(first_time){
 					first_time = 0;
 					spinning = 1;
-					transmitByte_down(1C);
+					transmitByte_down(0x1C);
 				}
 
-				setSpeed(100, 100, 1, 0); //Höger hjulpar bakåt
+				setSpeed(50, 50, 1, 0); //Höger hjulpar bakåt
 				transmitByte_down(12);
 				t_gyro = receiveByte_down();
 
@@ -225,7 +225,7 @@ void autonom (){
 				if(first_time){
 					spinning = 1;
 					first_time = 0;
-					transmitByte_down(1D);
+					transmitByte_down(0x1D);
 				}
 
 				setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
@@ -248,7 +248,7 @@ void autonom (){
 
 			case (SPIN_180):
 				//GER GYROT VÄRDEN PER SEKUND???
-				setSpeed(100, 100, 1, 0);
+				setSpeed(50, 50, 1, 0);
 
 
 				dir +=2;
@@ -263,8 +263,10 @@ void autonom (){
 					parallell_cnt++;
 
 					if(parallell_cnt == 10){
-						setSpeed(0, 0, 1, 0);
+						setSpeed(0, 0, 1, 1);
+						_delay_ms(100);
 						dir = NORTH;
+
 						action_done();
 					}
 				}	
@@ -273,11 +275,11 @@ void autonom (){
 					parallell_cnt = 0;
 				}
 				else if (t_p_h > 0){ //påväg från väggen
-					setSpeed(15 * t_p_h, 15 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
+					setSpeed(20 * t_p_h, 20 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
 					parallell_cnt = 0;
 				}	
 				else if (t_p_h < 0){ //påväg in i väggen
-					setSpeed(15 * (-t_p_h), 15 * (-t_p_h), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
+					setSpeed(20 * (-t_p_h), 20 * (-t_p_h), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
 					parallell_cnt = 0;
 				}
 				
