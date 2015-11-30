@@ -142,7 +142,7 @@ def left_down():
 def back_down():
 	harald.sendData(b'\x04')
 
-def forward_down(event):
+def forward_down():
 	harald.sendData(b'\x00')
 
 def right_down():
@@ -212,12 +212,14 @@ def getLidarToken():
 def getParallelRight():
 	harald.sendData(b'\x50')
 	data = harald.receiveData()
-	return int(data[0])
+	out = twos_comp(int(hex(data[0]),16), 8)
+	return out
 
 def getParallelLeft():
 	harald.sendData(b'\x51')
 	data = harald.receiveData()
-	return int(data[0])
+	out = twos_comp(int(hex(data[0]),16), 8)
+	return out
 	
 def getGyroToken():
 	harald.sendData(b'\x52')
@@ -289,7 +291,7 @@ def getDecision():
 def getDebug():
 	harald.sendData(b'\x4E')
 	data = harald.receiveData()
-	out = twos_comp(int(hex(data[0]),16), 32)
+	out = twos_comp(int(hex(data[0]),16), 8)
 	return out
 	
 def twos_comp(val, bits):
@@ -336,11 +338,12 @@ handle_dictionary_data = {
 	"Steering Decision" : getDecision,
 	"Debug" : getDebug
 }
-
+timestamp = clock()
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
+	global timestamp
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
@@ -348,6 +351,8 @@ def getData():
 	if mapSystem.dataIndex == 0:
 		paintMap(mapSystem)
 		paintData(mapSystem)
+		print(str(round(clock() - timestamp, 1)))
+		timestamp = clock()
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	
