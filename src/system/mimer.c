@@ -391,8 +391,15 @@ void calcParallel_old(){
 }
 
 void calcParallel(){
-	parallelR = IRRF - IRRB;
-	parallelL = IRLF - IRLB;
+	if (IRRF == 0 || IRRB == 0){
+		parallelR = 127;
+		parallelL = IRLF - IRLB;
+	}
+	else{
+		parallelR = IRRF - IRRB;
+		parallelL = IRLF - IRLB;	
+	}
+	
 }
 
 
@@ -436,7 +443,13 @@ uint16_t read_lidar(){
 			
 					// conversion to cm with number magic
 					//cm = timeOfMyLife*200/39;	
-					cm = (int)timeOfMyLife/25;	
+					cm = (int)timeOfMyLife/25;
+					
+					if (cm > 250){// faster at high distances
+						return cm;
+					}
+					
+						
 					prev = 0;					 
 					positive_edge_triggered = 0;
 					cm_sum += cm;
@@ -666,7 +679,8 @@ int main()
 		IRRB = adc_to_cm(adc_read(1));
 		IRLF = adc_to_cm(adc_read(2));
 		IRRF = adc_to_cm(adc_read(3));
-		 
+		calcTokensIR();
+		calcParallel();
 		usart_gogo();
 		
 		//gyrotime++;
@@ -679,8 +693,7 @@ int main()
 		//}
 		
 		// not needed 
-		calcTokensIR();
-		calcParallel();
+
 		
 		if(gyromode == 1){
 			gyro_gogo();
