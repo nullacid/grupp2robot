@@ -5,22 +5,20 @@
 
 #define MAX_SPEED_R 5 //1 to 10, 10 is highest
 #define MAX_SPEED_L 5
-#define STEERING_SCALE 20 //20
-#define DEV_SCALE 15 //15 is ok -ish
-
+#define DEV_SCALE 		5	//10 is ok -ish
+#define PERFECT_DIST 	12 	//12
 
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
 #define FOLlOW_WALL 0
 #define MAP_REST 1
-#define PERFECT_DIST 27 //22
-
-
 
 
 uint8_t cur_action = 0;
 int distance_LIDAR;
 uint8_t first_time;
 uint8_t NODBROMS = 0;
+uint8_t parallell_cnt = 0;
+uint8_t spinning = 0;
 
 void update_sensor_data(); 
 void init_auto();
@@ -56,13 +54,15 @@ void init_auto(){
 	s_gyro = 0;
 	t_gyro = 0;		// bestäm vilka värden vi vill ha
 
-	paction(FORWARD);
-	paction(FORWARD);
+	//paction(PARALLELIZE);
+	//paction(FORWARD);
+	//paction(FORWARD);
 
-	paction(FORWARD);
+	//paction(FORWARD);
 	
 	paction(FORWARD);
 	
+	paction(PARALLELIZE);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
 	//----------------------------
@@ -99,7 +99,8 @@ void autonom (){
 
 	if ((s_LIDAR_u == 0) && (s_LIDAR_l < 10)){
 		NODBROMS = 1;
-		return;
+		setSpeed(0,0,1,1);
+
 	}
 	else{
 		NODBROMS = 0;
@@ -124,140 +125,178 @@ void autonom (){
 
 	void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir, uint8_t rdir);
 	*/
+	if(!NODBROMS){
+		switch(cur_action){
+			case (EMPTY):
+				setSpeed(0, 0, 0, 0);
+				action_done();
+			break;
 
-	switch(cur_action){
-		case (EMPTY):
-			setSpeed(0, 0, 0, 0);
-			action_done();
-		break;
-
-		case (FORWARD):
-			if (first_time){
-				distance_LIDAR = s_LIDAR - 40; //LIDAR distance - 40 cm
-				first_time = 0;
-			}
-			/*
-			if (t_p_h == 0){ //Parallellt
-				setSpeed(100, 100, 1, 1);
-			}	
-			else if (t_p_h == 3){ //påväg från väggen
-				setSpeed(100, 20, 1, 1);
-			}	
-			else if (t_p_h == 4){ //påväg från väggen
-				setSpeed(100, 0, 1, 1);
-			}	
-			else if (t_p_h == 1){ //påväg in i väggen
-				setSpeed(20, 100, 1, 1);
-			}	
-			else if (t_p_h == 2){ //påväg in i väggen
-				setSpeed(0, 100, 1, 1);
-			}	
-			else{ //vet inte hur vi står riktigt
-			}
-				*/
-
-			if(t_vagg_h_f){
-
-				uint8_t rspeed;
-				uint8_t lspeed;
-				debug = s_ir_h_f - PERFECT_DIST;
-				int8_t 	deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
-				//Neg om för nära väggen
-				if(t_p_h > 0){
-					rspeed = 100-(t_p_h*STEERING_SCALE);
-					rspeed -= deviation_from_wall*DEV_SCALE;
-
-					lspeed = 100;
+			case (FORWARD):
+				if (first_time){
+					distance_LIDAR = s_LIDAR - 40; //LIDAR distance - 40 cm
+					first_time = 0;
 				}
-				else if (t_p_h < 0){
-					lspeed = 100-(t_p_h*STEERING_SCALE);
-					lspeed += deviation_from_wall*DEV_SCALE;
 
-					rspeed = 100;
+				if(t_vagg_h_f){ //Om det finns en vägg höger fram, reglera efter den
+
+					uint8_t rspeed = 100;
+					uint8_t lspeed = 100;
+					int8_t 	deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
+
+					if(deviation_from_wall > 0){
+						rspeed -= (deviation_from_wall*DEV_SCALE);
+						lspeed = 100;
+					}
+					else if(deviation_from_wall < 0){
+						//nära höger vägg
+
+						lspeed += (deviation_from_wall*DEV_SCALE);
+						rspeed = 100;
+					}
+					else{
+						lspeed = 100;
+						rspeed = 100;
+					}
+					if(deviation_from_wall > 10){
+						rspeed = 0;
+						lspeed = 100;
+					}
+					else if(deviation_from_wall < -10){
+						lspeed = 0;
+						rspeed = 100;
+					}
+
+					debug = deviation_from_wall;
+					motor_r = rspeed;
+					motor_l = lspeed;
+					setSpeed(lspeed , rspeed,1,1);
 				}
 				else{
-					lspeed = 100;
-					rspeed = 100;
+					setSpeed(100,100,1,1);
 				}
 				
-				setSpeed(lspeed , rspeed,1,1);
-			}
-			else{
-				setSpeed(100,100,1,1);
-			}
-			
-			if (s_LIDAR <= distance_LIDAR) {
-				first_time = 1;
-				action_done();
-			}
-		break;
-//---------------------------------SVÄNGA--------------------------------
-		case (SPIN_R):
-			//GER GYROT VÄRDEN PER SEKUND???
-			setSpeed(100, 100, 1, 0); //Höger hjulpar bakåt
+				if(t_p_h == 0){
+					if (s_LIDAR <= distance_LIDAR) {
+						first_time = 1;
 
-			//NÄR KLAR
-			dir = dir +=1;
-			action_done();
-		break;
+						if(dir == NORTH){
+							robot_pos_y--;
+						}
+						else if(dir == WEST){
+							robot_pos_x--;
+						}
+						else if(dir == SOUTH){
+							robot_pos_y++;
+						}
+						else{
+							robot_pos_x++;
+						}
 
-		case (SPIN_L):
-			//GER GYROT VÄRDEN PER SEKUND???
+						action_done();
+					}
+				}
 
+			break;
+	//---------------------------------SVÄNGA--------------------------------
+			case (SPIN_R):
 
-			if(dir == 0){
-				dir = 3;
-			}
-			else{
-				dir -=1;
-			}
+				if(first_time){
+					first_time = 0;
+					spinning = 1;
+					transmitByte_down(1C);
+				}
 
+				setSpeed(100, 100, 1, 0); //Höger hjulpar bakåt
+				transmitByte_down(12);
+				t_gyro = receiveByte_down();
 
-			
-			action_done();
-			setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
-		break;
+				if(t_gyro){
+					first_time = 1;
+					spinning = 0;
+					dir = dir +=1;
+					action_done();
 
-		case (SPIN_180):
-			//GER GYROT VÄRDEN PER SEKUND???
-			setSpeed(100, 100, 1, 0);
+				}
+			break;
 
+			case (SPIN_L):
 
-			dir +=2;
-			action_done();
+				if(first_time){
+					spinning = 1;
+					first_time = 0;
+					transmitByte_down(1D);
+				}
 
-		break;
-//------------------------------------------------------------------------
-		case(PARALLELIZE):
-			if (t_p_h == 0){ //Parallellt
-				setSpeed(0, 0, 1, 0);
-				dir = NORTH;
-				action_done();
-			}	
-			else if (t_p_h == 1 || t_p_h == 2){ //påväg från väggen
-				setSpeed(40 * t_p_h, 40 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
-			}	
-			else if (t_p_h == 3 || t_p_h == 4){ //påväg in i väggen
-				setSpeed(40 * (t_p_h - 2), 40 * (t_p_h -2), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
-			}
-			else{ //vet inte hur vi står riktigt
+				setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
+				transmitByte_down(12);
+				t_gyro = receiveByte_down();
+
+				if(t_gyro){
+					if(dir == 0){
+						dir = 3;
+					}
+					else{
+						dir -=1;
+					}			
+					spinning = 0;
+					first_time = 1;	
+					action_done();
+
+				}
+			break;
+
+			case (SPIN_180):
+				//GER GYROT VÄRDEN PER SEKUND???
 				setSpeed(100, 100, 1, 0);
-			}
-		break;
 
-		case(BACKWARD):
-			if (first_time){
-				distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l + 40; //LIDAR distance + 40 cm
-				first_time = 0;
-			}
-			//Kolla så vi åker typ parallellt
 
-			setSpeed(100, 100, 0, 0);
-			if ((s_LIDAR_u*256 + s_LIDAR_l) >= distance_LIDAR) {
-				first_time = 1;
+				dir +=2;
 				action_done();
-			}
-		break;
+
+			break;
+	//------------------------------------------------------------------------
+			case(PARALLELIZE):
+				//if ((t_p_h == 0) || (t_p_v == 1) || (t_p_h == -1)){ //Parallellt
+				if (t_p_h == 0){ //Parallellt
+
+					parallell_cnt++;
+
+					if(parallell_cnt == 10){
+						setSpeed(0, 0, 1, 0);
+						dir = NORTH;
+						action_done();
+					}
+				}	
+				else if(t_p_h == 127){
+					setSpeed(50,50,0,1);
+					parallell_cnt = 0;
+				}
+				else if (t_p_h > 0){ //påväg från väggen
+					setSpeed(15 * t_p_h, 15 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
+					parallell_cnt = 0;
+				}	
+				else if (t_p_h < 0){ //påväg in i väggen
+					setSpeed(15 * (-t_p_h), 15 * (-t_p_h), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
+					parallell_cnt = 0;
+				}
+				
+			break;
+
+			case(BACKWARD):
+				if (first_time){
+					distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l + 40; //LIDAR distance + 40 cm
+					first_time = 0;
+				}
+				//Kolla så vi åker typ parallellt
+
+				setSpeed(100, 100, 0, 0);
+				if ((s_LIDAR_u*256 + s_LIDAR_l) >= distance_LIDAR) {
+					first_time = 1;
+					action_done();
+				}
+			break;
+		}
 	}
 
 	//Läs actionstack och utför;
@@ -283,6 +322,8 @@ void action_done(){
 	}
 	//------------UPPDATERA KARTDATA ----------------
 	//Räknat med 0,0 i övre högra hörnet
+	parallell_cnt = 0;
+
 	switch(dir){
 		int i;
 		case (0): //LIDAR to the NORTH
@@ -417,8 +458,10 @@ void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
 			PORTA &= 0xBF;
 		}
 
-		uint16_t rdone = rspeed * MAX_SPEED_R;
-		uint16_t ldone = lspeed * MAX_SPEED_L;
+	uint16_t rdone = rspeed * MAX_SPEED_R;
+	uint16_t ldone = lspeed * MAX_SPEED_L;
+	//uint16_t rdone = rspeed;
+	//uint16_t ldone = lspeed;
 
 
 	if (rdone > 38){

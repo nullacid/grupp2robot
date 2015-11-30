@@ -64,10 +64,12 @@ int main(){
 		}
 		button_autonom = (PINA & 1);
 
-		update_sensor_data();
+		if(!spinning){
+			update_sensor_data();
+			handle_messages();
+		}
 		
-		
-		handle_messages();
+
 		//transmitByte_down(0x0D);
 	
 
@@ -237,8 +239,8 @@ void handle_messages(){
 			
 			case (0x19):
 			//senaste styrbeslut i send-buffern
-			//	styrdata = dir_left | (dir_right << 1);
-			//	transmitByte_up(styrdata);
+				transmitByte_up(motor_l);
+				transmitByte_up(motor_r);
 			break;
 
 			case (0x1A):

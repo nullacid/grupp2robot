@@ -69,6 +69,9 @@ uint8_t robot_pos_y;
 uint8_t target_x; //Target tile
 uint8_t target_y;
 
+uint8_t motor_r;
+uint8_t motor_l;
+
 uint8_t dir;
 
 #endif
