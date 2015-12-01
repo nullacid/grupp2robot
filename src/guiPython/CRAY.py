@@ -30,6 +30,9 @@ pygame.display.init()
 pygame.font.init()
 
 
+#Debugmode
+debug = True
+
 """#FULLSCREEN MODE
 screenWidth = 1584
 screenHeight = 891
@@ -169,35 +172,49 @@ def handle_SPACE():
 
 #Så här kan man göra om en byte till int :)
 #print(int(b'\x54'[0]))
-
 def getLidar():
+	if debug:
+		print ("lidar")
+	
+	#timestamp = clock()
 	harald.sendData(b'\x88')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
 	data = int(msByte[0])*256 + int(lsByte[0])
+	#print(str(round(clock() - timestamp, 2)))
 	return data
 	
 def getIRRF():
+	if debug:
+		print("IRRF")
 	harald.sendData(b'\x49')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRRB():
+	if debug:
+		print("IRRB")
 	harald.sendData(b'\x4A')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRLF():
+	if debug:
+		print("IRLF")
 	harald.sendData(b'\x4B')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRLB():
+	if debug:
+		print("IRLB")
 	harald.sendData(b'\x4C')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getGyro():
+	if debug:
+		print("gyro")
 	harald.sendData(b'\x8D')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
@@ -205,49 +222,67 @@ def getGyro():
 	return data
 
 def getLidarToken():
+	if debug:
+		print("lidartoken")
 	harald.sendData(b'\x4F')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getParallelRight():
+	if debug:
+		print("parallelRight")
 	harald.sendData(b'\x50')
 	data = harald.receiveData()
 	out = twos_comp(int(hex(data[0]),16), 8)
 	return out
 
 def getParallelLeft():
+	if debug:
+		print("parallelleft")
 	harald.sendData(b'\x51')
 	data = harald.receiveData()
 	out = twos_comp(int(hex(data[0]),16), 8)
 	return out
 	
 def getGyroToken():
+	if debug:
+		print("gyrotoken")
 	harald.sendData(b'\x52')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRRFtoken():
+	if debug:
+		print("IRRFtoken")
 	harald.sendData(b'\x53')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRRBtoken():
+	if debug:
+		print("IRRBtoken")
 	harald.sendData(b'\x54')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRLFtoken():
+	if debug:
+		print("IRLFtoken")
 	harald.sendData(b'\x55')
 	data = harald.receiveData()
 	return int(data[0])
 
 def getIRLBtoken():
+	if debug:
+		print("IRLBtoken")
 	harald.sendData(b'\x56')
 	data = harald.receiveData()
 	return int(data[0])
 
 #First byte is left engine, second byte is right engine
 def getSteering():
+	if debug:
+		print("steering")
 	harald.sendData(b'\x99')
 	leftEngine = int(harald.receiveData()[0])
 	rightEngine = int(harald.receiveData()[0])
@@ -255,6 +290,8 @@ def getSteering():
 
 #Gets data from the map update stack in bjarne and updates the map graphically
 def getMap():
+	if debug:
+		print("map")
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
@@ -275,6 +312,8 @@ def getMap():
 	
 
 def getPosition():
+	if debug:
+		print("position")
 	harald.sendData(b'\x9A')
 	mapSystem.sysPosX = int(harald.receiveData()[0])
 	mapSystem.sysPosY = int(harald.receiveData()[0])
@@ -282,6 +321,8 @@ def getPosition():
 
 def getDecision():
 	""""
+	if debug:
+		print("decision")
 	harald.sendData(b'\x5B')
 	data = harald.receiveData()
 	return int(data[0])
@@ -289,6 +330,8 @@ def getDecision():
 	pass
 	
 def getDebug():
+	if debug:
+		print("debug")
 	harald.sendData(b'\x4E')
 	data = harald.receiveData()
 	out = twos_comp(int(hex(data[0]),16), 8)
@@ -338,12 +381,12 @@ handle_dictionary_data = {
 	"Steering Decision" : getDecision,
 	"Debug" : getDebug
 }
-timestamp = clock()
+#timestamp = clock()
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	global timestamp
+	#global timestamp
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
@@ -351,8 +394,8 @@ def getData():
 	if mapSystem.dataIndex == 0:
 		paintMap(mapSystem)
 		paintData(mapSystem)
-		print(str(round(clock() - timestamp, 1)))
-		timestamp = clock()
+		#print(str(round(clock() - timestamp, 1)))
+		#timestamp = clock()
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	
