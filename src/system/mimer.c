@@ -44,12 +44,12 @@ uint8_t gyro2 = 0xb1;
 //uint8_t gyro3 = 0xb2;
 //uint8_t gyro4 = 0xb3;
 
-int rotation_constant_90_degrees = 120;
+uint16_t rotation_constant_90_degrees = 380;
 int gyromode = 0;
 int gyro_direction = 0;
-uint8_t gyro_zero = 0;
+uint16_t gyro_zero = 0;
 
-uint8_t gyro_token = 0x00;
+int gyro_token = 0;
 
 uint8_t usart_data;
 
@@ -178,7 +178,7 @@ void transmitParallelL(){
 }
 
 void transmitGyroT(){
-	transmitByte_up(0xAB);
+	transmitByte_up(gyro_token);
 }
 
 void transmitIRRFT(){
@@ -264,15 +264,20 @@ void processCommand(unsigned char data){
 	else if(data == 0x1D){
 		transmitALL();
 	}
-	/*
+	
 	else if(data == 0x1c){
 		gyromode = 1;
 		gyro_direction = 1; // 1 = clockwise
 	}
-	else if(data == 0x1d){
+	else if(data == 0x1f){
 		gyromode = 1;
 		gyro_direction = 0; // 0 = counterclockwise
 	}
+	else if(data == 0x1e){
+		gyromode = 0;
+		gyro_token =0;
+	}
+	/*
 	else if(data == 0xGYRO_reset){
 		gyromode = 0;
 		gyro_token = 0;
@@ -445,7 +450,7 @@ uint16_t read_lidar(){
 					//cm = timeOfMyLife*200/39;	
 					cm = (int)timeOfMyLife/25;
 					
-					if (cm > 250){// faster at high distances
+					if (cm > 125){// faster at high distances
 						return cm;
 					}
 					
@@ -466,7 +471,7 @@ void calibrate_gyro(){
 		uint8_t res_adc2;
 		int i = 0;
 		uint8_t single_value_gyro = 0;
-		
+		uint16_t gyro_zero_sum = 0;
 		// enable adc conversion
 		set_ss(0);
 		spi_tranceiver(0x94);
@@ -476,7 +481,7 @@ void calibrate_gyro(){
 		
 		_delay_us(115);
 		
-		while(i < 100){
+		while(i < 16){
 			
 			set_ss(0);
 			spi_tranceiver(0x94);
@@ -503,7 +508,7 @@ void calibrate_gyro(){
 			
 		}
 		
-		gyro_zero = gyro_zero/100; // calculate mean
+		gyro_zero = gyro_zero/16; // calculate mean
 		
 }
 uint8_t single_measure(){
@@ -601,24 +606,47 @@ void startMeasure(){
 void gyro_gogo(){
 	
 	uint8_t angular_rate = 0x00;
-	int angular_sum = 0;
+	uint16_t angular_sum = 0;
 	int angular_rate_n = 0;
 	
-	calibrate_gyro();
+	//calibrate_gyro();
 	
-	while(abs(angular_sum) < rotation_constant_90_degrees){	
-		if(gyro_direction == 1){ // clockwise
+	
+	transmitByte_up(0x44);
+
+	while(1){	
+		usart_gogo();
+		_delay_ms(10);
+		//if(gyro_direction == 1){ // clockwise
+			
 			angular_rate = single_measure();
-			angular_rate_n = angular_rate;
-			angular_rate_n -= gyro_zero; //actual difference
-			angular_sum += angular_rate_n;
-		
-		}
-		else if(gyro_direction == 0){ // counterclockwise
-			angular_rate = single_measure();
-			angular_rate_n = angular_rate;
-			angular_rate_n += gyro_zero; //actual difference
-			angular_sum += angular_rate_n;
+			if ((angular_rate > (gyro_zero + 0x05)) || (angular_rate < (gyro_zero - 0x05))){
+				
+			
+			
+			
+				if (angular_rate > gyro_zero){
+				angular_rate -= gyro_zero;
+				
+				}
+				else{
+					angular_rate = gyro_zero - angular_rate;
+				}
+			//angular_rate_n = angular_rate_n - gyro_zero ; //actual difference
+			
+				angular_sum += angular_rate;
+			}
+		//}
+// 		else if(gyro_direction == 0){ // counterclockwise
+// 			
+// 			angular_rate = single_measure();
+// 			if (a)
+// 			angular_rate_n = angular_rate;
+// 			angular_rate_n += gyro_zero; //actual difference
+// 			angular_sum += angular_rate_n;
+// 		}
+		if (angular_sum > rotation_constant_90_degrees){
+			break;
 		}
 	}
 	
@@ -679,15 +707,15 @@ int main()
 		IRRB = adc_to_cm(adc_read(1));
 		IRLF = adc_to_cm(adc_read(2));
 		IRRF = adc_to_cm(adc_read(3));
-		calcTokensIR();
-		calcParallel();
+ 		calcTokensIR();
+ 		calcParallel();
 		usart_gogo();
 		
 		//gyrotime++;
 		//if (gyrotime == 100){
-			int gyro_sum = single_measure();
-			gyro1 = (gyro_sum & 0x0f);
-			gyro2 = (gyro_sum & 0xf0)  >> 8;
+			//int gyro_sum = single_measure();
+			gyro1 = gyro_zero; //(gyro_sum & 0x0f);
+			gyro2 = 0; //(gyro_sum & 0xf0)  >> 8;
 			//gyrotime = 0;
 		
 		//}
@@ -697,7 +725,10 @@ int main()
 		
 		if(gyromode == 1){
 			gyro_gogo();
+			// reset gyroToken when processed
 		}
+		
+		
 	
 	}
 }
