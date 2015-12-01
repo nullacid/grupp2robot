@@ -44,6 +44,9 @@ int main(){
 	init_motors();
 	init_auto();
 
+
+	_delay_ms(1000);
+
 	while(1){
 
 		if(clk){
@@ -67,17 +70,12 @@ int main(){
 
 		if(!spinning){
 			update_sensor_data();
-			//handle_messages();
-		}
-		
-
-		//transmitByte_down(0x0D);
-	
+			handle_messages();	
+		}	
 
 		if (button_autonom == 1){
 	
 			//think();	
-			handle_messages();	
 			autonom();
 			
 		}			

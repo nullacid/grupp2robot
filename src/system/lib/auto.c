@@ -7,13 +7,11 @@
 
 #define MAX_SPEED_R 6 //1 to 10, 10 is highest
 #define MAX_SPEED_L 6
-#define DEV_SCALE 		7	//10 is ok -ish
 #define PERFECT_DIST 	12 	//12
 
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
 #define FOLlOW_WALL 0
 #define MAP_REST 1
-#define TIME_CONST 0.3 //delta-t
 
 
 uint8_t cur_action = 0;
@@ -22,13 +20,13 @@ uint8_t first_time;
 uint8_t NODBROMS = 0;
 uint8_t parallell_cnt = 0;
 
-int8_t deviation_from_wall = 0;
+int16_t deviation_from_wall = 0;
 int16_t old_deviation_from_wall = 0;
-int8_t derivata = 0;
+int16_t derivata = 0;
 int16_t P = 0;
 int16_t D = 0;
-uint8_t pidk = 1;
-uint8_t pidd = 0;
+uint8_t pidk = 10; //10 är okej
+uint8_t pidd = 30; //30 ok ish
 
 void update_sensor_data(); 
 void init_auto();
@@ -67,9 +65,13 @@ void init_auto(){
 	spinning = 0;
 
 
+	paction(FORWARD);
+	paction(FORWARD);
+	paction(FORWARD);
+	paction(FORWARD);
+	paction(PARALLELIZE);
 
 
-	paction(SPIN_R);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
 	//----------------------------
@@ -147,34 +149,35 @@ void autonom (){
 
 				if(t_vagg_h_f){ //Om det finns en vägg höger fram, reglera efter den
 
-					uint8_t control = 0;
-					uint8_t lspeed, rspeed;
+					int8_t control = 0;
+					uint8_t lspeed = 0;
+					uint8_t rspeed = 0;
 					deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
 					derivata = (deviation_from_wall - old_deviation_from_wall);
 
 					P = pidk * deviation_from_wall;
 					D = pidd * derivata;
 					control = P+D;
-
+					debug = control;
 					if(control > 0){
-						rspeed -= control;
+						rspeed = 100 - control;
 						lspeed = 100;
 					}
 					else if(control < 0){
 						//nära höger vägg
 
-						lspeed += control;
+						lspeed = 100 + control;
 						rspeed = 100;
 					}
 					else{
 						lspeed = 100;
 						rspeed = 100;
 					}
-					if(deviation_from_wall > 10){
+					if(deviation_from_wall > 20){
 						rspeed = 0;
 						lspeed = 100;
 					}
-					else if(deviation_from_wall < -10){
+					else if(deviation_from_wall < -7){
 						lspeed = 0;
 						rspeed = 100;
 					}
@@ -291,11 +294,11 @@ void autonom (){
 					parallell_cnt = 0;
 				}
 				else if (t_p_h > 0){ //påväg från väggen
-					setSpeed(20 * t_p_h, 20 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
+					setSpeed(30 * t_p_h, 30 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
 					parallell_cnt = 0;
 				}	
 				else if (t_p_h < 0){ //påväg in i väggen
-					setSpeed(20 * (-t_p_h), 20 * (-t_p_h), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
+					setSpeed(30 * (-t_p_h), 30 * (-t_p_h), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
 					parallell_cnt = 0;
 				}
 				
