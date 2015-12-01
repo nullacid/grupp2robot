@@ -1,5 +1,6 @@
 #ifndef MEM_H
 #define MEM_H
+#define F_CPU 20000000
 
 #define EMPTY		0 //The a_stack was empty //Stand still
 #define FORWARD 	1 //Go forward 1 tile

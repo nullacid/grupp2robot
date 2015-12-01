@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+
 #define MAX_SPEED_R 6 //1 to 10, 10 is highest
 #define MAX_SPEED_L 6
 #define DEV_SCALE 		7	//10 is ok -ish
@@ -12,6 +13,7 @@
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
 #define FOLlOW_WALL 0
 #define MAP_REST 1
+#define TIME_CONST 0.3 //delta-t
 
 
 uint8_t cur_action = 0;
@@ -19,6 +21,14 @@ int distance_LIDAR;
 uint8_t first_time;
 uint8_t NODBROMS = 0;
 uint8_t parallell_cnt = 0;
+
+int8_t deviation_from_wall = 0;
+int16_t old_deviation_from_wall = 0;
+int8_t derivata = 0;
+int16_t P = 0;
+int16_t D = 0;
+uint8_t pidk = 1;
+uint8_t pidd = 0;
 
 void update_sensor_data(); 
 void init_auto();
@@ -56,12 +66,9 @@ void init_auto(){
 
 	spinning = 0;
 
-	//paction(FORWARD);
-	//paction(FORWARD);	
-	//paction(FORWARD);
-	//paction(FORWARD);	
-	//paction(PARALLELIZE);
-	//paction(SPIN_L);
+
+
+
 	paction(SPIN_R);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
@@ -140,18 +147,23 @@ void autonom (){
 
 				if(t_vagg_h_f){ //Om det finns en vägg höger fram, reglera efter den
 
-					uint8_t rspeed = 100;
-					uint8_t lspeed = 100;
-					int8_t 	deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
+					uint8_t control = 0;
+					uint8_t lspeed, rspeed;
+					deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
+					derivata = (deviation_from_wall - old_deviation_from_wall);
 
-					if(deviation_from_wall > 0){
-						rspeed -= (deviation_from_wall*DEV_SCALE);
+					P = pidk * deviation_from_wall;
+					D = pidd * derivata;
+					control = P+D;
+
+					if(control > 0){
+						rspeed -= control;
 						lspeed = 100;
 					}
-					else if(deviation_from_wall < 0){
+					else if(control < 0){
 						//nära höger vägg
 
-						lspeed += (deviation_from_wall*DEV_SCALE);
+						lspeed += control;
 						rspeed = 100;
 					}
 					else{
@@ -167,7 +179,7 @@ void autonom (){
 						rspeed = 100;
 					}
 
-					debug = deviation_from_wall;
+					old_deviation_from_wall = deviation_from_wall;
 					motor_r = rspeed;
 					motor_l = lspeed;
 					setSpeed(lspeed , rspeed,1,1);
@@ -205,16 +217,18 @@ void autonom (){
 					first_time = 0;
 					spinning = 1;
 					transmitByte_down(0x1C);
+					receiveByte_down();
 				}
 
-				setSpeed(50, 50, 1, 0); //Höger hjulpar bakåt
-				transmitByte_down(12);
+				setSpeed(70, 70, 1, 0); //Höger hjulpar bakåt
+				transmitByte_down(0x12);
 				t_gyro = receiveByte_down();
 
 				if(t_gyro){
 					first_time = 1;
 					spinning = 0;
 					dir = dir +=1;
+					transmitByte_down(0x1E);
 					action_done();
 
 				}
@@ -225,11 +239,12 @@ void autonom (){
 				if(first_time){
 					spinning = 1;
 					first_time = 0;
-					transmitByte_down(0x1D);
+					transmitByte_down(0x1F);
+					receiveByte_down();
 				}
 
-				setSpeed(100, 100, 0, 1); //Höger hjulpar bakåt
-				transmitByte_down(12);
+				setSpeed(70, 70, 0, 1); //Höger hjulpar bakåt
+				transmitByte_down(0x12);
 				t_gyro = receiveByte_down();
 
 				if(t_gyro){
@@ -241,6 +256,7 @@ void autonom (){
 					}			
 					spinning = 0;
 					first_time = 1;	
+					transmitByte_down(0x1E);
 					action_done();
 
 				}
@@ -315,6 +331,7 @@ void action_done(){
 	if(dir>3){
 		dir -=4;
 	}
+
 
 	uint8_t old_action = cur_action;
 	pop_a_stack(); //Ta bort actionen från actionstacken

@@ -73,8 +73,6 @@ mapchange gstack(){
 		return data;
 
 	}
-
-	return;
 }
 
 node* rmem(uint8_t x, uint8_t y){

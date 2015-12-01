@@ -1,6 +1,5 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define F_CPU 20000000
 #include <util/delay.h>
 #include "lib/usart.h"
 #include "lib/mem.h"
@@ -37,6 +36,8 @@ uint8_t clk = 0;
 
 int main(){
 	
+
+	
 	init_USART_up(10);
 	init_USART_down(10);
 	init_mem();
@@ -66,7 +67,7 @@ int main(){
 
 		if(!spinning){
 			update_sensor_data();
-			handle_messages();
+			//handle_messages();
 		}
 		
 
@@ -75,7 +76,8 @@ int main(){
 
 		if (button_autonom == 1){
 	
-			//think();		
+			//think();	
+			handle_messages();	
 			autonom();
 			
 		}			
