@@ -46,14 +46,17 @@ uint8_t gyro2 = 0xb1;
 //uint8_t gyro3 = 0xb2;
 //uint8_t gyro4 = 0xb3;
 
-uint16_t rotation_constant_90_degrees = 380;
+uint16_t rotation_constant_90_degrees = 137;
 int gyromode = 0;
 int gyro_direction = 0;
-uint16_t gyro_zero = 0;
+uint8_t gyro_zero = 0;
 
-int gyro_token = 0;
+uint8_t gyro_token = 0x00;
 
 uint8_t usart_data;
+
+uint8_t spi_tranceiver(uint8_t data);
+uint8_t single_measure();
 
 int gyrotime = 0;
 /* initializes timer for pwm reading */
@@ -98,10 +101,18 @@ void SPI_init()
 	SPCR=(1<<SPE)|(1<<MSTR)|(1<<SPR0); // Enable SPI | set as master | SCK freq = mclk/8
 	
 	set_ss(1);
+	// enable adc conversion
+	set_ss(0);
+	spi_tranceiver(0x94);
+	spi_tranceiver(0x00);
+	spi_tranceiver(0x00);
+	set_ss(1);
+	_delay_ms(20);
+	
 }
 
 /*to transfer/recieve data via spi*/
-unsigned char spi_tranceiver (uint8_t data)
+uint8_t spi_tranceiver(uint8_t data)
 {
 	// Load data into the buffer
 	SPDR = data;
@@ -160,6 +171,7 @@ void transmitIRRB(){
 /* Transmits data from the left front sensor. 1 byte. */
 void transmitIRLF(){
 	transmitByte_up(IRLF);	
+
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
@@ -203,6 +215,7 @@ void transmitIRLFT(){
 
 void transmitIRLBT(){
 	transmitByte_up(IRLBT);
+	
 }
 
 /* Transmits all sensor data. */
@@ -277,20 +290,14 @@ void processCommand(unsigned char data){
 		gyromode = 1;
 		gyro_direction = 1; // 1 = clockwise
 	}
-	else if(data == 0x1f){
+	else if(data == 0x1d){
 		gyromode = 1;
 		gyro_direction = 0; // 0 = counterclockwise
 	}
 	else if(data == 0x1e){
 		gyromode = 0;
-		gyro_token =0;
+		gyro_token = 0x00;
 	}
-	/*
-	else if(data == 0xGYRO_reset){
-		gyromode = 0;
-		gyro_token = 0;
-	}
-	*/
 }
 
 /* Calculates the token value given pointers to the stored values. */
@@ -412,7 +419,6 @@ void calcParallel(){
 		parallelR = IRRF - IRRB;
 		parallelL = IRLF - IRLB;	
 	}
-	
 }
 
 
@@ -480,30 +486,26 @@ void calibrate_gyro(){
 		int i = 0;
 		uint8_t single_value_gyro = 0;
 		uint16_t gyro_zero_sum = 0;
-		// enable adc conversion
-		set_ss(0);
-		spi_tranceiver(0x94);
-		res_adc1 = spi_tranceiver(0x00);
-		spi_tranceiver(0x00);
-		set_ss(1);
-		
-		_delay_us(115);
+		int EOC = 0;
 		
 		while(i < 16){
-			
 			set_ss(0);
 			spi_tranceiver(0x94);
 			res_adc1 = spi_tranceiver(0x00);
 			spi_tranceiver(0x00);
 			set_ss(1);
 		
-			_delay_us(115);
-
-			set_ss(0);
-			spi_tranceiver(0x80);
-			res_adc1 = spi_tranceiver(0x00);
-			res_adc2 = spi_tranceiver(0x00);
-			set_ss(1);
+			//_delay_us(115);
+			while(!EOC){
+				set_ss(0);
+				spi_tranceiver(0x80);
+				res_adc1 = spi_tranceiver(0x00);
+				res_adc2 = spi_tranceiver(0x00);
+				set_ss(1);
+				if((res_adc1 & 0x20) == 0x20){
+					EOC = 1;
+				}
+			}
 			
 			// stores the 8MSB bits in single_value_gyro		
 			single_value_gyro = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
@@ -619,54 +621,53 @@ void startMeasure(){
 }
 
 void gyro_gogo(){
-	
 	uint8_t angular_rate = 0x00;
 	uint16_t angular_sum = 0;
 	int angular_rate_n = 0;
-	
 	//calibrate_gyro();
-	
-	
-	transmitByte_up(0x44);
-
-	while(1){	
-		usart_gogo();
+	//transmitByte_up(0x44);
+	while(gyromode == 1){	
+		//usart_gogo();
+		//_delay_ms(10);
+		gyro1 = angular_rate;	
+		gyro2 = 0;
+		//transmitGyroT();
+		transmitByte_up(0x01);
+		
 		_delay_ms(10);
-		//if(gyro_direction == 1){ // clockwise
-			
+		//_delay_ms(10000);
+		//transmitByte_up(0x44);
+		//transmitByte_up(0x01);
+		
+	//	if(gyro_direction == 1){ // clockwise	
 			angular_rate = single_measure();
-			if ((angular_rate > (gyro_zero + 0x05)) || (angular_rate < (gyro_zero - 0x05))){
-				
-			
-			
-			
-				if (angular_rate > gyro_zero){
+			//if ((angular_rate > (gyro_zero + 0x05)) || (angular_rate < (gyro_zero - 0x05))){
+			if (angular_rate > gyro_zero){
 				angular_rate -= gyro_zero;
-				
-				}
-				else{
-					angular_rate = gyro_zero - angular_rate;
-				}
-			//angular_rate_n = angular_rate_n - gyro_zero ; //actual difference
-			
-				angular_sum += angular_rate;
 			}
+			else{
+				angular_rate = gyro_zero - angular_rate;
+			}
+			//angular_rate_n = angular_rate_n - gyro_zero ; //actual difference
+			angular_sum += angular_rate;
+	//	}
 		//}
 // 		else if(gyro_direction == 0){ // counterclockwise
-// 			
 // 			angular_rate = single_measure();
 // 			if (a)
 // 			angular_rate_n = angular_rate;
 // 			angular_rate_n += gyro_zero; //actual difference
 // 			angular_sum += angular_rate_n;
 // 		}
-		if (angular_sum > rotation_constant_90_degrees){
-			break;
+
+		if (angular_sum > 351){
+			gyromode = 0;
+			gyro_token = 0x01; // how to reset?
+			transmitByte_up(0x44);
 		}
 	}
-	
 	gyromode = 0;
-	gyro_token = 1; // how to reset?
+	usart_gogo();
 }
 
 
@@ -701,11 +702,7 @@ int main()
 	_delay_ms(500);
 	calibrate_gyro();
 	
-	// waiting for something good to happen
-	while(1){
-		single_measure();
-	}
-	/*
+	// waiting for something good to happe
 	while(1){				
 		// usart
 		usart_gogo();
@@ -745,19 +742,16 @@ int main()
 		//gyrotime++;
 		//if (gyrotime == 100){
 			//int gyro_sum = single_measure();
-			gyro1 = gyro_zero; //(gyro_sum & 0x0f);
-			gyro2 = 0; //(gyro_sum & 0xf0)  >> 8;
+		//	gyro1 = gyro_zero; //(gyro_sum & 0x0f);
+			//gyro2 = 0; //(gyro_sum & 0xf0)  >> 8;
 			//gyrotime = 0;
-		
 		//}
-		
 		// not needed 
 		if(gyromode == 1){
 			gyro_gogo();
+			//while(1){
+			//transmitByte_up(0x33);}
 			// reset gyroToken when processed
 		}
-		*/
-		
-	
-	//}
+	}
 }
