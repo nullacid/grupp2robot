@@ -1,6 +1,9 @@
-import bluetooth
 import sys, os, traceback
 import select
+
+import bluetooth
+import serial
+#import bluetooth._bluetooth as bt   # low level bluetooth wrappers.
 from time import *
 
 
@@ -13,10 +16,14 @@ class Harald():
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 		
+		self.cereal = serial.Serial(0)
+		
+		
 		self.connectionstatus = 0
 
 		while not self.establishDirectConnection():
 			pass
+		
 		
 	#Finds all nearby bluetooth devices and tries to connect to our firefly if it finds it
 	#Not used anymore.
@@ -71,15 +78,11 @@ class Harald():
 			#print("sent data: " + str(hex(data[0])))
 			
 	def receiveData(self):
-		data = self.__waitToReceive()
-		#print("Data Received: " + str(hex(data[0])))
-		self.__inc_status()
-		return data
-			
-	def __waitToReceive(self):
 		if self.targetDevice != None:
-			return self.ourSocket.recv(1)
-			
+			self.ourSocket.settimeout(1.0)
+			data = self.ourSocket.recv(1)
+			self.__inc_status()
+			return data
 
 	def __inc_status(self):
 		if self.connectionstatus < 3:
