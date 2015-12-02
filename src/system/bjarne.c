@@ -70,11 +70,14 @@ int main(){
 
 		if(!spinning){
 			update_sensor_data();
-			handle_messages();	
+
 		}	
 
-		if (button_autonom == 1){
-	
+		handle_messages();	
+
+
+		if (button_autonom == 1){	
+
 			//think();	
 			autonom();
 			

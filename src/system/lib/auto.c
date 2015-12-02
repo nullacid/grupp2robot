@@ -65,13 +65,8 @@ void init_auto(){
 	spinning = 0;
 
 
-	paction(FORWARD);
-	paction(FORWARD);
-	paction(FORWARD);
-	paction(FORWARD);
-	paction(PARALLELIZE);
-
-
+	paction(SPIN_R);
+	//paction(PARALLELIZE);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
 	//----------------------------
@@ -216,24 +211,24 @@ void autonom (){
 	//---------------------------------SVÄNGA--------------------------------
 			case (SPIN_R):
 
+				debug = spinning;
+
 				if(first_time){
 					first_time = 0;
 					spinning = 1;
 					transmitByte_down(0x1C);
-					receiveByte_down();
+					//receiveByte_down();
 				}
 
 				setSpeed(70, 70, 1, 0); //Höger hjulpar bakåt
-				transmitByte_down(0x12);
 				t_gyro = receiveByte_down();
 
-				if(t_gyro){
+				if(t_gyro == 0x44){
 					first_time = 1;
 					spinning = 0;
-					dir = dir +=1;
+					dir += 1;
 					transmitByte_down(0x1E);
 					action_done();
-
 				}
 			break;
 
@@ -243,14 +238,13 @@ void autonom (){
 					spinning = 1;
 					first_time = 0;
 					transmitByte_down(0x1F);
-					receiveByte_down();
+				//	receiveByte_down();
 				}
 
 				setSpeed(70, 70, 0, 1); //Höger hjulpar bakåt
-				transmitByte_down(0x12);
 				t_gyro = receiveByte_down();
 
-				if(t_gyro){
+				if(t_gyro == 0x44){
 					if(dir == 0){
 						dir = 3;
 					}
@@ -267,7 +261,7 @@ void autonom (){
 
 			case (SPIN_180):
 				//GER GYROT VÄRDEN PER SEKUND???
-				setSpeed(50, 50, 1, 0);
+				setSpeed(70, 70, 1, 0);
 
 
 				dir +=2;
