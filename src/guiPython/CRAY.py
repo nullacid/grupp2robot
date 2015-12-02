@@ -31,7 +31,7 @@ pygame.font.init()
 
 
 #Debugmode
-debug = True
+debug = False
 
 """#FULLSCREEN MODE
 screenWidth = 1584
@@ -305,9 +305,9 @@ def getMap():
 			tileType = "OPEN"
 		elif tileType == 3:
 			tileType = "WALL"
-	
-		mapSystem.arrayMap[xCoord][yCoord] = tileType
-		return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+		if xCoord < 32 and yCoord < 32:
+			mapSystem.arrayMap[xCoord][yCoord] = tileType
+			return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
 	return mapSystem.dataDict["Update Map"]
 	
 
@@ -381,12 +381,13 @@ handle_dictionary_data = {
 	"Steering Decision" : getDecision,
 	"Debug" : getDebug
 }
-#timestamp = clock()
+
+timestamp = clock()
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	#global timestamp
+	global timestamp
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
@@ -394,8 +395,8 @@ def getData():
 	if mapSystem.dataIndex == 0:
 		paintMap(mapSystem)
 		paintData(mapSystem)
-		#print(str(round(clock() - timestamp, 1)))
-		#timestamp = clock()
+		print(str(round(clock() - timestamp, 1)))
+		timestamp = clock()
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	
