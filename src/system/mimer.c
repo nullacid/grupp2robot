@@ -7,7 +7,7 @@
  * ändå var det folk som failade på logiktentan
  */
 #ifndef F_CPU
-#define F_CPU 20000000
+#define F_CPU 20000000UL
 #endif
 
 #include <avr/io.h>
@@ -31,6 +31,8 @@ uint8_t IRRBT = 0x0d;
 
 int8_t parallelL = 0xa0;
 int8_t parallelR = 0xb0;
+
+int8_t MR_Reflex = 0xBF;
 
 /*LIDAR*/
 uint8_t LIDAR_H = 0xa0;
@@ -81,7 +83,12 @@ void adc_init()
 }
 
 void set_ss(int mode){
-	PORTB &= (mode<<PORTB4);
+	if (mode == 0){
+		PORTB &= (mode<<PORTB4);
+	}
+	else{
+		PORTB |= (mode<<PORTB4);
+	}
 }
 
 /*SPI initialization*/
@@ -143,7 +150,8 @@ void transmitLidar(){
 }
 /* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
-	transmitByte_up(IRRF);
+	//transmitByte_up(IRRF);
+	transmitByte_up(MR_Reflex);
 }
 /* Transmits data from the right back IR sensor. 1 byte. */
 void transmitIRRB(){
@@ -516,20 +524,27 @@ uint8_t single_measure(){
 	uint8_t res_adc1;
 	uint8_t res_adc2;
 	uint8_t angular_rate = 0x00;
+	int EOC = 0;
 	
+	// start command
 	set_ss(0);
 	spi_tranceiver(0x94);
 	res_adc1 = spi_tranceiver(0x00);
 	spi_tranceiver(0x00);
 	set_ss(1);
 	
-	_delay_us(115);
+	//_delay_us(115);
 	
-	set_ss(0);
-	spi_tranceiver(0x80);
-	res_adc1 = spi_tranceiver(0x00);
-	res_adc2 = spi_tranceiver(0x00);
-	set_ss(1);
+	while(!EOC){
+		set_ss(0);
+		spi_tranceiver(0x80);
+		res_adc1 = spi_tranceiver(0x00);
+		res_adc2 = spi_tranceiver(0x00);
+		set_ss(1);
+		if((res_adc1 & 0x20) == 0x20){ 
+			EOC = 1;
+		}
+	}
 	
 	angular_rate = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
 	angular_rate >>= 4; // shift four bits right
@@ -654,6 +669,15 @@ void gyro_gogo(){
 	gyro_token = 1; // how to reset?
 }
 
+
+void reflex_sensor(){
+//	current = adc_read(5);
+//	if (current != previous){
+//		segments_turned++;
+//	}
+//	previous = current;
+}
+
 /*usart code*/
 void usart_gogo(){
 	if(checkUSARTflag_up()){
@@ -678,6 +702,10 @@ int main()
 	calibrate_gyro();
 	
 	// waiting for something good to happen
+	while(1){
+		single_measure();
+	}
+	/*
 	while(1){				
 		// usart
 		usart_gogo();
@@ -707,6 +735,9 @@ int main()
 		IRRB = adc_to_cm(adc_read(1));
 		IRLF = adc_to_cm(adc_read(2));
 		IRRF = adc_to_cm(adc_read(3));
+		
+		MR_Reflex = adc_read(5);
+		
  		calcTokensIR();
  		calcParallel();
 		usart_gogo();
@@ -721,14 +752,12 @@ int main()
 		//}
 		
 		// not needed 
-
-		
 		if(gyromode == 1){
 			gyro_gogo();
 			// reset gyroToken when processed
 		}
-		
+		*/
 		
 	
-	}
+	//}
 }
