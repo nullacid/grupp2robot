@@ -90,7 +90,7 @@ void transmitSendNext_down(){
 }
 
 void waitForSendNext_up(){
-	uint8_t dummy = receiveByte_up();
+	_delay_ms(30);
 }
 
 void flushUSART_down(){

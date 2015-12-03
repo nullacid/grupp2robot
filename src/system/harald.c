@@ -23,7 +23,7 @@ int main(void)
 	
 
     while (1) 
-    {
+		{
 			unsigned char data = receiveByte_up();
 			transmitByte_down(data);
 		
@@ -37,9 +37,9 @@ int main(void)
 
 			while(datalength != 0){
 				returnDataArray[i] = receiveByte_down();
-				if(datalength > 1){
-					transmitSendNext_down();
-				}
+				//if(datalength > 1){
+				//	transmitSendNext_down();
+				//}
 				datalength--;
 				i++;
 			}

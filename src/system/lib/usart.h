@@ -22,10 +22,18 @@ void transmitByte_up(unsigned char data);
 /* Transmits a byte to the downward module. */
 void transmitByte_down(unsigned char data);
 
-/* Returns 1 if there is data in receivebuffer from usart0 */
+/* Returns 1 if there is data in receive buffer from usart0 */
 int checkUSARTflag_up(void);
 
-/* Returns 1 if there is data in receivebuffer from usart1 */
+/* Returns 1 if there is data in receive buffer from usart1 */
 int checkUSARTflag_down(void);
+
+/* Used to synchronize when receiving 2 bytes from different clock.
+Otherwise the buffer might be overwritten by the second transmit before the first byte has been read. */
+void transmitSendNext_down(void);
+
+/* Used to synchronize when transmitting 2 bytes to different clock frequency.
+Otherwise the buffer might be overwritten by the second transmit before the first byte has been read. */
+void waitForSendNext_up(void);
 
 #endif

@@ -2,7 +2,6 @@ import sys, os, traceback
 import select
 
 import bluetooth
-import serial
 from time import *
 
 
@@ -14,8 +13,6 @@ class Harald():
 		self.targetDevice = None
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-		
-		#self.cereal = serial.Serial(0)
 		
 		
 		self.connectionstatus = 0
@@ -80,6 +77,7 @@ class Harald():
 		if self.targetDevice != None:
 			self.ourSocket.settimeout(1.0)
 			data = self.ourSocket.recv(1)
+			#print("received data: " + str(hex(data[0])))
 			self.__inc_status()
 			return data
 
