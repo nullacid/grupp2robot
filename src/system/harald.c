@@ -24,7 +24,6 @@ int main(void)
 
     while (1) 
     {
-		if(checkUSARTflag_up()){
 			unsigned char data = receiveByte_up();
 			transmitByte_down(data);
 		
@@ -38,11 +37,9 @@ int main(void)
 
 			while(datalength != 0){
 				returnDataArray[i] = receiveByte_down();
-					// if mapdata, store it for debugging
-					//if (data == 0x58){
-						//  mapData[mapSize] = returnDataArray[i];
-						//  mapSize++;
-					//}
+				if(datalength > 1){
+					transmitSendNext_down();
+				}
 				datalength--;
 				i++;
 			}
@@ -51,7 +48,7 @@ int main(void)
 				datalength++;
 			}
 		}
-	}
+	
 }
 
 

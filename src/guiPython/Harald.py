@@ -3,7 +3,6 @@ import select
 
 import bluetooth
 import serial
-#import bluetooth._bluetooth as bt   # low level bluetooth wrappers.
 from time import *
 
 
@@ -16,7 +15,7 @@ class Harald():
 		self.port = 1
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 		
-		self.cereal = serial.Serial(0)
+		#self.cereal = serial.Serial(0)
 		
 		
 		self.connectionstatus = 0

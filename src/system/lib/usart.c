@@ -85,6 +85,14 @@ int checkUSARTflag_down(){
 	return (UCSR1A & (1<<RXC1));
 }
 
+void transmitSendNext_down(){
+	transmitByte_down(0x40);
+}
+
+void waitForSendNext_up(){
+	uint8_t dummy = receiveByte_up();
+}
+
 void flushUSART_down(){
 	int dummy;
 	while ( UCSR1A & (1<<RXC0) ) dummy = UDR1;
