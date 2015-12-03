@@ -6,7 +6,7 @@ void init_USART_up(unsigned int baud){
 	UBRR0H = (unsigned char)(baud>>8);
 	UBRR0L = (unsigned char)baud;
 	
-	flushUSASRT_up();
+	flushUSART_up();
 
 	/* UCSZn0,1,2 as 110 gives 8 bit frame size, UPMn0,1 as 00 disables parity
 	 USBS0 as 0 gives 1 stopbit, UMSELn as 00 asyncronus usart, UCPOLn as 0: triggered on positive flank */
@@ -90,7 +90,7 @@ void flushUSART_down(){
 	while ( UCSR1A & (1<<RXC0) ) dummy = UDR1;
 }
 
-void flushUSASRT_up(){
+void flushUSART_up(){
 	int dummy;
 	while ( UCSR0A & (1<<RXC0) ) dummy = UDR0;
 }
