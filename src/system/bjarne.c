@@ -254,7 +254,7 @@ void handle_messages(){
 			case (0x1A):
 			//pos karta X och Y i send-buffern
 				transmitByte_up(robot_pos_x);
-				waitForSendNext_upcd ();
+				waitForSendNext_up();
 				transmitByte_up(robot_pos_y);
 			break;
 			
