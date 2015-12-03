@@ -1,4 +1,5 @@
 #include "usart.h"
+#include <util/delay.h>
 
 /* Initialize USART. */
 void init_USART_up(unsigned int baud){
