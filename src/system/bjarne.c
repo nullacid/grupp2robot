@@ -149,6 +149,7 @@ void handle_messages(){
 			case (0x08):
 				//lägg lidardata i send-buffern
 				transmitByte_up(s_LIDAR_u);
+				waitForSendNext_up();
 				transmitByte_up(s_LIDAR_l);
 
 			break;
@@ -177,6 +178,7 @@ void handle_messages(){
 			case (0x0D):
 			//lägg gyro-data i send-buffern
 				transmitByte_up(s_gyro_u);
+				waitForSendNext_up();
 				transmitByte_up(s_gyro_l);
 
 			break;
@@ -230,6 +232,7 @@ void handle_messages(){
 			case (0x17):
 			//lägg reflex-token i send-buffern
 				//transmitByte_up(t_reflex_u);
+				//waitForSendNext_up();
 				//transmitByte_up(t_reflex_l);
 			break;
 			
@@ -237,18 +240,21 @@ void handle_messages(){
 			//lägg kartdata i send-buffern
 				temp = gstack();
 				transmitByte_up(temp.x);
+				waitForSendNext_up();
 				transmitByte_up(temp.y | (temp.t<<6));
 			break;
 			
 			case (0x19):
 			//senaste styrbeslut i send-buffern
 				transmitByte_up(motor_l);
+				waitForSendNext_up();
 				transmitByte_up(motor_r);
 			break;
 
 			case (0x1A):
 			//pos karta X och Y i send-buffern
 				transmitByte_up(robot_pos_x);
+				waitForSendNext_upcd ();
 				transmitByte_up(robot_pos_y);
 			break;
 			
