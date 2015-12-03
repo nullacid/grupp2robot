@@ -91,7 +91,7 @@ void transmitSendNext_down(){
 }
 
 void waitForSendNext_up(){
-	_delay_ms(30);
+	_delay_ms(50);
 }
 
 void flushUSART_down(){
