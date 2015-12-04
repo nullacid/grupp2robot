@@ -68,17 +68,16 @@ int main(){
 		}
 		button_autonom = (PINA & 1);
 
-		if(!spinning){
+		//if(!spinning){
 			update_sensor_data();
+			handle_messages();	
+		//}	
 
-		}	
-
-		handle_messages();	
 
 
 		if (button_autonom == 1){	
 
-			//think();	
+			think();	
 			autonom();
 			
 		}			
