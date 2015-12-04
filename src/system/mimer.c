@@ -3,8 +3,8 @@
  *
  * Created: i den spirande vårens tid anno 1734 i väntan på vår herre jesus kristus återkomst
  * Author: Mikha'el and Eirikur
- * Det är lätt med facit i hand 
- * ändå var det folk som failade på logiktentan
+ * "Det är lätt med facit i hand,
+ *  ändå var det folk som failade på logiktentan" - Peter
  */
 #ifndef F_CPU
 #define F_CPU 20000000UL
@@ -172,15 +172,17 @@ void transmitIRRF(){
 }
 /* Transmits data from the right back IR sensor. 1 byte. */
 void transmitIRRB(){
+	//transmitByte_up(IRRB);
 	transmitByte_up(segments_turned);
 }
 /* Transmits data from the left front sensor. 1 byte. */
 void transmitIRLF(){
+	//transmitByte_up(IRLF);
 	transmitByte_up(MR_Reflex);	
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
-	transmitByte_up(IRLB);
+	transmitByte_up(IRLB); // angular rate
 }
 /* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitGyro(){
@@ -483,50 +485,50 @@ uint16_t read_lidar(){
 
 /*calculate middle point of gyro, called zero. uses 100 values*/
 void calibrate_gyro(){
-		uint8_t res_adc1; 
-		uint8_t res_adc2;
-		int i = 0;
-		uint16_t single_value_gyro_temp = 0x0000;
-		uint8_t single_value_gyro = 0x00;
-		uint16_t gyro_zero_sum = 0;
-		int EOC = 0;
-		
-		while(i < 16){
-			set_ss(0);
-			spi_tranceiver(0x94);
-			res_adc1 = spi_tranceiver(0x00);
-			spi_tranceiver(0x00);
-			set_ss(1);
-		
-			//_delay_us(115);
-			while(!EOC){
-				set_ss(0);
-				spi_tranceiver(0x80);
-				res_adc1 = spi_tranceiver(0x00);
-				res_adc2 = spi_tranceiver(0x00);
-				set_ss(1);
-				if((res_adc1 & 0x20) == 0x20){
-					EOC = 1;
-				}
-			}
-			
-			// stores the 8MSB bits in single_value_gyro		
-			single_value_gyro_temp = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
-			single_value_gyro_temp >>= 4; // shift four bits right
-			single_value_gyro_temp &= 0x00ff; // stores the MSB 8 bits	
-			
-			single_value_gyro = single_value_gyro_temp;
-			
-			gyro_zero_sum += single_value_gyro;
+	uint8_t res_adc1; 
+	uint8_t res_adc2;
+	int i = 0;
+	uint16_t single_value_gyro_temp = 0x0000;
+	uint8_t single_value_gyro = 0x00;
+	uint16_t gyro_zero_sum = 0;
+	int EOC = 0;
 	
-			i++;
-			
+	while(i < 16){
+		set_ss(0);
+		spi_tranceiver(0x94);
+		res_adc1 = spi_tranceiver(0x00);
+		spi_tranceiver(0x00);
+		set_ss(1);
+	
+		//_delay_us(115);
+		while(!EOC){
+			set_ss(0);
+			spi_tranceiver(0x80);
+			res_adc1 = spi_tranceiver(0x00);
+			res_adc2 = spi_tranceiver(0x00);
+			set_ss(1);
+			if((res_adc1 & 0x20) == 0x20){
+				EOC = 1;
+			}
 		}
+			
+		// stores the 8MSB bits in single_value_gyro		
+		single_value_gyro_temp = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
+		single_value_gyro_temp >>= 4; // shift four bits right
+		single_value_gyro_temp &= 0x00ff; // stores the MSB 8 bits	
 		
-		gyro_zero_sum = gyro_zero_sum/16;
-		gyro_zero = gyro_zero_sum; // calculate mean
+		single_value_gyro = single_value_gyro_temp;
 		
+		gyro_zero_sum += single_value_gyro;
+	
+		i++;
+			
+	}
+		
+	gyro_zero_sum = gyro_zero_sum/16;
+	gyro_zero = gyro_zero_sum; // calculate mean		
 }
+
 uint8_t single_measure(){
 	
 	uint8_t res_adc1;
@@ -639,7 +641,6 @@ void gyro_gogo(){
 		transmitByte_up(0x01);
 		
 		_delay_ms(10);
-		//_delay_ms(10000);
 		//transmitByte_up(0x44);
 		angular_rate = single_measure();
 			
@@ -652,16 +653,14 @@ void gyro_gogo(){
 		angular_sum += angular_rate;
 
 		if (angular_sum > 137){
-			//gyromode = 0;
+			gyromode = 0;
 			//gyro_token = 0x01; // how to reset?
 			transmitByte_up(0x44);
 		}
 	}
-	
 	gyromode = 0;
 	usart_gogo();
 }
-
 
 void reflex_sensor(){
 	if(MR_Reflex > 200){
@@ -669,6 +668,9 @@ void reflex_sensor(){
 	}
 	else if(MR_Reflex < 60){
 		reflex_current = 0x01;
+	}
+	else{
+		reflex_current = 0xff;
 	}
 	
 	if (reflex_current != reflex_previous){
