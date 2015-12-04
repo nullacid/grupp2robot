@@ -36,7 +36,7 @@ int8_t parallelR = 0xb0;
 uint8_t reflex_previous = 0x00;
 uint8_t reflex_current = 0x00;
 uint8_t segments_turned = 0x00;
-int8_t MR_Reflex = 0x00;
+uint8_t MR_Reflex = 0x00;
 
 /*LIDAR*/
 uint8_t LIDAR_H = 0xa0;
@@ -45,15 +45,16 @@ uint8_t lidarT = 0x45;
 int current = 0;
 
 /*GYRO*/
-uint8_t gyro1 = 0xb0;
-uint8_t gyro2 = 0xb1;
+uint8_t gyro_L = 0xb0;
+uint8_t gyro_H = 0xb1;
 //uint8_t gyro3 = 0xb2;
 //uint8_t gyro4 = 0xb3;
 
-uint16_t rotation_constant_90_degrees = 137;
+uint32_t rotation_constant = 60000;
 int gyromode = 0;
 int gyro_direction = 0;
 uint8_t gyro_zero = 0x00;
+int super_rotation = 0;
 
 uint8_t gyro_token = 0x00;
 
@@ -167,18 +168,15 @@ void transmitLidar(){
 }
 /* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
-	//transmitByte_up(IRRF);
-	transmitByte_up(reflex_current);
+	transmitByte_up(IRRF);
 }
 /* Transmits data from the right back IR sensor. 1 byte. */
 void transmitIRRB(){
-	//transmitByte_up(IRRB);
-	transmitByte_up(segments_turned);
+	transmitByte_up(IRRB);
 }
 /* Transmits data from the left front sensor. 1 byte. */
 void transmitIRLF(){
-	//transmitByte_up(IRLF);
-	transmitByte_up(MR_Reflex);	
+	transmitByte_up(IRLF);
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
@@ -186,10 +184,8 @@ void transmitIRLB(){
 }
 /* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitGyro(){
-//	transmitByte_up(gyro4);
-//	transmitByte_up(gyro3);
-	transmitByte_up(gyro2);
-	transmitByte_up(gyro1);
+	transmitByte_up(gyro_H);
+	transmitByte_up(gyro_L);
 }
 
 void transmitLidarT(){
@@ -293,11 +289,15 @@ void processCommand(unsigned char data){
 	}
 	else if(data == 0x1c){
 		gyromode = 1;
-		gyro_direction = 1; // 1 = clockwise
+		super_rotation = 0; // clockwise
 	}
-	else if(data == 0x1d){
+	else if(data == 0x1f){
 		gyromode = 1;
-		gyro_direction = 0; // 0 = counterclockwise
+		super_rotation = 1; // counterclockwise
+	}
+	else if(data == 0x20){
+		gyromode = 1;
+		super_rotation = 2; // 180°
 	}
 	else if(data == 0x1e){
 		gyromode = 0;
@@ -351,79 +351,15 @@ void calcGyroT(){
 	//gyro1 = (angular_sum & 0x000f);
 }
 
-/*  Calculates the token values for parallelism by taking the quotient of the front and back sensors. 
-	0 represents parallelism. 
-    1 and 2 represents a positive offset in the front sensor (front sensor is further away from the wall, turn right to fix this).
-    3 and 4 represents a negative offset in the front sensor (front sensor is closer to the wall, turn left to fix this).
-    The lower value represents a smaller offset. 
-    Will return 0xFF if there is not a wall within one square. */
-void calcParallel_old(){
-	double floatingIRF;
-	double floatingIRB;
-	double quotient;
-	uint8_t offset;
-    
-	//Calculates parallelism for the right sensors.
-	if(IRRFT == 1 && IRRBT == 1){
-		floatingIRF = IRRF;
-        floatingIRB = IRRB;
-        quotient = 1 - (floatingIRF/floatingIRB);
-        offset = 0;
-        //Negative quotient means that IRRF > IRRB ((1 - >1) < 0). Sets offset to 2 so that the token values will be set to 3 and 4 instead of 1 and 2.
-        if(quotient < 0){
-                offset = 2;
-                quotient = fabs(quotient); //Takes the absolute value of quotient to make calculations easier.
-        }
-                
-        if(quotient < 0.1){
-			parallelR = 0x00;
-        }
-        else if(quotient < 0.2){
-			parallelR = offset + 0x01;
-        }
-        else if(quotient < 0.4){
-			parallelR = offset + 0x02;
-		}
-	}
-	else{
-		parallelR = 0xFF;
-	}	
-        
-	//Calculates parallelism for the left sensors.
-	if(IRLFT == 1 && IRLBT == 1){
-		floatingIRF = IRLF;
-		floatingIRB = IRLB;
-		quotient = 1 - (floatingIRF/floatingIRB);
-		offset = 0;
-		if(quotient < 0){
-			offset = 2;
-			quotient = fabs(quotient);
-		}
-		if(quotient < 0.1){
-			parallelL = 0x00;
-		}
-		else if(quotient < 0.2){
-			parallelL = offset + 0x01;
-		}
-		else if(quotient < 0.4){
-			parallelL = offset + 0x02;
-		}
-	}
-	else{
-		parallelL = 0xFF;
-	}
-}
-
 /* new version of parallell */
 void calcParallel(){
 	if (IRRF == 0 || IRRB == 0){
 		parallelR = 127;
-		parallelL = IRLF - IRLB;
 	}
 	else{
 		parallelR = IRRF - IRRB;
-		parallelL = IRLF - IRLB;	
 	}
+	parallelL = IRLF - IRLB;
 }
 
 /*  */
@@ -483,50 +419,21 @@ uint16_t read_lidar(){
 	}
 }
 
-/*calculate middle point of gyro, called zero. uses 100 values*/
+/*calculate middle point of gyro, called gyro_zero. uses 16 values*/
 void calibrate_gyro(){
-	uint8_t res_adc1; 
-	uint8_t res_adc2;
 	int i = 0;
-	uint16_t single_value_gyro_temp = 0x0000;
 	uint8_t single_value_gyro = 0x00;
 	uint16_t gyro_zero_sum = 0;
-	int EOC = 0;
 	
 	while(i < 16){
-		set_ss(0);
-		spi_tranceiver(0x94);
-		res_adc1 = spi_tranceiver(0x00);
-		spi_tranceiver(0x00);
-		set_ss(1);
-	
-		//_delay_us(115);
-		while(!EOC){
-			set_ss(0);
-			spi_tranceiver(0x80);
-			res_adc1 = spi_tranceiver(0x00);
-			res_adc2 = spi_tranceiver(0x00);
-			set_ss(1);
-			if((res_adc1 & 0x20) == 0x20){
-				EOC = 1;
-			}
-		}
-			
-		// stores the 8MSB bits in single_value_gyro		
-		single_value_gyro_temp = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
-		single_value_gyro_temp >>= 4; // shift four bits right
-		single_value_gyro_temp &= 0x00ff; // stores the MSB 8 bits	
-		
-		single_value_gyro = single_value_gyro_temp;
-		
+		single_value_gyro = single_measure();
 		gyro_zero_sum += single_value_gyro;
-	
 		i++;
-			
 	}
-		
+	
 	gyro_zero_sum = gyro_zero_sum/16;
-	gyro_zero = gyro_zero_sum; // calculate mean		
+	gyro_zero = gyro_zero_sum;
+	
 }
 
 uint8_t single_measure(){
@@ -544,8 +451,7 @@ uint8_t single_measure(){
 	spi_tranceiver(0x00);
 	set_ss(1);
 	
-	//_delay_us(115);
-	
+	// wait until EOC is set ( end of conversion )
 	while(!EOC){
 		set_ss(0);
 		spi_tranceiver(0x80);
@@ -561,117 +467,57 @@ uint8_t single_measure(){
 	angular_rate_temp >>= 4; // shift four bits right
 	angular_rate_temp &= 0x00ff; // stores the MSB 8 bits	
 	angular_rate = angular_rate_temp;
+	
 	return angular_rate; 
-}
-void startMeasure(){
-// 	unsigned char data;            //Received data stored here
-// 		uint8_t res_adc1;
-// 		uint8_t res_adc2;
-// 		uint8_t angular_rate;
-// 		
-// 		// step1 put adc to the active mode if it wasn't
-// 		set_ss(0);
-// 		spi_tranceiver(0x94);
-// 		res_adc1 = spi_tranceiver(0x00);
-// 		spi_tranceiver(0x00);
-// 	
-// 		set_ss(1);
-// 		_delay_us(115);
-// 		
-// 		// step 2 start conversion
-// 		set_ss(0);
-// 		spi_tranceiver(0x94);
-// 		res_adc1 = spi_tranceiver(0x00);
-// 		spi_tranceiver(0x00);
-// 	
-// 		set_ss(1);
-// 		
-// 		_delay_us(115);
-// 	
-// 		set_ss(0);
-// 		
-// 		// step 3 result obtaining
-// 		spi_tranceiver(0x80);
-// 		res_adc1 = spi_tranceiver(0x00);
-// 		res_adc2 = spi_tranceiver(0x00);
-// 	
-// 		set_ss(1);
-// 		gyro_zero = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
-// 		
-// 		while (1){
-// 			
-// 			// step 2 start conversion
-// 			set_ss(0);
-// 			spi_tranceiver(0x94);
-// 			res_adc1 = spi_tranceiver(0x00);
-// 			spi_tranceiver(0x00);
-// 			
-// 			set_ss(1);
-// 			
-// 			_delay_us(115);
-// 			set_ss(0);
-// 			
-// 			// step 3 result obtaining
-// 			spi_tranceiver(0x80);
-// 			res_adc1 = spi_tranceiver(0x00);
-// 			res_adc2 = spi_tranceiver(0x00);
-// 			set_ss(1);
-// 			
-// 			angular_rate = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
-// 			angular_sum = angular_sum + angular_rate-gyro_zero;
-// 			
-// 			_delay_ms(100);
-// 			
-// 			//gyro4 = (angular_sum & 0xf000) >> 24;
-// 			//gyro3 = (angular_sum & 0x0f00) >> 16;
-// 			gyro2 = (angular_sum & 0x00f0) >> 8;
-// 			gyro1 = (angular_sum & 0x000f);
-// 		}
 }
 
 void gyro_gogo(){
 	uint8_t angular_rate = 0x00;
-	uint16_t angular_sum = 0;
-	int angular_rate_n = 0;
+	uint32_t angular_sum = 0;
+	
+	if (super_rotation == 2){
+		rotation_constant = 124736;
+	}
+	else if(super_rotation == 1){
+		rotation_constant = 61002;
+	}
+	else if(super_rotation == 0){
+		rotation_constant = 58000;
+	}
 	
 	while(gyromode == 1){	
-		usart_gogo();
-		//_delay_ms(10);
-		//transmitGyroT();
-		transmitByte_up(0x01);
-		
-		_delay_ms(10);
-		//transmitByte_up(0x44);
 		angular_rate = single_measure();
 			
-		if (angular_rate > gyro_zero){
+		if (angular_rate > (gyro_zero+10)){
 			angular_rate -= gyro_zero;
 		}
-		else{
+		else if(angular_rate < (gyro_zero-10)){
 			angular_rate = gyro_zero - angular_rate;
 		}
-		angular_sum += angular_rate;
-
-		if (angular_sum > 137){
-			gyromode = 0;
-			//gyro_token = 0x01; // how to reset?
-			transmitByte_up(0x44);
+		else{ 
+			angular_rate = 0;
 		}
+		angular_sum += angular_rate;
+		
+		if (angular_sum > rotation_constant){
+			gyromode = 0;
+			gyro_token = 0x44; // how to reset?
+		}
+		
+		usart_gogo();
 	}
-	gyromode = 0;
-	usart_gogo();
 }
 
 void reflex_sensor(){
-	if(MR_Reflex > 200){
+	if(MR_Reflex > 160){
 		reflex_current = 0x00;
 	}
 	else if(MR_Reflex < 60){
 		reflex_current = 0x01;
 	}
-	else{
-		reflex_current = 0xff;
-	}
+	//else{
+	//	reflex_current = 0xff;
+	//}
 	
 	if (reflex_current != reflex_previous){
 		segments_turned++;
@@ -721,15 +567,14 @@ int main()
 		else if(lidar_cm < 25){
 			lidar_cm -= 2;
 		}
-		LIDAR_L = lidar_cm & 0xff;
+		LIDAR_L = lidar_cm;
 		LIDAR_H = lidar_cm >> 8;	
 		calcLidarT();	
 		
 		usart_gogo();
 		
 		// adc	
-		//IRLB = adc_to_cm(adc_read(0));
-		IRLB = single_measure();
+		IRLB = adc_to_cm(adc_read(0));
 		IRRB = adc_to_cm(adc_read(1));
 		IRLF = adc_to_cm(adc_read(2));
 		IRRF = adc_to_cm(adc_read(3));
@@ -740,20 +585,9 @@ int main()
  		calcTokensIR();
  		calcParallel();
 		usart_gogo();
-		
-		//gyrotime++;
-		//if (gyrotime == 100){
-			//int gyro_sum = single_measure();
-		//	gyro1 = gyro_zero; //(gyro_sum & 0x0f);
-			//gyro2 = 0; //(gyro_sum & 0xf0)  >> 8;
-			//gyrotime = 0;
-		//}
-		// not needed 
+
 		if(gyromode == 1){
 			gyro_gogo();
-			//while(1){
-			//transmitByte_up(0x33);}
-			// reset gyroToken when processed
 		}
 	}
 }
