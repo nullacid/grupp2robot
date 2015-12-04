@@ -3,8 +3,8 @@
  *
  * Created: i den spirande vårens tid anno 1734 i väntan på vår herre jesus kristus återkomst
  * Author: Mikha'el and Eirikur
- * Det är lätt med facit i hand 
- * ändå var det folk som failade på logiktentan
+ * "Det är lätt med facit i hand,
+ *  ändå var det folk som failade på logiktentan" - Peter
  */
 #ifndef F_CPU
 #define F_CPU 20000000UL
@@ -32,7 +32,11 @@ uint8_t IRRBT = 0x0d;
 int8_t parallelL = 0xa0;
 int8_t parallelR = 0xb0;
 
-int8_t MR_Reflex = 0xBF;
+/*reflex-sensor*/
+uint8_t reflex_previous = 0x00;
+uint8_t reflex_current = 0x00;
+uint8_t segments_turned = 0x00;
+uint8_t MR_Reflex = 0x00;
 
 /*LIDAR*/
 uint8_t LIDAR_H = 0xa0;
@@ -41,15 +45,16 @@ uint8_t lidarT = 0x45;
 int current = 0;
 
 /*GYRO*/
-uint8_t gyro1 = 0xb0;
-uint8_t gyro2 = 0xb1;
+uint8_t gyro_L = 0xb0;
+uint8_t gyro_H = 0xb1;
 //uint8_t gyro3 = 0xb2;
 //uint8_t gyro4 = 0xb3;
 
-uint16_t rotation_constant_90_degrees = 137;
+uint32_t rotation_constant = 60000;
 int gyromode = 0;
 int gyro_direction = 0;
-uint8_t gyro_zero = 0;
+uint8_t gyro_zero = 0x00;
+int super_rotation = 0;
 
 uint8_t gyro_token = 0x00;
 
@@ -59,20 +64,20 @@ uint8_t spi_tranceiver(uint8_t data);
 uint8_t single_measure();
 
 int gyrotime = 0;
+
 /* initializes timer for pwm reading */
 void timer1_init(){
 	// reset registers and set prescaler to 1024
 	TCCR1A = 0;
 	TCCR1B = 0;
 	
-	//TCCR1B |= (1<<CS10)|(0<<CS11)|(1<<CS12);
-	
-	// prescaler 8 i
+	// prescaler of 8
 	TCCR1B |= (0<<CS10)|(1<<CS11)|(0<<CS12);
 	
 	// reset timer
 	TCNT1 = 0;
 }
+
 /* initializes ad converter */
 void adc_init()
 {
@@ -85,6 +90,7 @@ void adc_init()
 	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
 }
 
+/* slave select - for SPI */
 void set_ss(int mode){
 	if (mode == 0){
 		PORTB &= (mode<<PORTB4);
@@ -124,8 +130,8 @@ uint8_t spi_tranceiver(uint8_t data)
 	return(SPDR);
 }
 
-// read adc value
-int16_t adc_read(int16_t ch)
+/* read adc value */
+int8_t adc_read(int16_t ch)
 {
 	// select the corresponding channel 0~7
 	// ANDing with '7' will always keep the value
@@ -142,18 +148,19 @@ int16_t adc_read(int16_t ch)
 	// till then, run loop continuously
 	while(ADCSRA & (1<<ADSC));
 	
+	// return the 8 msb bits
 	return (ADCH);
 }
 
 /*look up corresponding value for ir-sensor*/
 int16_t adc_to_cm(int16_t value){
+	// for short distances
 	if (value > 200)
 		return 1;
 	return cm_values[value];
 }
 
 /* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
-
 /* Transmits data from LIDAR. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitLidar(){
 	transmitByte_up(LIDAR_H);
@@ -161,8 +168,7 @@ void transmitLidar(){
 }
 /* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
-	//transmitByte_up(IRRF);
-	transmitByte_up(MR_Reflex);
+	transmitByte_up(IRRF);
 }
 /* Transmits data from the right back IR sensor. 1 byte. */
 void transmitIRRB(){
@@ -170,19 +176,16 @@ void transmitIRRB(){
 }
 /* Transmits data from the left front sensor. 1 byte. */
 void transmitIRLF(){
-	transmitByte_up(IRLF);	
-
+	transmitByte_up(IRLF);
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
-	transmitByte_up(IRLB);
+	transmitByte_up(IRLB); // angular rate
 }
 /* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
 void transmitGyro(){
-//	transmitByte_up(gyro4);
-//	transmitByte_up(gyro3);
-	transmitByte_up(gyro2);
-	transmitByte_up(gyro1);
+	transmitByte_up(gyro_H);
+	transmitByte_up(gyro_L);
 }
 
 void transmitLidarT(){
@@ -215,7 +218,6 @@ void transmitIRLFT(){
 
 void transmitIRLBT(){
 	transmitByte_up(IRLBT);
-	
 }
 
 /* Transmits all sensor data. */
@@ -285,14 +287,17 @@ void processCommand(unsigned char data){
 	else if(data == 0x1D){
 		transmitALL();
 	}
-	
 	else if(data == 0x1c){
 		gyromode = 1;
-		gyro_direction = 1; // 1 = clockwise
+		super_rotation = 0; // clockwise
 	}
-	else if(data == 0x1d){
+	else if(data == 0x1f){
 		gyromode = 1;
-		gyro_direction = 0; // 0 = counterclockwise
+		super_rotation = 1; // counterclockwise
+	}
+	else if(data == 0x20){
+		gyromode = 1;
+		super_rotation = 2; // 180°
 	}
 	else if(data == 0x1e){
 		gyromode = 0;
@@ -316,7 +321,6 @@ void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 /*counts multiples of 40cm. example: 60cm = 1, 80cm = 2 ... */
 void calcLidarT(){
 	uint16_t lidarValue = LIDAR_H*256 + LIDAR_L;
-	//lidarT = lidarValue / 40;
 	uint8_t x = 0;
 	while (x < 20){
 		if (lidarValue >= 40){
@@ -347,81 +351,18 @@ void calcGyroT(){
 	//gyro1 = (angular_sum & 0x000f);
 }
 
-/*  Calculates the token values for parallelism by taking the quotient of the front and back sensors. 
-	0 represents parallelism. 
-    1 and 2 represents a positive offset in the front sensor (front sensor is further away from the wall, turn right to fix this).
-    3 and 4 represents a negative offset in the front sensor (front sensor is closer to the wall, turn left to fix this).
-    The lower value represents a smaller offset. 
-    Will return 0xFF if there is not a wall within one square. */
-void calcParallel_old(){
-	double floatingIRF;
-	double floatingIRB;
-	double quotient;
-	uint8_t offset;
-    
-	//Calculates parallelism for the right sensors.
-	if(IRRFT == 1 && IRRBT == 1){
-		floatingIRF = IRRF;
-        floatingIRB = IRRB;
-        quotient = 1 - (floatingIRF/floatingIRB);
-        offset = 0;
-        //Negative quotient means that IRRF > IRRB ((1 - >1) < 0). Sets offset to 2 so that the token values will be set to 3 and 4 instead of 1 and 2.
-        if(quotient < 0){
-                offset = 2;
-                quotient = fabs(quotient); //Takes the absolute value of quotient to make calculations easier.
-        }
-                
-        if(quotient < 0.1){
-			parallelR = 0x00;
-        }
-        else if(quotient < 0.2){
-			parallelR = offset + 0x01;
-        }
-        else if(quotient < 0.4){
-			parallelR = offset + 0x02;
-		}
-	}
-	else{
-		parallelR = 0xFF;
-	}	
-        
-	//Calculates parallelism for the left sensors.
-	if(IRLFT == 1 && IRLBT == 1){
-		floatingIRF = IRLF;
-		floatingIRB = IRLB;
-		quotient = 1 - (floatingIRF/floatingIRB);
-		offset = 0;
-		if(quotient < 0){
-			offset = 2;
-			quotient = fabs(quotient);
-		}
-		if(quotient < 0.1){
-			parallelL = 0x00;
-		}
-		else if(quotient < 0.2){
-			parallelL = offset + 0x01;
-		}
-		else if(quotient < 0.4){
-			parallelL = offset + 0x02;
-		}
-	}
-	else{
-		parallelL = 0xFF;
-	}
-}
-
+/* new version of parallell */
 void calcParallel(){
 	if (IRRF == 0 || IRRB == 0){
 		parallelR = 127;
-		parallelL = IRLF - IRLB;
 	}
 	else{
 		parallelR = IRRF - IRRB;
-		parallelL = IRLF - IRLB;	
 	}
+	parallelL = IRLF - IRLB;
 }
 
-
+/*  */
 uint16_t read_lidar(){
 	//uint16_t cm;
 	int prev = 0;
@@ -441,6 +382,7 @@ uint16_t read_lidar(){
 		prev = current;
 		current = PINC && 0x02;
 		
+		//positive edge triggered
 		if (prev == 0){
 			if (current == 1){
 				//reset timer
@@ -449,7 +391,7 @@ uint16_t read_lidar(){
 				positive_edge_triggered = 1;
 			}
 		}
-			// negative edge trigger
+		// negative edge trigger
 		else if (positive_edge_triggered == 1){
 			if (prev == 1){
 				if (current == 0){
@@ -467,8 +409,6 @@ uint16_t read_lidar(){
 					if (cm > 125){// faster at high distances
 						return cm;
 					}
-					
-						
 					prev = 0;					 
 					positive_edge_triggered = 0;
 					cm_sum += cm;
@@ -479,52 +419,28 @@ uint16_t read_lidar(){
 	}
 }
 
-/*calculate middle point of gyro, called zero. uses 100 values*/
+/*calculate middle point of gyro, called gyro_zero. uses 16 values*/
 void calibrate_gyro(){
-		uint8_t res_adc1; 
-		uint8_t res_adc2;
-		int i = 0;
-		uint8_t single_value_gyro = 0;
-		uint16_t gyro_zero_sum = 0;
-		int EOC = 0;
-		
-		while(i < 16){
-			set_ss(0);
-			spi_tranceiver(0x94);
-			res_adc1 = spi_tranceiver(0x00);
-			spi_tranceiver(0x00);
-			set_ss(1);
-		
-			//_delay_us(115);
-			while(!EOC){
-				set_ss(0);
-				spi_tranceiver(0x80);
-				res_adc1 = spi_tranceiver(0x00);
-				res_adc2 = spi_tranceiver(0x00);
-				set_ss(1);
-				if((res_adc1 & 0x20) == 0x20){
-					EOC = 1;
-				}
-			}
-			
-			// stores the 8MSB bits in single_value_gyro		
-			single_value_gyro = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
-			single_value_gyro >>= 4; // shift four bits right
-			single_value_gyro &= 0x00ff; // stores the MSB 8 bits	
-			
-			gyro_zero += single_value_gyro;
+	int i = 0;
+	uint8_t single_value_gyro = 0x00;
+	uint16_t gyro_zero_sum = 0;
 	
-			i++;
-			
-		}
-		
-		gyro_zero = gyro_zero/16; // calculate mean
-		
+	while(i < 16){
+		single_value_gyro = single_measure();
+		gyro_zero_sum += single_value_gyro;
+		i++;
+	}
+	
+	gyro_zero_sum = gyro_zero_sum/16;
+	gyro_zero = gyro_zero_sum;
+	
 }
+
 uint8_t single_measure(){
 	
 	uint8_t res_adc1;
 	uint8_t res_adc2;
+	uint16_t angular_rate_temp = 0x0000;
 	uint8_t angular_rate = 0x00;
 	int EOC = 0;
 	
@@ -535,8 +451,7 @@ uint8_t single_measure(){
 	spi_tranceiver(0x00);
 	set_ss(1);
 	
-	//_delay_us(115);
-	
+	// wait until EOC is set ( end of conversion )
 	while(!EOC){
 		set_ss(0);
 		spi_tranceiver(0x80);
@@ -548,135 +463,66 @@ uint8_t single_measure(){
 		}
 	}
 	
-	angular_rate = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
-	angular_rate >>= 4; // shift four bits right
-	angular_rate &= 0x00ff; // stores the MSB 8 bits	
-
+	angular_rate_temp = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
+	angular_rate_temp >>= 4; // shift four bits right
+	angular_rate_temp &= 0x00ff; // stores the MSB 8 bits	
+	angular_rate = angular_rate_temp;
+	
 	return angular_rate; 
-}
-void startMeasure(){
-// 	unsigned char data;            //Received data stored here
-// 		uint8_t res_adc1;
-// 		uint8_t res_adc2;
-// 		uint8_t angular_rate;
-// 		
-// 		// step1 put adc to the active mode if it wasn't
-// 		set_ss(0);
-// 		spi_tranceiver(0x94);
-// 		res_adc1 = spi_tranceiver(0x00);
-// 		spi_tranceiver(0x00);
-// 	
-// 		set_ss(1);
-// 		_delay_us(115);
-// 		
-// 		// step 2 start conversion
-// 		set_ss(0);
-// 		spi_tranceiver(0x94);
-// 		res_adc1 = spi_tranceiver(0x00);
-// 		spi_tranceiver(0x00);
-// 	
-// 		set_ss(1);
-// 		
-// 		_delay_us(115);
-// 	
-// 		set_ss(0);
-// 		
-// 		// step 3 result obtaining
-// 		spi_tranceiver(0x80);
-// 		res_adc1 = spi_tranceiver(0x00);
-// 		res_adc2 = spi_tranceiver(0x00);
-// 	
-// 		set_ss(1);
-// 		gyro_zero = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
-// 		
-// 		while (1){
-// 			
-// 			// step 2 start conversion
-// 			set_ss(0);
-// 			spi_tranceiver(0x94);
-// 			res_adc1 = spi_tranceiver(0x00);
-// 			spi_tranceiver(0x00);
-// 			
-// 			set_ss(1);
-// 			
-// 			_delay_us(115);
-// 			set_ss(0);
-// 			
-// 			// step 3 result obtaining
-// 			spi_tranceiver(0x80);
-// 			res_adc1 = spi_tranceiver(0x00);
-// 			res_adc2 = spi_tranceiver(0x00);
-// 			set_ss(1);
-// 			
-// 			angular_rate = ((res_adc1 & 0x0f) << 4) | ((res_adc2 & 0xf0) >> 4); // b5 = 0
-// 			angular_sum = angular_sum + angular_rate-gyro_zero;
-// 			
-// 			_delay_ms(100);
-// 			
-// 			//gyro4 = (angular_sum & 0xf000) >> 24;
-// 			//gyro3 = (angular_sum & 0x0f00) >> 16;
-// 			gyro2 = (angular_sum & 0x00f0) >> 8;
-// 			gyro1 = (angular_sum & 0x000f);
-// 		}
 }
 
 void gyro_gogo(){
 	uint8_t angular_rate = 0x00;
-	uint16_t angular_sum = 0;
-	int angular_rate_n = 0;
-	//calibrate_gyro();
-	//transmitByte_up(0x44);
-	while(gyromode == 1){	
-		//usart_gogo();
-		//_delay_ms(10);
-		gyro1 = angular_rate;	
-		gyro2 = 0;
-		//transmitGyroT();
-		transmitByte_up(0x01);
-		
-		_delay_ms(10);
-		//_delay_ms(10000);
-		//transmitByte_up(0x44);
-		//transmitByte_up(0x01);
-		
-	//	if(gyro_direction == 1){ // clockwise	
-			angular_rate = single_measure();
-			//if ((angular_rate > (gyro_zero + 0x05)) || (angular_rate < (gyro_zero - 0x05))){
-			if (angular_rate > gyro_zero){
-				angular_rate -= gyro_zero;
-			}
-			else{
-				angular_rate = gyro_zero - angular_rate;
-			}
-			//angular_rate_n = angular_rate_n - gyro_zero ; //actual difference
-			angular_sum += angular_rate;
-	//	}
-		//}
-// 		else if(gyro_direction == 0){ // counterclockwise
-// 			angular_rate = single_measure();
-// 			if (a)
-// 			angular_rate_n = angular_rate;
-// 			angular_rate_n += gyro_zero; //actual difference
-// 			angular_sum += angular_rate_n;
-// 		}
-
-		if (angular_sum > 351){
-			gyromode = 0;
-			gyro_token = 0x01; // how to reset?
-			transmitByte_up(0x44);
-		}
+	uint32_t angular_sum = 0;
+	
+	if (super_rotation == 2){
+		rotation_constant = 124736;
 	}
-	gyromode = 0;
-	usart_gogo();
+	else if(super_rotation == 1){
+		rotation_constant = 61002;
+	}
+	else if(super_rotation == 0){
+		rotation_constant = 58000;
+	}
+	
+	while(gyromode == 1){	
+		angular_rate = single_measure();
+			
+		if (angular_rate > (gyro_zero+10)){
+			angular_rate -= gyro_zero;
+		}
+		else if(angular_rate < (gyro_zero-10)){
+			angular_rate = gyro_zero - angular_rate;
+		}
+		else{ 
+			angular_rate = 0;
+		}
+		angular_sum += angular_rate;
+		
+		if (angular_sum > rotation_constant){
+			gyromode = 0;
+			gyro_token = 0x44; // how to reset?
+		}
+		
+		usart_gogo();
+	}
 }
 
-
 void reflex_sensor(){
-//	current = adc_read(5);
-//	if (current != previous){
-//		segments_turned++;
-//	}
-//	previous = current;
+	if(MR_Reflex > 160){
+		reflex_current = 0x00;
+	}
+	else if(MR_Reflex < 60){
+		reflex_current = 0x01;
+	}
+	//else{
+	//	reflex_current = 0xff;
+	//}
+	
+	if (reflex_current != reflex_previous){
+		segments_turned++;
+	}
+	reflex_previous = reflex_current;
 }
 
 /*usart code*/
@@ -721,7 +567,7 @@ int main()
 		else if(lidar_cm < 25){
 			lidar_cm -= 2;
 		}
-		LIDAR_L = lidar_cm & 0xff;
+		LIDAR_L = lidar_cm;
 		LIDAR_H = lidar_cm >> 8;	
 		calcLidarT();	
 		
@@ -734,24 +580,14 @@ int main()
 		IRRF = adc_to_cm(adc_read(3));
 		
 		MR_Reflex = adc_read(5);
+		reflex_sensor();
 		
  		calcTokensIR();
  		calcParallel();
 		usart_gogo();
-		
-		//gyrotime++;
-		//if (gyrotime == 100){
-			//int gyro_sum = single_measure();
-		//	gyro1 = gyro_zero; //(gyro_sum & 0x0f);
-			//gyro2 = 0; //(gyro_sum & 0xf0)  >> 8;
-			//gyrotime = 0;
-		//}
-		// not needed 
+
 		if(gyromode == 1){
 			gyro_gogo();
-			//while(1){
-			//transmitByte_up(0x33);}
-			// reset gyroToken when processed
 		}
 	}
 }
