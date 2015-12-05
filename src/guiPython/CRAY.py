@@ -212,6 +212,7 @@ def getIRLB():
 	data = harald.receiveData()
 	return int(data[0])
 
+#NOT USED ATM
 def getGyro():
 	if debug:
 		print("gyro")
@@ -221,6 +222,13 @@ def getGyro():
 	data = int(msByte[0])*256 + int(lsByte[0])
 	return data
 
+def getReflexToken():
+	if debug:
+		print("reflex token")
+	harald.sendData(b'\x57')
+	return int(harald.receiveData()[0])
+
+	
 def getLidarToken():
 	if debug:
 		print("lidartoken")
@@ -368,7 +376,7 @@ handle_dictionary_data = {
 	"IRrightBack" : getIRRB,
 	"IRleftFront" : getIRLF,
 	"IRleftBack" : getIRLB,
-	"Gyro" : getGyro,
+	"Segments turned" : getReflexToken,
 	"Lidar (token)" : getLidarToken,
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
@@ -393,9 +401,10 @@ def getData():
 	mapSystem.updateLog(currentDataSlot)
 	
 	if mapSystem.dataIndex == 0:
+		harald.inc_status()
 		paintMap(mapSystem)
 		paintData(mapSystem)
-		print(str(round(clock() - timestamp, 1)))
+		print(str(round(clock() - timestamp, 2)))
 		timestamp = clock()
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17

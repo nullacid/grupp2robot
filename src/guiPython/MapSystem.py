@@ -18,6 +18,7 @@ class MapSystem():
 		self.parallelLeftFile = open("logs/parallel_left.swag", 'w', 1)
 		self.debugFile = open("logs/debug.swag", 'w', 1)
 		self.irRightFile = open("logs/irRight.swag", 'w', 1)
+		self.segmentsFile = open("logs/segments.swag", 'w', 1)
 		
 
 		#Dictionary used for looping over data types
@@ -27,7 +28,7 @@ class MapSystem():
 						2 : "IRrightBack",
 						3 : "IRleftFront",
 						4 : "IRleftBack",
-						5 : "Gyro",
+						5 : "Segments turned",
 						6 : "Lidar (token)",
 						7 : "Parallel Right",
 						8 : "Parallel Left",
@@ -47,7 +48,7 @@ class MapSystem():
 						"IRrightBack" : 1,
 						"IRleftFront" : 1,
 						"IRleftBack" : 1,
-						"Gyro" : 1,
+						"Segments turned" : 1,
 						"Lidar (token)" : 1,
 						"Parallel Right" : 1,
 						"Parallel Left" : 1,
@@ -68,6 +69,7 @@ class MapSystem():
 						"Steering data" : self.steeringDataFile,
 						"Parallel Right" : self.parallelRightFile,
 						"Parallel Left" : self.parallelLeftFile,
+						"Segments turned" : self.segmentsFile,
 						"Debug" : self.debugFile,
 						"Lidar (token)" : self.lidartokenFile,
 						"Update Map" : self.mapUpdateFile,
