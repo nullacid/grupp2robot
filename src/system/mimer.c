@@ -153,9 +153,9 @@ int8_t adc_read(int16_t ch)
 }
 
 /*look up corresponding value for ir-sensor*/
-int16_t adc_to_cm(int16_t value){
+uint8_t adc_to_cm(uint8_t value){
 	// for short distances
-	if (value > 200)
+	if (value >= 200)
 		return 1;
 	return cm_values[value];
 }
@@ -310,7 +310,7 @@ void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 	if(1 < *IRxx && *IRxx <= 32){
 		*IRxxT = 1;
 	}
-	else if(32 < *IRxx && *IRxx < 90){
+	else if(32 < *IRxx && *IRxx < 60){
 		*IRxxT = 2;
 	}
 	else{
@@ -322,16 +322,16 @@ void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 void calcLidarT(){
 	uint16_t lidarValue = LIDAR_H*256 + LIDAR_L;
 	uint8_t x = 0;
-	while (x < 20){
-		if (lidarValue >= 40){
-			x++;
-			lidarValue -= 40;
-		}
-		else{
-			break;
-		}
+	
+	if(lidarValue <= 15){
+		lidarT = 0;
 	}
-	lidarT = x;
+	else if(lidarValue <= 47){
+		lidarT = 1;
+	}
+	else{
+		lidarT = 2;
+	}
 }
 
 /*	Calculates the token values for the IR sensors. 
@@ -342,13 +342,6 @@ void calcTokensIR(){
 	calcTokenIR(&IRLF, &IRLFT);
 	calcTokenIR(&IRRB, &IRRBT);
 	calcTokenIR(&IRRF, &IRRFT);
-}
-
-void calcGyroT(){	
-	//gyro4 = (angular_sum & 0xf000) >> 24;
-	//gyro3 = (angular_sum & 0x0f00) >> 16;
-	//gyro2 = (angular_sum & 0x00f0) >> 8;
-	//gyro1 = (angular_sum & 0x000f);
 }
 
 /* new version of parallell */
@@ -364,11 +357,9 @@ void calcParallel(){
 
 /*  */
 uint16_t read_lidar(){
-	//uint16_t cm;
 	int prev = 0;
-	//int timeOfMyLife;
 	int positive_edge_triggered = 0;
-	int j =0;
+	int j = 0;
 	double timeOfMyLife;
 	int low,high;
 	int cm;
@@ -399,11 +390,10 @@ uint16_t read_lidar(){
 					low  = TCNT1;
 					high = TCNT1H;
 			
-					// timeOfMyLife = high + low;
+					// timeOfMyLife = high & low;
 					timeOfMyLife = (high << 8) |low;
 			
-					// conversion to cm with number magic
-					//cm = timeOfMyLife*200/39;	
+					// conversion to cm with number magic	
 					cm = (int)timeOfMyLife/25;
 					
 					if (cm > 125){// faster at high distances
@@ -425,7 +415,7 @@ void calibrate_gyro(){
 	uint8_t single_value_gyro = 0x00;
 	uint16_t gyro_zero_sum = 0;
 	
-	while(i < 16){
+	while(i < 16){ //measure 16 times
 		single_value_gyro = single_measure();
 		gyro_zero_sum += single_value_gyro;
 		i++;
@@ -433,7 +423,6 @@ void calibrate_gyro(){
 	
 	gyro_zero_sum = gyro_zero_sum/16;
 	gyro_zero = gyro_zero_sum;
-	
 }
 
 uint8_t single_measure(){
@@ -447,7 +436,7 @@ uint8_t single_measure(){
 	// start command
 	set_ss(0);
 	spi_tranceiver(0x94);
-	res_adc1 = spi_tranceiver(0x00);
+	spi_tranceiver(0x00);
 	spi_tranceiver(0x00);
 	set_ss(1);
 	
@@ -463,9 +452,9 @@ uint8_t single_measure(){
 		}
 	}
 	
-	angular_rate_temp = (res_adc1 << 8) | res_adc2; // angular_rate = res_adc1 & res_adc2
-	angular_rate_temp >>= 4; // shift four bits right
-	angular_rate_temp &= 0x00ff; // stores the MSB 8 bits	
+	angular_rate_temp = (res_adc1 << 8) | res_adc2;			// angular_rate = res_adc1 & res_adc2
+	angular_rate_temp >>= 4;								// shift four bits right
+	angular_rate_temp &= 0x00ff;							// stores the MSB 8 bits	
 	angular_rate = angular_rate_temp;
 	
 	return angular_rate; 
@@ -475,13 +464,13 @@ void gyro_gogo(){
 	uint8_t angular_rate = 0x00;
 	uint32_t angular_sum = 0;
 	
-	if (super_rotation == 2){
+	if (super_rotation == 2){ // 180 degrees
 		rotation_constant = 124736;
 	}
-	else if(super_rotation == 1){
+	else if(super_rotation == 1){ // counter-clockwise
 		rotation_constant = 61002;
 	}
-	else if(super_rotation == 0){
+	else if(super_rotation == 0){  // clockwise
 		rotation_constant = 58000;
 	}
 	
@@ -501,7 +490,7 @@ void gyro_gogo(){
 		
 		if (angular_sum > rotation_constant){
 			gyromode = 0;
-			gyro_token = 0x44; // how to reset?
+			gyro_token = 0x44;
 		}
 		
 		usart_gogo();
@@ -515,9 +504,6 @@ void reflex_sensor(){
 	else if(MR_Reflex < 60){
 		reflex_current = 0x01;
 	}
-	//else{
-	//	reflex_current = 0xff;
-	//}
 	
 	if (reflex_current != reflex_previous){
 		segments_turned++;
