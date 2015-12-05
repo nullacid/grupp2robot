@@ -233,7 +233,6 @@ void transmitALL(){
 	transmitIRRB();
 	transmitIRLF();
 	transmitIRLB();
-	transmitGyro();
 	transmitLidarT();
 	transmitParallelR();
 	transmitParallelL();
@@ -309,20 +308,21 @@ void processCommand(unsigned char data){
 		gyro_token = 0x00;
 	}
 	else if(data == 0x21){
-		segments_turned = 0;
+		segments_turned = 0x00;
+		transmitByte_up(0xf0);
 	}
 }
 
 /* Calculates the token value given pointers to the stored values. */
 void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 	if(1 < *IRxx && *IRxx <= 32){
-		*IRxxT = 1;
+		*IRxxT = 0x02;
 	}
 	else if(32 < *IRxx && *IRxx < 60){
-		*IRxxT = 2;
+		*IRxxT = 0x01;
 	}
 	else{
-		*IRxxT = 0;
+		*IRxxT = 0x00;
 	}
 }
 
@@ -367,16 +367,10 @@ void calcParallel(){
 uint16_t read_lidar(){
 	int prev = 0;
 	int positive_edge_triggered = 0;
-	int j = 0;
 	double timeOfMyLife;
 	int low,high;
 	int cm;
-	int cm_sum=0;
 	while(1){
-		if (j == 7){
-			j= 0;
-			return (cm_sum/8);
-		}
 		//lidar PWM PC1 (SDA PIN 22)
 		prev = current;
 		current = PINC && 0x02;
@@ -403,14 +397,9 @@ uint16_t read_lidar(){
 			
 					// conversion to cm with number magic	
 					cm = (int)timeOfMyLife/25;
-					
-					if (cm > 125){// faster at high distances
-						return cm;
-					}
 					prev = 0;					 
 					positive_edge_triggered = 0;
-					cm_sum += cm;
-					j++;
+					return cm;
 				}
 			}
 		}
@@ -433,8 +422,8 @@ void calibrate_gyro(){
 	gyro_zero = gyro_zero_sum;
 }
 
+/* reads an ADC value from the GYRO. sends start command and reads values until conversion is done (EOC == 1) */
 uint8_t single_measure(){
-	
 	uint8_t res_adc1;
 	uint8_t res_adc2;
 	uint16_t angular_rate_temp = 0x0000;
@@ -468,10 +457,12 @@ uint8_t single_measure(){
 	return angular_rate; 
 }
 
+/* handles rotation. uses single measure. either 90 degrees clockwise/counterclockwise or 180 degrees*/
 void gyro_gogo(){
 	uint8_t angular_rate = 0x00;
 	uint32_t angular_sum = 0;
 	
+	// sets the rotation constant. tuned to be smooth
 	if (super_rotation == 2){ // 180 degrees
 		rotation_constant = 124736;
 	}
@@ -482,9 +473,10 @@ void gyro_gogo(){
 		rotation_constant = 58000;
 	}
 	
-	while(gyromode == 1){	
+	while(gyromode == 1){
 		angular_rate = single_measure();
 			
+		// abs(angular_rate-gyro_zero)
 		if (angular_rate > (gyro_zero+10)){
 			angular_rate -= gyro_zero;
 		}
@@ -494,17 +486,19 @@ void gyro_gogo(){
 		else{ 
 			angular_rate = 0;
 		}
+
 		angular_sum += angular_rate;
 		
 		if (angular_sum > rotation_constant){
 			gyromode = 0;
-			gyro_token = 0x44;
+			gyro_token = 0x44; // value sent to bjarne that rotation is done
 		}
 		
 		usart_gogo();
 	}
 }
 
+/* dd*/ 
 void reflex_sensor(){
 	if(MR_Reflex > 160){
 		reflex_current = 0x00;
