@@ -28,13 +28,13 @@ void think(){
 
 		if(follow_wall){ //Om vi ska följa högerväggen
 
-			if((t_vagg_h_f == 0) || (t_vagg_h_f == 2)){ //If there is no wall to the right of the robot
+			if((t_vagg_h_f == 0) || (t_vagg_h_f == 1)){ //If there is no wall to the right of the robot
 				paction(FORWARD);
 				paction(SPIN_R);
 			}
 			else if(t_LIDAR == 0){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
 				
-				if((t_vagg_v_f == 0) || (t_vagg_v_f == 2)){ //Turn left
+				if((t_vagg_v_f == 0) || (t_vagg_v_f == 1)){ //Turn left
 					paction(FORWARD);
 					paction(SPIN_L);
 				}
