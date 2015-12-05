@@ -220,6 +220,10 @@ void transmitIRLBT(){
 	transmitByte_up(IRLBT);
 }
 
+void transmitReflexT(){
+	transmitByte_up(segments_turned);
+}
+
 /* Transmits all sensor data. */
 /* Transmitted data order will be LIDAR1 -> LIDAR2 -> IRRF -> IRRB -> IRLF -> GYRO1 -> GYRO2 -> LIDAR token -> Parallel Right -> Parallel Left -> Gyro token -> IRRF token -> IRRB token ->
 	-> IRLF token -> IRLB token. */
@@ -238,6 +242,7 @@ void transmitALL(){
 	transmitIRRBT();
 	transmitIRLFT();
 	transmitIRLBT();
+	transmitReflexT();
 }
 
 /* Translates the command code into the corresponding function. */
@@ -302,6 +307,9 @@ void processCommand(unsigned char data){
 	else if(data == 0x1e){
 		gyromode = 0;
 		gyro_token = 0x00;
+	}
+	else if(data == 0x21){
+		segments_turned = 0;
 	}
 }
 
@@ -504,9 +512,8 @@ void reflex_sensor(){
 	else if(MR_Reflex < 60){
 		reflex_current = 0x01;
 	}
-	
 	if (reflex_current != reflex_previous){
-		segments_turned++;
+		segments_turned++;		
 	}
 	reflex_previous = reflex_current;
 }
