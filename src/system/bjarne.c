@@ -230,9 +230,7 @@ void handle_messages(){
 			
 			case (0x17):
 			//lägg reflex-token i send-buffern
-				//transmitByte_up(t_reflex_u);
-				//waitForSendNext_up();
-				//transmitByte_up(t_reflex_l);
+				transmitByte_up(t_reflex);
 			break;
 			
 			case (0x18):

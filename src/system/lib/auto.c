@@ -65,9 +65,6 @@ void init_auto(){
 	spinning = 0;
 
 	wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Mark start tile as foor
-
-
-
 	paction(PARALLELIZE);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
@@ -83,8 +80,6 @@ void update_sensor_data(){
 	s_ir_h_b = receiveByte_down();
 	s_ir_v_f = receiveByte_down();
 	s_ir_v_b = receiveByte_down();
-	s_gyro_u = receiveByte_down();
-	s_gyro_l = receiveByte_down();
 
 	t_LIDAR = receiveByte_down();
 	t_p_h = receiveByte_down();;
@@ -94,6 +89,9 @@ void update_sensor_data(){
 	t_vagg_h_b = receiveByte_down();
 	t_vagg_v_f = receiveByte_down();
 	t_vagg_v_b = receiveByte_down();
+
+	t_reflex = receiveByte_down();
+
 
 	s_LIDAR = ((s_LIDAR_u << 8) + s_LIDAR_l);
 	s_gyro = ((s_gyro_u << 8) + s_gyro_l);
@@ -129,14 +127,14 @@ void autonom (){
 				action_done();
 			break;
 
+//------------------------ÅKA FRAMMÅT--------------
 			case (FORWARD):
 				if (first_time){
-					distance_LIDAR = s_LIDAR - 40; //LIDAR distance - 40 cm
 					lidar_start = t_LIDAR;
 					first_time = 0;
 				}
 
-				if(t_vagg_h_f){ //Om det finns en vägg höger fram, reglera efter den
+				if(t_vagg_h_f == 2){ //Om det finns en vägg höger fram, reglera efter den
 
 					int8_t control = 0;
 					uint8_t lspeed = 0;
@@ -147,7 +145,6 @@ void autonom (){
 					P = pidk * deviation_from_wall;
 					D = pidd * derivata;
 					control = P+D;
-
 					if(control > 0){
 						rspeed = 100 - control;
 						lspeed = 100;
@@ -177,10 +174,10 @@ void autonom (){
 					setSpeed(lspeed , rspeed,1,1);
 				}
 				else{
-					setSpeed(100,100,1,1);
+					setSpeed(100, 100, 1, 1);
 				}
 				
-				if (t_LIDAR <  lidar_start) {
+				if(t_reflex > 30){
 					first_time = 1;
 
 					if(dir == NORTH){
@@ -195,18 +192,12 @@ void autonom (){
 					else{
 						robot_pos_x++;
 					}
-
 					action_done();
 				}
 				
-
-
-
-
 			break;
 	//---------------------------------SVÄNGA--------------------------------
 			case (SPIN_R):
-
 
 				if(first_time){
 					first_time = 0;
@@ -324,12 +315,19 @@ void action_done(){
 	pop_a_stack(); //Ta bort actionen från actionstacken
 	cur_action = read_a_top();	//Ta in actionen under
 	if (old_action != cur_action){ 
-		setSpeed(0, 0, 1, 1); //Stanna om vi inte ska fortsätta i samma riktning
-		_delay_ms(200);
+		//setSpeed(0, 0, 1, 1); //Stanna om vi inte ska fortsätta i samma riktning
+		//_delay_ms(100);
 	}
 	//------------UPPDATERA KARTDATA ----------------
 	//Räknat med 0,0 i övre högra hörnet
 	parallell_cnt = 0;
+
+	setSpeed(0,0,1,1);
+
+	transmitByte_down(0x21);
+	receiveByte_down();
+
+	_delay_ms(500);
 
 	switch(dir){
 		int i;
