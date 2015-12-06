@@ -59,11 +59,15 @@ class Harald():
 	#Establishes a connection to our firefly module without looking for it first.
 	#Returns true if it connects, false otherwise.
 	def establishDirectConnection(self):
-		#If socket is open from before, close it
+		
+		#If socket is open from before, close it NOT SURE IF THIS IS NEEDED
 		if self.ourSocket != None:
 			self.ourSocket.close()
 		#Open the socket
 		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+
+		#Disable timeout to give enough time for connection
+		self.ourSocket.settimeout(None)
 
 		try:
 			self.ourSocket.connect((self.targetDevice, self.port))
@@ -96,12 +100,13 @@ class Harald():
 					sleep(1)
 				self.receiveData()
 			else:
+				#print("Received data: " + str(hex(data[0])))
 				return data
 				
 
 	def __attemptReceive(self):
 		data = None
-		self.ourSocket.settimeout(3.0)
+		self.ourSocket.settimeout(2.0)
 		try:
 			data = self.ourSocket.recv(1)
 			return data
