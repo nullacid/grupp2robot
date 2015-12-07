@@ -27,7 +27,7 @@ int main(void)
 			unsigned char data = receiveByte_up();
 
 			if(data == 0x26){
-				transmitByte_up(0x26)
+				transmitByte_up(0x26);
 			}
 			else{
 				transmitByte_down(data);
