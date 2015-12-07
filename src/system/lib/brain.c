@@ -27,7 +27,11 @@ void think(){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
+			if(s_ir_front < 10){
+				paction(BACKWARD);
+			}
+		
+			else if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
 				paction(FORWARD);
 				paction(SPIN_R);
 			}

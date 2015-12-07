@@ -33,7 +33,7 @@ uint8_t pidd = 35; //35 ok ish
 uint8_t lidar_start = 0;
 uint8_t front_sensor_active = 0;
 uint8_t regulate_side = 0; 
-
+uint8_t sensor_start = 0;
 
 void update_sensor_data(); 
 void init_auto();
@@ -337,13 +337,14 @@ void autonom (){
 
 			case(BACKWARD):
 				if (first_time){
-
+					sensor_start = s_ir_front;
 					first_time = 0;
 				}
 				//Kolla så vi åker typ parallellt
 
-				setSpeed(100, 100, 0, 0);
-				if (1) {
+				setSpeed(20, 20, 0, 0);
+								
+				if(s_ir_front > 10){
 					first_time = 1;
 					action_done();
 				}
