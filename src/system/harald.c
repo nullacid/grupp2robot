@@ -36,7 +36,7 @@ int main(void)
 			unsigned int i = 0;
 
 			while(datalength != 0){
-				returnDataArray[i] = receiveByte_down();
+				returnDataArray[i] = receiveByte_down_to();
 				//if(datalength > 1){
 				//	transmitSendNext_down();
 				//}

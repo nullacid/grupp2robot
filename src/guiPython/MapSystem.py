@@ -9,8 +9,8 @@ class MapSystem():
 		
 		
 		self.gyroFile = open("logs/gyro.swag", 'w', 1)
-		self.lidarFile = open("logs/lidar.swag", 'w', 1)
-		self.lidartokenFile = open("logs/lidartoken.swag", 'w', 1)
+		self.IRFrontFile = open("logs/ir_front.swag", 'w', 1)
+		self.IRtokenFile = open("logs/IRtoken.swag", 'w', 1)
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
 		self.steeringDataFile = open("logs/steering_data.swag", 'w', 1)
 		self.mapUpdateFile = open("logs/map_updates.swag", 'w', 1)
@@ -23,13 +23,13 @@ class MapSystem():
 
 		#Dictionary used for looping over data types
 		self.indexDict = {
-						0 : "Lidar",
+						0 : "IR Front",
 						1 : "IRrightFront",
 						2 : "IRrightBack",
 						3 : "IRleftFront",
 						4 : "IRleftBack",
 						5 : "Segments turned",
-						6 : "Lidar (token)",
+						6 : "IR Front (token)",
 						7 : "Parallel Right",
 						8 : "Parallel Left",
 						9 : "Gyro (token)",
@@ -43,13 +43,13 @@ class MapSystem():
 		}
 		#Store values for each data type
 		self.dataDict = {
-						"Lidar" : 1,
+						"IR Front" : 1,
 						"IRrightFront" : 1,
 						"IRrightBack" : 1,
 						"IRleftFront" : 1,
 						"IRleftBack" : 1,
 						"Segments turned" : 1,
-						"Lidar (token)" : 1,
+						"IR Front (token)" : 1,
 						"Parallel Right" : 1,
 						"Parallel Left" : 1,
 						"Gyro (token)" : 1,
@@ -63,7 +63,7 @@ class MapSystem():
 		}
 		#Associates a data type name with a file
 		self.fileDict = {
-						"Lidar" : self.lidarFile,
+						"IR Front" : self.IRFrontFile,
 						"Gyro" : self.gyroFile,
 						"Steering Decision" : self.steeringDecisionFile,
 						"Steering data" : self.steeringDataFile,
@@ -71,7 +71,7 @@ class MapSystem():
 						"Parallel Left" : self.parallelLeftFile,
 						"Segments turned" : self.segmentsFile,
 						"Debug" : self.debugFile,
-						"Lidar (token)" : self.lidartokenFile,
+						"IR Front (token)" : self.IRtokenFile,
 						"Update Map" : self.mapUpdateFile,
 						"IRrightFront" : self.irRightFile
 		}

@@ -184,17 +184,13 @@ def handle_SPACE():
 
 #Så här kan man göra om en byte till int :)
 #print(int(b'\x54'[0]))
-def getLidar():
+def getIRF():
 	if debug:
-		print ("lidar")
+		print ("IRF")
 	
-	#timestamp = clock()
-	harald.sendData(b'\x88')
-	msByte = harald.receiveData()
-	lsByte = harald.receiveData()
-	data = int(msByte[0])*256 + int(lsByte[0])
-	#print(str(round(clock() - timestamp, 2)))
-	return data
+	harald.sendData(b'\x48')
+	data = harald.receiveData()
+	return int(data[0])
 	
 def getIRRF():
 	if debug:
@@ -241,9 +237,9 @@ def getReflexToken():
 	return int(harald.receiveData()[0])
 
 	
-def getLidarToken():
+def getIRFToken():
 	if debug:
-		print("lidartoken")
+		print("IRF token")
 	harald.sendData(b'\x4F')
 	data = harald.receiveData()
 	return int(data[0])
@@ -340,14 +336,13 @@ def getPosition():
 	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 def getDecision():
-	""""
+
 	if debug:
 		print("decision")
 	harald.sendData(b'\x5B')
 	data = harald.receiveData()
 	return int(data[0])
-	"""
-	pass
+
 	
 def getDebug():
 	if debug:
@@ -387,13 +382,13 @@ handle_dictionary_up = {
 
 #dictionary for binding functions to names of sensor data we want to get, see MapSystem
 handle_dictionary_data = {
-	"Lidar" : getLidar,
+	"IR Front" : getIRF,
 	"IRrightFront" : getIRRF,
 	"IRrightBack" : getIRRB,
 	"IRleftFront" : getIRLF,
 	"IRleftBack" : getIRLB,
 	"Segments turned" : getReflexToken,
-	"Lidar (token)" : getLidarToken,
+	"IR Front (token)" : getIRFToken,
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
 	"Gyro (token)" : getGyroToken,

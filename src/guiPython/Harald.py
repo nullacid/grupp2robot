@@ -12,7 +12,7 @@ class Harald():
 	def __init__(self):
 		self.targetDevice = fireflyMacAddr
 		self.port = 1
-		self.ourSocket = None
+		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 		
 		self.connectionstatus = 0
 
@@ -61,10 +61,10 @@ class Harald():
 	def establishDirectConnection(self):
 		
 		#If socket is open from before, close it NOT SURE IF THIS IS NEEDED
-		if self.ourSocket != None:
-			self.ourSocket.close()
+		#if self.ourSocket != None:
+		#	self.ourSocket.close()
 		#Open the socket
-		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+		#self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
 		#Disable timeout to give enough time for connection
 		self.ourSocket.settimeout(None)
