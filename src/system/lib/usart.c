@@ -39,7 +39,7 @@ void init_USART_down(unsigned int baud){
 
 unsigned char receiveByte_up_to()
 {
-	uint counter = 0;
+	int counter = 0;
 	while(!(UCSR0A & (1<<RXC0))){
 		if(counter > 15000000){
 			return 0x00;
@@ -52,7 +52,7 @@ unsigned char receiveByte_up_to()
 }
 
 unsigned char receiveByte_down_to(){
-	uint counter = 0;
+	int counter = 0;
 	while(!(UCSR1A & (1<<RXC1))){
 		if(counter > 15000000){
 			return 0x00;
