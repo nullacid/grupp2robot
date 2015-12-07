@@ -6,7 +6,6 @@ void find_next_wall();
 void find_empty_tile();
 
 void bfs();
-void bfs_u();
 uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile);
 uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile);
 void gen_adj_matrix(uint8_t home);
@@ -26,13 +25,18 @@ void think(){
 
 	if(read_a_top() == 0){
 
-		if(follow_wall){ //Om vi ska följa högerväggen
+		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if((t_vagg_h_f == 0) || (t_vagg_h_f == 1)){ //If there is no wall to the right of the robot
+			if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
 				paction(FORWARD);
 				paction(SPIN_R);
 			}
-			else if(t_LIDAR == 0){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
+
+			else if(t_vagg_h_f != 2){
+				paction(NUDGE_FORWARD);
+			}
+
+			else if(t_vagg_front == 2){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
 				
 				if((t_vagg_v_f == 0) || (t_vagg_v_f == 1)){ //Turn left
 					paction(FORWARD);
@@ -48,12 +52,14 @@ void think(){
 				paction(FORWARD);
 			}
 
-			//Kolla om väggen är sluten
+			//if(dfs(robot_pos_x, robot_pos_x, OUTSIDE) == 1){
+			//	follow_wall = 0;
+			//}
 
 		}
 		else{ //Om vi ska kartlägga mitten
 
-			//Hitta en tile att åka till
+			//bfs();
 
 		}
 
@@ -73,27 +79,7 @@ void find_next_wall(){
 		startup = 0;
 	}
 	else{
-		/*	uint8_t UNEXP 		= 1;	//Tile: Unexplored
-		uint8_t FLOOR 		= 2;	//Tile: Floor
-		uint8_t WALL 		= 3;	//Tile: Wall
-		uint8_t OUTSIDE 	= 4;	//Tile: Outside
-		#define NORTH	0
-		#define	EAST	1
-		#define	SOUTH	2
-		#define	WEST	3
 
-		uint8_t robot_pos_x;	// Start in the middle of the map
-		uint8_t robot_pos_y;
-
-		#define EMPTY		0 //The a_stack was empty //Stand still
-#define FORWARD 	1 //Go forward 1 tile
-#define	SPIN_R		2 //Turn 90 right
-#define SPIN_L		3 //Turn 90 left
-#define	SPIN_180 	4 //Turn 180 left
-#define PARALLELIZE	5 //Turn until parallel with wall on right side
-#define	BACKWARD	6 //Back-up one tile
-
-		*/
 		switch(dir){
 		case (0): //LIDAR to the NORTH
 			if (rmem(robot_pos_x + 1, robot_pos_y)->tileType == WALL){ //Vägg till öster
@@ -199,11 +185,7 @@ void bfs(){
 	return;
 }
 
-void bfs_u(){
-//Används när vi vill hitta närmsta vägen till en UNEXP-tile
 
-	return;
-}
 
 typedef struct tuple tuple;
 

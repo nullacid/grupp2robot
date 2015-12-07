@@ -2,13 +2,14 @@
 #define MEM_H
 #define F_CPU 20000000
 
-#define EMPTY		0 //The a_stack was empty //Stand still
-#define FORWARD 	1 //Go forward 1 tile
-#define	SPIN_R		2 //Turn 90 right
-#define SPIN_L		3 //Turn 90 left
-#define	SPIN_180 	4 //Turn 180 left
-#define PARALLELIZE	5 //Turn until parallel with wall on right side
-#define	BACKWARD	6 //Back-up one tile
+#define EMPTY			0 //The a_stack was empty //Stand still
+#define FORWARD 		1 //Go forward 1 tile
+#define	SPIN_R			2 //Turn 90 right
+#define SPIN_L			3 //Turn 90 left
+#define	SPIN_180 		4 //Turn 180 left
+#define PARALLELIZE		5 //Turn until parallel with wall on right side
+#define	BACKWARD		6 //Back-up one tile
+#define NUDGE_FORWARD	7
 
 #define NORTH	0
 #define	EAST	1
@@ -85,6 +86,7 @@ uint8_t s_ir_h_f;
 uint8_t s_ir_h_b;
 uint8_t s_ir_v_f;
 uint8_t s_ir_v_b;
+uint8_t s_ir_front;
 
 //	Token parallell vänster/höger
 
@@ -95,6 +97,7 @@ uint8_t t_vagg_h_f; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+4
 uint8_t t_vagg_h_b; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
 uint8_t t_vagg_v_f; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
 uint8_t t_vagg_v_b; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
+uint8_t t_vagg_front;
 
 uint8_t s_gyro_u;
 uint8_t s_gyro_l;

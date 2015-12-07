@@ -36,7 +36,6 @@ uint8_t clk = 0;
 
 int main(){
 	
-
 	
 	init_USART_up(10);
 	init_USART_down(10);
@@ -68,12 +67,8 @@ int main(){
 		}
 		button_autonom = (PINA & 1);
 
-		//if(!spinning){
-			update_sensor_data();
-			handle_messages();	
-		//}	
-
-
+		update_sensor_data();
+		handle_messages();	
 
 		if (button_autonom == 1){	
 
@@ -94,7 +89,7 @@ void handle_messages(){
 		uint8_t message_cpy = message;
 
 		//plocka ut OP-koden
-		message_cpy &= 31;
+		message_cpy &= 0x3F;
 		
 
 		if (button_autonom == 0){ //Manuellt läge
@@ -102,42 +97,68 @@ void handle_messages(){
 				switch(message_cpy){
 					case (0): //pil UPP trycks ner
 
-					dir_left = FORWARD;
-					dir_right = FORWARD;
-					spd_left = spd_left + 50;
-					spd_right = spd_right + 50;
+						dir_left = FORWARD;
+						dir_right = FORWARD;
+						spd_left = spd_left + 50;
+						spd_right = spd_right + 50;
 					break;
 					case(1): //pil UPP släpps
-					spd_left = spd_left - 50;
-					spd_right = spd_right - 50;
+						spd_left = spd_left - 50;
+						spd_right = spd_right - 50;
 					break;
 					case(2): //pil VÄNSTER trycks ner
-					dir_left = FORWARD;
-					spd_right = spd_right + 50;
+						dir_left = FORWARD;
+						spd_right = spd_right + 50;
 					break;
 					case(3): //pil VÄNSTER släpps
-					spd_right = spd_right - 50;
+						spd_right = spd_right - 50;
 					break;
 					case (4): //pil NER trycks ner
-					dir_left = BACK;
-					dir_right = BACK;
-					spd_left = spd_left + 50;
-					spd_right = spd_right + 50;
+						dir_left = BACK;
+						dir_right = BACK;
+						spd_left = spd_left + 50;
+						spd_right = spd_right + 50;
 					break;
 					case(5): //pil NER släpps
-					spd_left = spd_left - 50;
-					spd_right = spd_right - 50;
-					dir_left = FORWARD;
-					dir_right = FORWARD;
+						spd_left = spd_left - 50;
+						spd_right = spd_right - 50;
+						dir_left = FORWARD;
+						dir_right = FORWARD;
 
 					break;
 					case(6): //pil HÖGER trycks ner
-					dir_right = FORWARD;
-					spd_left = spd_left + 50;
+						dir_right = FORWARD;
+						spd_left = spd_left + 50;
 					break;
 					case(7): //pil HÖGER släpps
-					spd_left = spd_left - 50;
-					break;			
+						spd_left = spd_left - 50;
+					break;
+
+					case(0x22): //Q trycks ner
+						dir_right = FORWARD;
+						dir_left = BACK;
+						spd_left = 100;
+						spd_right = 100;
+
+					break;
+					case(0x23): //Q släpps
+						dir_left = FORWARD;
+						spd_left = 0;
+						spd_right = 0;
+					break;
+
+					case(0x24): //E trycks ner
+						dir_right = BACK;
+						dir_left = FORWARD;
+						spd_left = 100;
+						spd_right = 100;
+					break;
+					case(0x25): //E släpps
+						dir_right = FORWARD;
+						spd_right = 0;
+						spd_left = 0;
+					break;
+
 				}
 			
 			setSpeed(spd_left,spd_right,dir_left,dir_right);
@@ -147,9 +168,7 @@ void handle_messages(){
 			
 			case (0x08):
 				//lägg lidardata i send-buffern
-				transmitByte_up(s_LIDAR_u);
-				waitForSendNext_up();
-				transmitByte_up(s_LIDAR_l);
+				transmitByte_up(s_ir_front);
 
 			break;
 			
@@ -189,7 +208,7 @@ void handle_messages(){
 			
 			case (0x0F):
 			//lägg lidar-token i send-buffern
-				transmitByte_up(t_LIDAR);
+				transmitByte_up(t_vagg_front);
 			break;
 			
 			case (0x10):
@@ -257,7 +276,7 @@ void handle_messages(){
 			
 			case (0x1B):
 			//pos i algoritm i send-buffern
-			//	transmitByte_up(posalgoritm);
+				transmitByte_up(read_a_top());
 			break;
 			
 			case (0x1C):

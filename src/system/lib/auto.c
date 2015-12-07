@@ -13,6 +13,9 @@
 #define FOLlOW_WALL 0
 #define MAP_REST 1
 
+#define LEFT 1
+#define RIGHT 2
+#define NONE 0
 
 uint8_t cur_action = 0;
 int distance_LIDAR;
@@ -28,6 +31,9 @@ int16_t D = 0;
 uint8_t pidk = 10; //10 är okej
 uint8_t pidd = 35; //35 ok ish
 uint8_t lidar_start = 0;
+uint8_t front_sensor_active = 0;
+uint8_t regulate_side = 0; 
+
 
 void update_sensor_data(); 
 void init_auto();
@@ -64,7 +70,9 @@ void init_auto(){
 
 	spinning = 0;
 
+
 	wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Mark start tile as foor
+	//paction(SPIN_R);
 	paction(PARALLELIZE);
 
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
@@ -74,14 +82,12 @@ void update_sensor_data(){
 	//från 08 ---> 1 7 rader
 	transmitByte_down(0x1D); //fråga efter all data
 
-	s_LIDAR_u = receiveByte_down();
-	s_LIDAR_l = receiveByte_down();
 	s_ir_h_f = receiveByte_down();
 	s_ir_h_b = receiveByte_down();
 	s_ir_v_f = receiveByte_down();
 	s_ir_v_b = receiveByte_down();
+	s_ir_front = receiveByte_down();
 
-	t_LIDAR = receiveByte_down();
 	t_p_h = receiveByte_down();;
 	t_p_v = receiveByte_down();
 	t_gyro = receiveByte_down();
@@ -89,30 +95,16 @@ void update_sensor_data(){
 	t_vagg_h_b = receiveByte_down();
 	t_vagg_v_f = receiveByte_down();
 	t_vagg_v_b = receiveByte_down();
-
+	t_vagg_front = receiveByte_down();
 	t_reflex = receiveByte_down();
 
 
-	s_LIDAR = ((s_LIDAR_u << 8) + s_LIDAR_l);
 	s_gyro = ((s_gyro_u << 8) + s_gyro_l);
 
 	return;
 }
 
 void autonom (){
-
-				debug = spinning;
-
-
-	if ((s_LIDAR_u == 0) && (s_LIDAR_l < 7)){
-		NODBROMS = 1;
-		setSpeed(0,0,1,1);
-
-	}
-	else{
-		NODBROMS = 0;
-	}
-
 
 
 	if(cur_action == EMPTY){ //Om vi inte har en order, kolla om det finns någon ny
@@ -130,16 +122,37 @@ void autonom (){
 //------------------------ÅKA FRAMMÅT--------------
 			case (FORWARD):
 				if (first_time){
-					lidar_start = t_LIDAR;
+					if(t_vagg_front == 1){
+						front_sensor_active = 1;
+					}
+
+
 					first_time = 0;
 				}
 
-				if(t_vagg_h_f == 2){ //Om det finns en vägg höger fram, reglera efter den
+				if((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //Decide which side to regulate on
+					regulate_side = RIGHT;
+				}
+				else if(t_vagg_v_f == 2){
+					regulate_side = NONE; //ÄNDRA MIG HALLÅ
+				}
+				else{
+					regulate_side = NONE;
+				}
+
+				if(regulate_side != NONE){ //Om det finns en vägg höger fram, reglera efter den
 
 					int8_t control = 0;
 					uint8_t lspeed = 0;
 					uint8_t rspeed = 0;
-					deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
+
+					if(regulate_side == RIGHT){
+						deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
+					}
+					else{
+						deviation_from_wall = -(s_ir_v_f - PERFECT_DIST);
+					}
+
 					derivata = (deviation_from_wall - old_deviation_from_wall);
 
 					P = pidk * deviation_from_wall;
@@ -173,29 +186,64 @@ void autonom (){
 					motor_l = lspeed;
 					setSpeed(lspeed , rspeed,1,1);
 				}
+
 				else{
 					setSpeed(100, 100, 1, 1);
 				}
 				
-				if(t_reflex > 30){
-					first_time = 1;
+				if(front_sensor_active == 0){
+					if(t_reflex > 30){
+						first_time = 1;
 
-					if(dir == NORTH){
-						robot_pos_y--;
+						if(dir == NORTH){
+							robot_pos_y--;
+						}
+						else if(dir == WEST){
+							robot_pos_x--;
+						}
+						else if(dir == SOUTH){
+							robot_pos_y++;
+						}
+						else{
+							robot_pos_x++;
+						}
+						action_done();
 					}
-					else if(dir == WEST){
-						robot_pos_x--;
+				}
+				else{
+					if(t_vagg_front == 2){
+						first_time = 1;
+						front_sensor_active = 0;
+
+						if(dir == NORTH){
+							robot_pos_y--;
+						}
+						else if(dir == WEST){
+							robot_pos_x--;
+						}
+						else if(dir == SOUTH){
+							robot_pos_y++;
+						}
+						else{
+							robot_pos_x++;
+						}
+						action_done();
 					}
-					else if(dir == SOUTH){
-						robot_pos_y++;
-					}
-					else{
-						robot_pos_x++;
-					}
-					action_done();
 				}
 				
 			break;
+
+			case(NUDGE_FORWARD):
+
+				setSpeed(20,20,1,1);
+
+				if(t_reflex > 2){
+					action_done();
+				}
+
+			break;
+
+
 	//---------------------------------SVÄNGA--------------------------------
 			case (SPIN_R):
 
@@ -287,13 +335,13 @@ void autonom (){
 
 			case(BACKWARD):
 				if (first_time){
-					distance_LIDAR = s_LIDAR_u*256 + s_LIDAR_l + 40; //LIDAR distance + 40 cm
+
 					first_time = 0;
 				}
 				//Kolla så vi åker typ parallellt
 
 				setSpeed(100, 100, 0, 0);
-				if ((s_LIDAR_u*256 + s_LIDAR_l) >= distance_LIDAR) {
+				if (1) {
 					first_time = 1;
 					action_done();
 				}
@@ -310,24 +358,19 @@ void action_done(){
 		dir -=4;
 	}
 
-
 	uint8_t old_action = cur_action;
 	pop_a_stack(); //Ta bort actionen från actionstacken
 	cur_action = read_a_top();	//Ta in actionen under
 	if (old_action != cur_action){ 
-		//setSpeed(0, 0, 1, 1); //Stanna om vi inte ska fortsätta i samma riktning
-		//_delay_ms(100);
+		setSpeed(0, 0, 1, 1); //Stanna om vi inte ska fortsätta i samma riktning
+		_delay_ms(100);
 	}
 	//------------UPPDATERA KARTDATA ----------------
 	//Räknat med 0,0 i övre högra hörnet
 	parallell_cnt = 0;
+	old_deviation_from_wall = 0;
+	transmitByte_down(0x21); //Reset reflex-segments
 
-	setSpeed(0,0,1,1);
-
-	transmitByte_down(0x21);
-	receiveByte_down();
-
-	_delay_ms(500);
 
 	switch(dir){
 		int i;
