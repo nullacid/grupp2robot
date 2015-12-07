@@ -162,6 +162,18 @@ def forward_up():
 
 def right_up():
 	harald.sendData(b'\x07')
+
+def spinL_down():
+	harald.sendData(b'\x22')
+
+def spinL_up():
+	harald.sendData(b'\x23')
+
+def spinR_down():
+	harald.sendData(b'\x24')
+
+def spinR_up():
+	harald.sendData(b'\x25')
 	
 def handle_SPACE():
 	pass
@@ -357,6 +369,8 @@ handle_dictionary_down = {
 	K_s: back_down,
 	K_w: forward_down,
 	K_d: right_down,
+	K_q: spinL_down,
+	K_e: spinR_down,
 	K_SPACE: handle_SPACE
 }
 
@@ -366,7 +380,9 @@ handle_dictionary_up = {
 	K_w: forward_up,
 	K_a: left_up,
 	K_s: back_up,
-	K_d: right_up
+	K_d: right_up,
+	K_q: spinL_up,
+	K_e: spinR_up
 }
 
 #dictionary for binding functions to names of sensor data we want to get, see MapSystem
