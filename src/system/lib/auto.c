@@ -106,6 +106,8 @@ void update_sensor_data(){
 
 void autonom (){
 
+	debug = dir;
+
 
 	if(cur_action == EMPTY){ //Om vi inte har en order, kolla om det finns någon ny
 
@@ -237,7 +239,7 @@ void autonom (){
 
 				setSpeed(20,20,1,1);
 
-				if(t_reflex > 2){
+				if(t_reflex > 3){
 					action_done();
 				}
 
