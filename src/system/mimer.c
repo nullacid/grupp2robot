@@ -1,8 +1,6 @@
 /*
- * adc.c
- *
  * Created: i den spirande vårens tid anno 1734 i väntan på vår herre jesus kristus återkomst
- * Author: Mikha'el and Eirikur
+ * Author: Mikha'el and Eirikur aka the buzzmeister
  * "Det är lätt med facit i hand,
  *  ändå var det folk som failade på logiktentan" - Peter
  */
@@ -23,14 +21,16 @@ uint8_t IRLF = 0x01;
 uint8_t IRLB = 0x02;
 uint8_t IRRF = 0x03;
 uint8_t IRRB = 0x04;
+uint8_t IRF = 0x05;
 
-uint8_t IRLFT = 0x0a;
-uint8_t IRLBT = 0x0b;
-uint8_t IRRFT = 0x0c;
-uint8_t IRRBT = 0x0d;
+uint8_t IRLFT = 0x06;
+uint8_t IRLBT = 0x07;
+uint8_t IRRFT = 0x08;
+uint8_t IRRBT = 0x09;
+uint8_t IRFT = 0x0a;
 
-int8_t parallelL = 0xa0;
-int8_t parallelR = 0xb0;
+int8_t parallelL = 0x0b;
+int8_t parallelR = 0x0c;
 
 /*reflex-sensor*/
 uint8_t reflex_previous = 0x00;
@@ -38,45 +38,18 @@ uint8_t reflex_current = 0x00;
 uint8_t segments_turned = 0x00;
 uint8_t MR_Reflex = 0x00;
 
-/*LIDAR*/
-uint8_t LIDAR_H = 0xa0;
-uint8_t LIDAR_L = 0xa1;
-uint8_t lidarT = 0x45;
-int current = 0;
-
 /*GYRO*/
-uint8_t gyro_L = 0xb0;
-uint8_t gyro_H = 0xb1;
-//uint8_t gyro3 = 0xb2;
-//uint8_t gyro4 = 0xb3;
-
-uint32_t rotation_constant = 60000;
+uint32_t rotation_constant;
 int gyromode = 0;
-int gyro_direction = 0;
 uint8_t gyro_zero = 0x00;
-int super_rotation = 0;
-
+int rotation_direction = 0;
 uint8_t gyro_token = 0x00;
 
 uint8_t usart_data;
 
 uint8_t spi_tranceiver(uint8_t data);
 uint8_t single_measure();
-
-int gyrotime = 0;
-
-/* initializes timer for pwm reading */
-void timer1_init(){
-	// reset registers and set prescaler to 1024
-	TCCR1A = 0;
-	TCCR1B = 0;
-	
-	// prescaler of 8
-	TCCR1B |= (0<<CS10)|(1<<CS11)|(0<<CS12);
-	
-	// reset timer
-	TCNT1 = 0;
-}
+void usart_gogo();
 
 /* initializes ad converter */
 void adc_init()
@@ -113,11 +86,9 @@ void SPI_init()
 	spi_tranceiver(0x00);
 	spi_tranceiver(0x00);
 	set_ss(1);
-	_delay_ms(20);
-	
 }
 
-/*to transfer/recieve data via spi*/
+/*to transfer/recieve data via SPI */
 uint8_t spi_tranceiver(uint8_t data)
 {
 	// Load data into the buffer
@@ -160,12 +131,6 @@ uint8_t adc_to_cm(uint8_t value){
 	return cm_values[value];
 }
 
-/* These functions should get the internally stored values and transmit them, the functions sending two bytes will probably need to do some shifting. */
-/* Transmits data from LIDAR. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
-void transmitLidar(){
-	transmitByte_up(LIDAR_H);
-	transmitByte_up(LIDAR_L);
-}
 /* Transmits data from the right front IR sendor. 1 byte. */
 void transmitIRRF(){
 	transmitByte_up(IRRF);
@@ -180,18 +145,12 @@ void transmitIRLF(){
 }
 /* Transmits data from the left back IR sensor. 1 byte. */
 void transmitIRLB(){
-	transmitByte_up(IRLB); // angular rate
+	transmitByte_up(IRLB);
 }
-/* Transmits data from the Gyro. 2 bytes. MOST SIGNIFICANT BYTE NEED TO BE SENT FIRST. */
-void transmitGyro(){
-	transmitByte_up(gyro_H);
-	transmitByte_up(gyro_L);
+/* Transmits data from the front IR sensor. 1 byte of pure love. */
+void transmitIRF(){
+	transmitByte_up(IRF);
 }
-
-void transmitLidarT(){
-	transmitByte_up(lidarT);
-}
-
 void transmitParallelR(){
 	transmitByte_up(parallelR);
 }
@@ -199,11 +158,9 @@ void transmitParallelR(){
 void transmitParallelL(){
 	transmitByte_up(parallelL);
 }
-
 void transmitGyroT(){
 	transmitByte_up(gyro_token);
 }
-
 void transmitIRRFT(){
 	transmitByte_up(IRRFT);
 }
@@ -219,35 +176,39 @@ void transmitIRLFT(){
 void transmitIRLBT(){
 	transmitByte_up(IRLBT);
 }
-
+void transmitIRFT(){
+	transmitByte_up(IRFT);
+}
 void transmitReflexT(){
 	transmitByte_up(segments_turned);
 }
 
 /* Transmits all sensor data. */
-/* Transmitted data order will be LIDAR1 -> LIDAR2 -> IRRF -> IRRB -> IRLF -> GYRO1 -> GYRO2 -> LIDAR token -> Parallel Right -> Parallel Left -> Gyro token -> IRRF token -> IRRB token ->
-	-> IRLF token -> IRLB token. */
+/* Transmitted data order will be IRRF -> IRRB -> IRLF -> IRLB -> IRF -> Parallel Right -> Parallel Left -> Gyro token -> IRRF token -> IRRB token -> IRLF token -> IRLB token -> IRF token -> reflex token. */
 void transmitALL(){
-	transmitLidar();
 	transmitIRRF();
 	transmitIRRB();
 	transmitIRLF();
 	transmitIRLB();
-	transmitLidarT();
+	transmitIRF();
+
 	transmitParallelR();
 	transmitParallelL();
 	transmitGyroT();
+	
 	transmitIRRFT();
 	transmitIRRBT();
 	transmitIRLFT();
 	transmitIRLBT();
+	transmitIRFT();
+	
 	transmitReflexT();
 }
 
 /* Translates the command code into the corresponding function. */
 void processCommand(unsigned char data){
 	if(data == 0x08){
-		transmitLidar();
+		transmitIRF();
 	}
 	else if(data == 0x09){
 		transmitIRRF();
@@ -261,11 +222,8 @@ void processCommand(unsigned char data){
 	else if(data == 0x0C){
 		transmitIRLB();
 	}
-	else if(data == 0x0D){
-		transmitGyro();
-	}
 	else if(data == 0x0F){
-		transmitLidarT();
+		transmitIRFT();
 	}
 	else if(data == 0x10){
 		transmitParallelR();
@@ -293,58 +251,52 @@ void processCommand(unsigned char data){
 	}
 	else if(data == 0x1c){
 		gyromode = 1;
-		super_rotation = 0; // clockwise
+		rotation_direction = 0; // clockwise
 	}
 	else if(data == 0x1f){
 		gyromode = 1;
-		super_rotation = 1; // counterclockwise
+		rotation_direction = 1; // counterclockwise
 	}
 	else if(data == 0x20){
 		gyromode = 1;
-		super_rotation = 2; // 180°
+		rotation_direction = 2; // 180°
 	}
-	else if(data == 0x1e){
+	else if(data == 0x1e){ // reset gyro
 		gyromode = 0;
 		gyro_token = 0x00;
 	}
-	else if(data == 0x21){
-		segments_turned = 0x00;
-		transmitByte_up(0xf0);
+	else if(data == 0x21){ // reset reflex counter
+		segments_turned = 0;
 	}
 }
 
 /* Calculates the token value given pointers to the stored values. */
 void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 	if(1 < *IRxx && *IRxx <= 32){
-		*IRxxT = 0x02;
+		*IRxxT = 1;
 	}
 	else if(32 < *IRxx && *IRxx < 60){
-		*IRxxT = 0x01;
+		*IRxxT = 2;
 	}
 	else{
-		*IRxxT = 0x00;
+		*IRxxT = 0;
 	}
 }
 
-/*counts multiples of 40cm. example: 60cm = 1, 80cm = 2 ... */
-void calcLidarT(){
-	uint16_t lidarValue = LIDAR_H*256 + LIDAR_L;
-	uint8_t x = 0;
-	
-	if(lidarValue <= 15){
-		lidarT = 0;
+/* Calculate the token value for the front IR sensor */
+void calcIRFToken(){
+	if(IRF <= 15){
+		IRFT = 0;
 	}
-	else if(lidarValue <= 47){
-		lidarT = 1;
+	else if(IRF <= 47){
+		IRFT = 1;
 	}
 	else{
-		lidarT = 2;
+		IRFT = 2;
 	}
 }
 
-/*	Calculates the token values for the IR sensors. 
-	1 represents a value between 1 and 32 (a wall within 1 square), 
-	2 represents a value between 32 and 89 ( a wall within 2 squares). */
+/*	Calculates the token values for the IR sensors */
 void calcTokensIR(){
 	calcTokenIR(&IRLB, &IRLBT);
 	calcTokenIR(&IRLF, &IRLFT);
@@ -352,7 +304,7 @@ void calcTokensIR(){
 	calcTokenIR(&IRRF, &IRRFT);
 }
 
-/* new version of parallell */
+/* parallelism for the IR sensors */
 void calcParallel(){
 	if (IRRF == 0 || IRRB == 0){
 		parallelR = 127;
@@ -363,50 +315,7 @@ void calcParallel(){
 	parallelL = IRLF - IRLB;
 }
 
-/*  */
-uint16_t read_lidar(){
-	int prev = 0;
-	int positive_edge_triggered = 0;
-	double timeOfMyLife;
-	int low,high;
-	int cm;
-	while(1){
-		//lidar PWM PC1 (SDA PIN 22)
-		prev = current;
-		current = PINC && 0x02;
-		
-		//positive edge triggered
-		if (prev == 0){
-			if (current == 1){
-				//reset timer
-				TCNT1 = 0;
-				prev = 1;
-				positive_edge_triggered = 1;
-			}
-		}
-		// negative edge trigger
-		else if (positive_edge_triggered == 1){
-			if (prev == 1){
-				if (current == 0){
-					// read timer value
-					low  = TCNT1;
-					high = TCNT1H;
-			
-					// timeOfMyLife = high & low;
-					timeOfMyLife = (high << 8) |low;
-			
-					// conversion to cm with number magic	
-					cm = (int)timeOfMyLife/25;
-					prev = 0;					 
-					positive_edge_triggered = 0;
-					return cm;
-				}
-			}
-		}
-	}
-}
-
-/*calculate middle point of gyro, called gyro_zero. uses 16 values*/
+/*calculate middle point of gyro, called gyro_zero. uses 16 values. is called in the beginning of the program.*/
 void calibrate_gyro(){
 	int i = 0;
 	uint8_t single_value_gyro = 0x00;
@@ -418,12 +327,13 @@ void calibrate_gyro(){
 		i++;
 	}
 	
-	gyro_zero_sum = gyro_zero_sum/16;
+	gyro_zero_sum = gyro_zero_sum/16; // divides with 'magic' constant (4!-3!-(2!)^2+1!+0!)
 	gyro_zero = gyro_zero_sum;
 }
 
-/* reads an ADC value from the GYRO. sends start command and reads values until conversion is done (EOC == 1) */
-uint8_t single_measure(){
+/* Single measure from the GYRO */
+uint8_t single_measure(){ 
+	
 	uint8_t res_adc1;
 	uint8_t res_adc2;
 	uint16_t angular_rate_temp = 0x0000;
@@ -457,26 +367,24 @@ uint8_t single_measure(){
 	return angular_rate; 
 }
 
-/* handles rotation. uses single measure. either 90 degrees clockwise/counterclockwise or 180 degrees*/
+/* to rotate either 90° clockwise/counterclockwise or 180°  */
 void gyro_gogo(){
 	uint8_t angular_rate = 0x00;
 	uint32_t angular_sum = 0;
 	
-	// sets the rotation constant. tuned to be smooth
-	if (super_rotation == 2){ // 180 degrees
+	if (rotation_direction == 2){ // 180 degrees
 		rotation_constant = 124736;
 	}
-	else if(super_rotation == 1){ // counter-clockwise
+	else if(rotation_direction == 1){ // counter-clockwise
 		rotation_constant = 61002;
 	}
-	else if(super_rotation == 0){  // clockwise
+	else if(rotation_direction == 0){  // clockwise
 		rotation_constant = 58000;
 	}
 	
-	while(gyromode == 1){
+	while(gyromode == 1){	// until rotation complete, spin
 		angular_rate = single_measure();
 			
-		// abs(angular_rate-gyro_zero)
 		if (angular_rate > (gyro_zero+10)){
 			angular_rate -= gyro_zero;
 		}
@@ -486,19 +394,18 @@ void gyro_gogo(){
 		else{ 
 			angular_rate = 0;
 		}
-
 		angular_sum += angular_rate;
 		
 		if (angular_sum > rotation_constant){
 			gyromode = 0;
-			gyro_token = 0x44; // value sent to bjarne that rotation is done
+			gyro_token = 0x44;
 		}
 		
 		usart_gogo();
 	}
 }
 
-/* dd*/ 
+/* Counts # of segments turned */
 void reflex_sensor(){
 	if(MR_Reflex > 160){
 		reflex_current = 0x00;
@@ -522,55 +429,33 @@ void usart_gogo(){
 }
 
 int main()
-{
-	uint16_t lidar_cm;
-	int gyro_sum;
-	int clk = 0;
-
-	timer1_init();
+{	
 	adc_init();
-	init_USART_up(10); 	//Baud rate is 10
+	init_USART_up(10); 	// Baud rate is 10
 	
 	SPI_init();
-	_delay_ms(500);
-	calibrate_gyro();
+	calibrate_gyro(); // calibrate and initialize ADC
 	
-	// waiting for something good to happe
 	while(1){				
 		// usart
 		usart_gogo();
-			
-		// lidar
-		lidar_cm = read_lidar();
-		if(lidar_cm < 10){
-			lidar_cm -= 1;
-		}
-		else if(lidar_cm < 15){
-			lidar_cm -= 3;
-		}
-		else if(lidar_cm < 20){
-			lidar_cm -= 1;
-		}
-		else if(lidar_cm < 25){
-			lidar_cm -= 2;
-		}
-		LIDAR_L = lidar_cm;
-		LIDAR_H = lidar_cm >> 8;	
-		calcLidarT();	
 		
-		usart_gogo();
-		
-		// adc	
+		// ad conversion from IR-sensors
 		IRLB = adc_to_cm(adc_read(0));
 		IRRB = adc_to_cm(adc_read(1));
 		IRLF = adc_to_cm(adc_read(2));
 		IRRF = adc_to_cm(adc_read(3));
+		IRF = adc_to_cm(adc_read(4));
+		
+		usart_gogo();
 		
 		MR_Reflex = adc_read(5);
 		reflex_sensor();
 		
  		calcTokensIR();
+		calcIRFToken();	
  		calcParallel();
+		 
 		usart_gogo();
 
 		if(gyromode == 1){
