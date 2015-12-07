@@ -431,13 +431,11 @@ void usart_gogo(){
 int main()
 {	
 	adc_init();
-	init_USART_up(10); 	//Baud rate is 10
+	init_USART_up(10); 	// Baud rate is 10
 	
 	SPI_init();
-	_delay_ms(500);
-	calibrate_gyro();
+	calibrate_gyro(); // calibrate and initialize ADC
 	
-	// waiting for something good to happen
 	while(1){				
 		// usart
 		usart_gogo();
