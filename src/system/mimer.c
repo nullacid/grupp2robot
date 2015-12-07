@@ -273,26 +273,26 @@ void processCommand(unsigned char data){
 /* Calculates the token value given pointers to the stored values. */
 void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 	if(1 < *IRxx && *IRxx <= 32){
-		*IRxxT = 1;
+		*IRxxT = 0x02;
 	}
 	else if(32 < *IRxx && *IRxx < 60){
-		*IRxxT = 2;
+		*IRxxT = 0x01;
 	}
 	else{
-		*IRxxT = 0;
+		*IRxxT = 0x00;
 	}
 }
 
-/* Calculate the token value for the front IR sensor */
-void calcIRFToken(){
-	if(IRF <= 15){
-		IRFT = 0;
+/* special values for FRONT sensor */
+void calcTokenFront(uint8_t *IRxx, uint8_t *IRxxT){
+	if(1 < *IRxx && *IRxx <= 12){
+		*IRxxT = 0x02;
 	}
-	else if(IRF <= 47){
-		IRFT = 1;
+	else if(9 < *IRxx && *IRxx < 43){
+		*IRxxT = 0x01;
 	}
 	else{
-		IRFT = 2;
+		*IRxxT = 0x00;
 	}
 }
 
@@ -302,6 +302,7 @@ void calcTokensIR(){
 	calcTokenIR(&IRLF, &IRLFT);
 	calcTokenIR(&IRRB, &IRRBT);
 	calcTokenIR(&IRRF, &IRRFT);
+	calcTokenFront(&IRF,&IRFT);
 }
 
 /* parallelism for the IR sensors */
@@ -369,17 +370,20 @@ uint8_t single_measure(){
 
 /* to rotate either 90° clockwise/counterclockwise or 180°  */
 void gyro_gogo(){
+	
+	calibrate_gyro();
+	
 	uint8_t angular_rate = 0x00;
 	uint32_t angular_sum = 0;
 	
 	if (rotation_direction == 2){ // 180 degrees
-		rotation_constant = 124736;
+		rotation_constant = 150000;
 	}
 	else if(rotation_direction == 1){ // counter-clockwise
-		rotation_constant = 61002;
+		rotation_constant = 70000;
 	}
 	else if(rotation_direction == 0){  // clockwise
-		rotation_constant = 58000;
+		rotation_constant = 75000;
 	}
 	
 	while(gyromode == 1){	// until rotation complete, spin
@@ -453,7 +457,6 @@ int main()
 		reflex_sensor();
 		
  		calcTokensIR();
-		calcIRFToken();	
  		calcParallel();
 		 
 		usart_gogo();
