@@ -12,7 +12,7 @@ class Harald():
 	def __init__(self):
 		self.targetDevice = fireflyMacAddr
 		self.port = 1
-		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+		self.ourSocket = None
 		
 		self.connectionstatus = 0
 
@@ -73,6 +73,7 @@ class Harald():
 			self.ourSocket.connect((self.targetDevice, self.port))
 			print("Connected to firefly module")
 			
+			print("SYNCING!")
 			#Clear any data from the old bluetooth connection
 			while not self.__doSync():
 				pass
@@ -102,7 +103,7 @@ class Harald():
 
 	def __attemptReceive(self):
 		data = None
-		self.ourSocket.settimeout(5.0)
+		self.ourSocket.settimeout(2.0)
 		try:
 			data = self.ourSocket.recv(1)
 			return data
