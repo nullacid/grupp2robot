@@ -401,12 +401,10 @@ handle_dictionary_data = {
 	"Debug" : getDebug
 }
 
-timestamp = clock()
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	global timestamp
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
@@ -415,8 +413,7 @@ def getData():
 		harald.inc_status()
 		paintMap(mapSystem)
 		paintData(mapSystem)
-		print(str(round(clock() - timestamp, 2)))
-		timestamp = clock()
+
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	

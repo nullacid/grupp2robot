@@ -25,27 +25,33 @@ int main(void)
     while (1) 
 		{
 			unsigned char data = receiveByte_up();
-			transmitByte_down(data);
-		
-			// Removes data and shifts it down
-			uint8_t datalength = data & 0xC0;
-			datalength = (datalength >> 6);
-		
-			unsigned char returnDataArray[3];
-		
-			unsigned int i = 0;
 
-			while(datalength != 0){
-				returnDataArray[i] = receiveByte_down_to();
-				//if(datalength > 1){
-				//	transmitSendNext_down();
-				//}
-				datalength--;
-				i++;
+			if(data == 0x26){
+				transmitByte_up(0x26)
 			}
-			while(datalength != i){
-				transmitByte_up(returnDataArray[datalength]);
-				datalength++;
+			else{
+				transmitByte_down(data);
+		
+				// Removes data and shifts it down
+				uint8_t datalength = data & 0xC0;
+				datalength = (datalength >> 6);
+		
+				unsigned char returnDataArray[3];
+		
+				unsigned int i = 0;
+
+				while(datalength != 0){
+					returnDataArray[i] = receiveByte_down_to();
+					//if(datalength > 1){
+					//	transmitSendNext_down();
+					//}
+					datalength--;
+					i++;
+				}
+				while(datalength != i){
+					transmitByte_up(returnDataArray[datalength]);
+					datalength++;
+				}
 			}
 		}
 	
