@@ -37,6 +37,33 @@ void init_USART_down(unsigned int baud){
 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);
 }
 
+unsigned char receiveByte_up_to()
+{
+	int counter = 0;
+	while(!(UCSR0A & (1<<RXC0))){
+		if(counter > 15000000){
+			return 0x00;
+		}
+		counter++;
+	}
+	
+	unsigned char data = UDR0;
+	return data;
+}
+
+unsigned char receiveByte_down_to(){
+	int counter = 0;
+	while(!(UCSR1A & (1<<RXC1))){
+		if(counter > 15000000){
+			return 0x00;
+		}
+		counter++;
+	}
+	
+	unsigned char data = UDR1;
+	return data;
+}
+
 /* Returns the value in the receivebuffer from the module above */
 unsigned char receiveByte_up()
 {

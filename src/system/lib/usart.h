@@ -10,6 +10,12 @@ void init_USART_up(unsigned int baud);
 /* Initializes USART connection to the module downwards. */
 void init_USART_down(unsigned int baud);
 
+/* Receives byte with timeout. */
+unsigned char receiveByte_down_to(void);
+
+/* Receives byte with timeout. */
+unsigned char receiveByte_up_to(void);
+
 /* Listens and receives a byte from the upward module. */
 unsigned char receiveByte_up(void);
 

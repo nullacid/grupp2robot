@@ -73,13 +73,10 @@ class Harald():
 			self.ourSocket.connect((self.targetDevice, self.port))
 			print("Connected to firefly module")
 			
+			print("SYNCING!")
 			#Clear any data from the old bluetooth connection
-			self.ourSocket.settimeout(2.0)
-			try:
-				synctrash = self.ourSocket.recv(1)
-				synctrash2 = self.ourSocket.recv(1)
-			except bluetooth.BluetoothError:
-				print("No data on bluetooth")
+			while not self.__doSync():
+				pass
 
 			return True
 		except IOError:
@@ -98,7 +95,7 @@ class Harald():
 			if not data:
 				while not self.establishDirectConnection():
 					sleep(1)
-				self.receiveData()
+				return b'\xff'
 			else:
 				#print("Received data: " + str(hex(data[0])))
 				return data
@@ -112,6 +109,18 @@ class Harald():
 			return data
 		except bluetooth.BluetoothError:
 			print("timeout yo")
+			return False
+
+	def __doSync(self):
+		self.sendData(b'\x26')
+
+		self.ourSocket.settimeout(2.0)
+
+		try:
+			while self.receiveData() != b'\x26':
+				pass
+			return True
+		except bluetooth.BluetoothError:
 			return False
 
 	def inc_status(self):
