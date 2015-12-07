@@ -101,5 +101,8 @@ uint8_t s_gyro_l;
 uint16_t s_gyro;
 uint8_t t_gyro;		// bestäm vilka värden vi vill ha
 
+uint8_t t_reflex;
+uint8_t s_reflex;
+
 
 #endif

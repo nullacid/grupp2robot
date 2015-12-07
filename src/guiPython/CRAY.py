@@ -162,6 +162,18 @@ def forward_up():
 
 def right_up():
 	harald.sendData(b'\x07')
+
+def spinL_down():
+	harald.sendData(b'\x22')
+
+def spinL_up():
+	harald.sendData(b'\x23')
+
+def spinR_down():
+	harald.sendData(b'\x24')
+
+def spinR_up():
+	harald.sendData(b'\x25')
 	
 def handle_SPACE():
 	pass
@@ -172,17 +184,13 @@ def handle_SPACE():
 
 #Så här kan man göra om en byte till int :)
 #print(int(b'\x54'[0]))
-def getLidar():
+def getIRF():
 	if debug:
-		print ("lidar")
+		print ("IRF")
 	
-	#timestamp = clock()
-	harald.sendData(b'\x88')
-	msByte = harald.receiveData()
-	lsByte = harald.receiveData()
-	data = int(msByte[0])*256 + int(lsByte[0])
-	#print(str(round(clock() - timestamp, 2)))
-	return data
+	harald.sendData(b'\x48')
+	data = harald.receiveData()
+	return int(data[0])
 	
 def getIRRF():
 	if debug:
@@ -212,6 +220,7 @@ def getIRLB():
 	data = harald.receiveData()
 	return int(data[0])
 
+#NOT USED ATM
 def getGyro():
 	if debug:
 		print("gyro")
@@ -221,9 +230,16 @@ def getGyro():
 	data = int(msByte[0])*256 + int(lsByte[0])
 	return data
 
-def getLidarToken():
+def getReflexToken():
 	if debug:
-		print("lidartoken")
+		print("reflex token")
+	harald.sendData(b'\x57')
+	return int(harald.receiveData()[0])
+
+	
+def getIRFToken():
+	if debug:
+		print("IRF token")
 	harald.sendData(b'\x4F')
 	data = harald.receiveData()
 	return int(data[0])
@@ -320,14 +336,13 @@ def getPosition():
 	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 def getDecision():
-	""""
+
 	if debug:
 		print("decision")
 	harald.sendData(b'\x5B')
 	data = harald.receiveData()
 	return int(data[0])
-	"""
-	pass
+
 	
 def getDebug():
 	if debug:
@@ -349,6 +364,8 @@ handle_dictionary_down = {
 	K_s: back_down,
 	K_w: forward_down,
 	K_d: right_down,
+	K_q: spinL_down,
+	K_e: spinR_down,
 	K_SPACE: handle_SPACE
 }
 
@@ -358,18 +375,20 @@ handle_dictionary_up = {
 	K_w: forward_up,
 	K_a: left_up,
 	K_s: back_up,
-	K_d: right_up
+	K_d: right_up,
+	K_q: spinL_up,
+	K_e: spinR_up
 }
 
 #dictionary for binding functions to names of sensor data we want to get, see MapSystem
 handle_dictionary_data = {
-	"Lidar" : getLidar,
+	"IR Front" : getIRF,
 	"IRrightFront" : getIRRF,
 	"IRrightBack" : getIRRB,
 	"IRleftFront" : getIRLF,
 	"IRleftBack" : getIRLB,
-	"Gyro" : getGyro,
-	"Lidar (token)" : getLidarToken,
+	"Segments turned" : getReflexToken,
+	"IR Front (token)" : getIRFToken,
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
 	"Gyro (token)" : getGyroToken,
@@ -382,21 +401,19 @@ handle_dictionary_data = {
 	"Debug" : getDebug
 }
 
-timestamp = clock()
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	global timestamp
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
 	
 	if mapSystem.dataIndex == 0:
+		harald.inc_status()
 		paintMap(mapSystem)
 		paintData(mapSystem)
-		print(str(round(clock() - timestamp, 1)))
-		timestamp = clock()
+
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	
