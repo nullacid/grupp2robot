@@ -39,7 +39,7 @@ int main(void)
 					returnDataArray[i] = receiveByte_down_to();
 				}
 				//Transmit all data to CRAY
-				for(int j = 0; j < DataSlots; ++j){
+				for(int j = 0; j < DATASLOTS; ++j){
 					transmitByte_up(returnDataArray[j]);
 				}
 			}
