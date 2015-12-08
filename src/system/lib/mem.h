@@ -10,6 +10,8 @@
 #define PARALLELIZE		5 //Turn until parallel with wall on right side
 #define	BACKWARD		6 //Back-up one tile
 #define NUDGE_FORWARD	7
+#define P_WEAK			8 //Weak parallelization
+#define P_WEAK_L		9
 
 #define NORTH	0
 #define	EAST	1

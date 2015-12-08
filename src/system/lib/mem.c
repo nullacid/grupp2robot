@@ -91,7 +91,7 @@ void wmem(uint8_t data, uint8_t x, uint8_t y){
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
 
 	//Denna kallar auto på, lägger till i change-stacken om ny data
-	if (mapmem[x][y].tileType != data){ //NY DATA, ska skickas upp
+	if (mapmem[x][y].tileType != UNEXP){ //NY DATA, ska skickas upp
 		
 		mapmem[x][y].tileType = data;
 		pstack(x, y, data);

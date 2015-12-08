@@ -7,7 +7,7 @@
 
 #define MAX_SPEED_R 6 //1 to 10, 10 is highest
 #define MAX_SPEED_L 6
-#define PERFECT_DIST 	10 	//12
+#define PERFECT_DIST 	11 	//12
 
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
 #define FOLlOW_WALL 0
@@ -28,8 +28,8 @@ int16_t old_deviation_from_wall = 0;
 int16_t derivata = 0;
 int16_t P = 0;
 int16_t D = 0;
-uint8_t pidk = 10; //10 är okej
-uint8_t pidd = 35; //35 ok ish
+uint8_t pidk = 10; //20 är okej
+uint8_t pidd = 19; //11 ok ish
 uint8_t lidar_start = 0;
 uint8_t front_sensor_active = 0;
 uint8_t regulate_side = 0; 
@@ -72,9 +72,7 @@ void init_auto(){
 
 
 	wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Mark start tile as foor
-	//paction(SPIN_R);
 	paction(PARALLELIZE);
-
 	uint8_t current_state = 0; //0 - start, 1 - stå still, 2 - köra, 3 - snurra
 	//----------------------------
 }
@@ -106,7 +104,7 @@ void update_sensor_data(){
 
 void autonom (){
 
-	debug = dir;
+	debug = front_sensor_active;
 
 
 	if(cur_action == EMPTY){ //Om vi inte har en order, kolla om det finns någon ny
@@ -127,10 +125,14 @@ void autonom (){
 					if(t_vagg_front == 1){
 						front_sensor_active = 1;
 					}
+					else{
+						front_sensor_active = 0;
+					}
 
 
 					first_time = 0;
 				}
+
 
 				if((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //Decide which side to regulate on
 					regulate_side = RIGHT;
@@ -167,7 +169,7 @@ void autonom (){
 					else if(control < 0){
 						//nära höger vägg
 
-						lspeed = 100 + control;
+						lspeed = 100 + control-10;
 						rspeed = 100;
 					}
 					else{
@@ -178,7 +180,7 @@ void autonom (){
 						rspeed = 0;
 						lspeed = 100;
 					}
-					else if(deviation_from_wall < -7){
+					else if(deviation_from_wall < -9){
 						lspeed = 0;
 						rspeed = 100;
 					}
@@ -194,8 +196,9 @@ void autonom (){
 				}
 				
 				if(front_sensor_active == 0){
-					if(t_reflex > 30){
+					if(t_reflex > 28){ //28
 						first_time = 1;
+
 
 						if(dir == NORTH){
 							robot_pos_y--;
@@ -209,25 +212,26 @@ void autonom (){
 						else{
 							robot_pos_x++;
 						}
+						
 						action_done();
 					}
 				}
 				else{
 					if(t_vagg_front == 2){
 						first_time = 1;
-						front_sensor_active = 0;
-
-						if(dir == NORTH){
-							robot_pos_y--;
-						}
-						else if(dir == WEST){
-							robot_pos_x--;
-						}
-						else if(dir == SOUTH){
-							robot_pos_y++;
-						}
-						else{
-							robot_pos_x++;
+						if(t_reflex > 20){
+							if(dir == NORTH){
+								robot_pos_y--;
+							}
+							else if(dir == WEST){
+								robot_pos_x--;
+							}
+							else if(dir == SOUTH){
+								robot_pos_y++;
+							}
+							else{
+								robot_pos_x++;
+							}
 						}
 						action_done();
 					}
@@ -307,13 +311,58 @@ void autonom (){
 
 			break;
 	//------------------------------------------------------------------------
+
+			case(P_WEAK):
+
+				if(t_p_h == 0){
+					setSpeed(0, 0, FORWARD, FORWARD);
+					action_done();
+				}
+
+				else if(t_p_h == 127){
+					setSpeed(50,50,0,1);
+					parallell_cnt = 0;
+				}
+				else if (t_p_h > 0){ //påväg från väggen
+					setSpeed(40 * t_p_h, 40 * t_p_h, 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
+					parallell_cnt = 0;
+				}	
+				else if (t_p_h < 0){ //påväg in i väggen
+					setSpeed(40 * (-t_p_h), 40 * (-t_p_h), 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
+					parallell_cnt = 0;
+				}
+
+			break;
+
+				case(P_WEAK_L):
+
+				if(t_p_v == 0){
+					setSpeed(0, 0, FORWARD, FORWARD);
+					action_done();
+				}
+
+				else if(t_p_v == 127){
+					setSpeed(50,50,0,1);
+					parallell_cnt = 0;
+				}
+				else if (t_p_v > 0){ //påväg från väggen
+					setSpeed(40 * t_p_v, 40 * t_p_v, 0, 1); //Speed till 40 eller 80 beroende på hur fel vi är
+					parallell_cnt = 0;
+				}	
+				else if (t_p_v < 0){ //påväg in i väggen
+					setSpeed(40 * (-t_p_v), 40 * (-t_p_v), 1, 0); //Speed till 40 eller 80 beroende på hur fel vi är
+					parallell_cnt = 0;
+				}
+
+			break;
+
 			case(PARALLELIZE):
 				if (t_p_h == 0){ //Parallellt
 
 					parallell_cnt++;
 
 					if(parallell_cnt == 10){
-						setSpeed(0, 0, 1, 1);
+						setSpeed(0, 0, FORWARD, FORWARD);
 						_delay_ms(100);
 						dir = NORTH;
 
@@ -344,10 +393,14 @@ void autonom (){
 
 				setSpeed(20, 20, 0, 0);
 								
-				if(s_ir_front > 10){
+				if(s_ir_front > 9){
 					first_time = 1;
 					action_done();
 				}
+			break;
+
+			default:
+				debug = 0xFF;
 			break;
 		}
 	}
@@ -364,16 +417,16 @@ void action_done(){
 	uint8_t old_action = cur_action;
 	pop_a_stack(); //Ta bort actionen från actionstacken
 	cur_action = read_a_top();	//Ta in actionen under
-	if (old_action != cur_action){ 
+	//if (old_action != cur_action){ 
 		setSpeed(0, 0, 1, 1); //Stanna om vi inte ska fortsätta i samma riktning
 		_delay_ms(100);
-	}
+	//}
 	//------------UPPDATERA KARTDATA ----------------
 	//Räknat med 0,0 i övre högra hörnet
 	parallell_cnt = 0;
 	old_deviation_from_wall = 0;
 	transmitByte_down(0x21); //Reset reflex-segments
-
+	receiveByte_down();
 
 	switch(dir){
 		int i;

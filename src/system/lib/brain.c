@@ -27,13 +27,17 @@ void think(){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if(s_ir_front < 10){
+			if((s_ir_front < 10) && (s_ir_front > 2)){
 				paction(BACKWARD);
 			}
 		
 			else if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
 				paction(FORWARD);
 				paction(SPIN_R);
+				if((t_vagg_v_f == 1)&&(t_vagg_v_b == 1)){
+					//paction(P_WEAK_L);
+				}
+
 			}
 
 			else if(t_vagg_h_f != 2){
@@ -45,10 +49,12 @@ void think(){
 				if((t_vagg_v_f == 0) || (t_vagg_v_f == 1)){ //Turn left
 					paction(FORWARD);
 					paction(SPIN_L);
+					paction(P_WEAK);
 				}
 				else{ //If there is a wall both left and right, turn 180 deg
 					paction(FORWARD);
 					paction(SPIN_180);
+					paction(P_WEAK);
 				}
 
 			}

@@ -44,7 +44,7 @@ int main(){
 	init_auto();
 
 
-	_delay_ms(1000);
+	_delay_ms(1500);
 
 	while(1){
 
