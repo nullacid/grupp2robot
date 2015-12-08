@@ -7,6 +7,7 @@
 
 #define F_CPU 14.7456E6
 #define BAUD 7
+#define DATASLOTS 19
 #include <avr/io.h>
 #include <util/delay.h>
 #include "lib\usart.h"
@@ -25,10 +26,24 @@ int main(void)
     while (1) 
 		{
 			unsigned char data = receiveByte_up();
-
+			//Is it a sync command?
 			if(data == 0x26){
 				transmitByte_up(0x26);
 			}
+			//Is it a transmit all command?
+			else if(data = 0x1D){
+				transmitByte_down(data);
+				unsigned char returnDataArray[DATASLOTS];
+				//Get all data from bjarne
+				for(int i = 0; i < DATASLOTS; ++i){
+					returnDataArray[i] = receiveByte_down_to();
+				}
+				//Transmit all data to CRAY
+				for(int j = 0; j < DataSlots; ++j){
+					transmitByte_up(returnDataArray[j]);
+				}
+			}
+			//For all other commands
 			else{
 				transmitByte_down(data);
 		

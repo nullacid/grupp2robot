@@ -401,6 +401,86 @@ handle_dictionary_data = {
 	"Debug" : getDebug
 }
 
+#Gets all data from one command and then updates the screen.
+#ORDER DATA HAS TO BE TRANSMITTED IN
+#-------
+#IRRF
+#IRRB
+#IRLF
+#IRF
+#PR
+#PL
+#Gt
+#IRRt
+#IRLt
+#IRFt
+#Steering
+#Map
+#SysPos
+#Decision
+#Debug
+#-------
+def getAllData():
+	#Send command
+	harald.sendData(b'\x1D')
+
+	#Get IR sensor data
+	mapSystem.dataDict["IRrightFront"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRrightBack"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRleftFront"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRleftBack"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IR Front"] = int(harald.receiveData()[0])
+
+	#Get Parallel tokens
+	mapSystem.dataDict["Parallel Right"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["Parallel Left"] = int(harald.receiveData()[0])
+
+	#Get gyro token
+	mapSystem.dataDict["Gyro (token)"] = int(harald.receiveData()[0])
+
+	#Get IR token data
+	mapSystem.dataDict["IRright (token)"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRleft (token)"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IR Front (token)"] = int(harald.receiveData()[0])
+
+	#Get Steering data. (Output to engine)
+	leftSteering = int(harald.receiveData()[0])
+	rightSteering = int(harald.receiveData()[0])
+	mapSystem.dataDict["Steering data"] = str(leftEngine) + "  " + str(rightEngine)
+
+	#Get Map data from change stack
+	msByteMap = harald.receiveData()
+	lsByteMap = harald.receiveData()
+	xCoordMap = int(msByteMap[0])
+	yCoordMap = int(lsByteMap[0] & b'\x3F'[0])
+	tileType = int(lsByteMap[0] >> 6)
+	if tileType != 0:
+		if tileType == 1:
+			tileType = "UNEXPLORED"
+		elif tileType == 2:
+			tileType = "OPEN"
+		elif tileType == 3:
+			tileType = "WALL"
+		if xCoord < 32 and yCoord < 32:
+			mapSystem.arrayMap[xCoord][yCoord] = tileType
+			mapSystem.dataDict["Update Map"] = "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+
+	#Get System Position
+	mapSystem.sysPosX = int(harald.receiveData()[0])
+	mapSystem.sysPosY = int(harald.receiveData()[0])
+	mapSystem.dataDict["System Position"] = "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
+
+	#Get Steering Decision
+	mapSystem.dataDict["Steering Decision"] = int(harald.receiveData()[0])
+	#Update the log for steering decision, great for debugging
+	mapSystem.updateLog("Steering Decision")
+
+	#Get Debug
+	mapSystem.dataDict["Debug"] = int(harald.receiveData()[0])
+
+	#Update Screen
+	paintMap(mapSystem)
+	paintData(mapSystem)
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
@@ -421,7 +501,8 @@ def getData():
 
 while(crayRunning):
 	getData()
-	
+	#getAllData()
+
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
 			handle_dictionary_down[event.key]()
