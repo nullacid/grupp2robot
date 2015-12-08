@@ -54,7 +54,7 @@ squareHeight = screenHeight/32
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
-offset = -10
+offset = -40
 #dataOffset = 220"""
 
 
@@ -91,16 +91,16 @@ def paintData(mapSystem):
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
 	#Start Position Circle
-	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(18 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(17 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
-	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
+	surface.blit(text, (36 * squareWidth, 17 * (5 * squareHeight) / 3))
 	
 	#Current Position Circle
-	pygame.draw.circle(surface, MAGENTA, [int(35 * squareWidth), int(19 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	pygame.draw.circle(surface, MAGENTA, [int(35 * squareWidth), int(18 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
 	text = "Current Position"
 	text = font.render(text, 0 , WHITE)
-	surface.blit(text, (36 * squareWidth, 19 * (5 * squareHeight) / 3))
+	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
 	
 	#Conneciton status
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
