@@ -34,10 +34,10 @@ pygame.font.init()
 debug = False
 
 """#FULLSCREEN MODE
-screenWidth = 1584
-screenHeight = 891
-squareWidth = screenHeight/33
-squareHeight = screenHeight/33
+screenWidth = 1536
+screenHeight = 864
+squareWidth = screenHeight/32
+squareHeight = screenHeight/32
 
 screen_size = [screenWidth,screenHeight]
 
@@ -46,10 +46,10 @@ offset = -15
 #dataOffset = 300
 
 """#SMALLSCREEN MODE
-screenWidth = 990
-screenHeight = 660
-squareWidth = screenHeight/33
-squareHeight = screenHeight/33
+screenWidth = 960
+screenHeight = 640
+squareWidth = screenHeight/32
+squareHeight = screenHeight/32
 
 screen_size = [screenWidth, screenHeight]
 
@@ -106,8 +106,8 @@ def paintData(mapSystem):
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
 	
 def paintMap(mapSystem):
-	for i in range(0,33):
-		for j in range(0,33):
+	for i in range(0,32):
+		for j in range(0,32):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 
 	#Draw startPosition
@@ -311,8 +311,8 @@ def getMap():
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
-	xCoord = int(msByte[0])
-	yCoord = int(lsByte[0] & b'\x3F'[0])
+	xCoord = int(msByte[0]) - 1
+	yCoord = int(lsByte[0] & b'\x3F'[0]) - 1
 	tileType = int(lsByte[0] >> 6)
 	if tileType != 0:
 		if tileType == 1:
@@ -407,6 +407,7 @@ handle_dictionary_data = {
 #IRRF
 #IRRB
 #IRLF
+#IRLB
 #IRF
 #PR
 #PL
@@ -451,8 +452,8 @@ def getAllData():
 	#Get Map data from change stack
 	msByteMap = harald.receiveData()
 	lsByteMap = harald.receiveData()
-	xCoordMap = int(msByteMap[0])
-	yCoordMap = int(lsByteMap[0] & b'\x3F'[0])
+	xCoordMap = int(msByteMap[0]) - 1
+	yCoordMap = int(lsByteMap[0] & b'\x3F'[0]) - 1
 	tileType = int(lsByteMap[0] >> 6)
 	if tileType != 0:
 		if tileType == 1:
@@ -501,7 +502,6 @@ def getData():
 
 while(crayRunning):
 	getData()
-	#getAllData()
 
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:

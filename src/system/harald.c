@@ -31,7 +31,7 @@ int main(void)
 				transmitByte_up(0x26);
 			}
 			//Is it a transmit all command?
-			else if(data = 0x1D){
+			else if(data == 0x1D){
 				transmitByte_down(data);
 				unsigned char returnDataArray[DATASLOTS];
 				//Get all data from bjarne
