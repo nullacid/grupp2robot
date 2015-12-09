@@ -276,7 +276,7 @@ void handle_messages(){
 			
 			case (0x1B):
 			//pos i algoritm i send-buffern
-				transmitByte_up(read_a_top());
+				transmitByte_up(curr_action);
 			break;
 			
 			case (0x1C):

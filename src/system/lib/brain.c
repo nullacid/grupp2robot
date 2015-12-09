@@ -22,44 +22,41 @@ uint8_t check = 0;
 
 void think(){
 
-
-	if(read_a_top() == 0){
+	if(curr_action == EMPTY){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
 			if((s_ir_front < 10) && (s_ir_front > 2)){
-				paction(BACKWARD);
+					curr_action = BACKWARD;
 			}
 		
 			else if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
-				paction(FORWARD);
-				paction(SPIN_R);
-				if((t_vagg_v_f == 1)&&(t_vagg_v_b == 1)){
-					//paction(P_WEAK_L);
+				curr_action = SPIN_R;
+				if((t_vagg_v_f == 1) && (t_vagg_v_b == 1)){
+					curr_action = P_WEAK_L;
 				}
 
 			}
 
 			else if(t_vagg_h_f != 2){
-				paction(NUDGE_FORWARD);
+				curr_action = NUDGE_FORWARD;
 			}
 
 			else if(t_vagg_front == 2){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
-				
-				if((t_vagg_v_f == 0) || (t_vagg_v_f == 1)){ //Turn left
-					paction(FORWARD);
-					paction(SPIN_L);
-					paction(P_WEAK);
+				if(t_p_h == 0){
+					curr_action = P_WEAK;
 				}
-				else{ //If there is a wall both left and right, turn 180 deg
-					paction(FORWARD);
-					paction(SPIN_180);
-					paction(P_WEAK);
+				else{
+					if((t_vagg_v_f == 0) || (t_vagg_v_f == 1)){ //Turn left
+						curr_action = SPIN_L;
+					}
+					else{ //If there is a wall both left and right, turn 180 deg
+						curr_action = SPIN_180;
+					}
 				}
-
 			}
 			else{
-				paction(FORWARD);
+				curr_action = FORWARD;
 			}
 
 			//if(dfs(robot_pos_x, robot_pos_x, OUTSIDE) == 1){
@@ -81,7 +78,7 @@ void think(){
 	return;
 }
 
-void find_next_wall(){
+/*void find_next_wall(){
 
 	if(startup){
 
@@ -186,7 +183,7 @@ void find_next_wall(){
 	return;
 }
 
-
+*/
 
 void bfs(){
 //Används när vi vill hitta närmsta vägen till känd position
@@ -204,7 +201,7 @@ struct tuple{
 		uint8_t y;
 };
 
-void gen_actions(){
+/*void gen_actions(){ //Kommer nog inte användas, man vill kunna stoppa in nudge osv.
 
 	uint8_t temp_x = target_x;
 	uint8_t temp_y = target_y;
@@ -288,7 +285,7 @@ void gen_actions(){
 		temp_y = next_y;
 	}
 }
-
+*/
 void gen_adj_matrix(uint8_t home){
 
 	uint8_t i;

@@ -43,11 +43,7 @@ mapchange gstack();
 
 void init_mem();
 
-uint8_t gaction();
-uint8_t paction(uint8_t action);
 
-uint8_t read_a_top();
-void pop_a_stack();
 
 
 //----------------Constants------------------------------------
@@ -77,6 +73,7 @@ uint8_t motor_r;
 uint8_t motor_l;
 
 uint8_t dir;
+uint8_t curr_action;
 
 
 uint8_t s_LIDAR_u;

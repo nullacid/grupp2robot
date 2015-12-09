@@ -20,7 +20,6 @@ uint8_t FLOOR 		= 2;	//Tile: Floor
 uint8_t WALL 		= 3;	//Tile: Wall
 uint8_t OUTSIDE 	= 4;	//Tile: Outside
 uint8_t C_STACK_MAX = 100;  //Size of stack
-uint8_t A_STACK_MAX = 50;  //Size of stack
 
 //-------------------------------------------------------------
 
@@ -99,45 +98,3 @@ void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
 	return;
 }
 
-uint8_t paction(uint8_t action){
-
-	if(a_stack_top == (A_STACK_MAX-1)){
-
-		return 0; //Return false, since the stack is full
-
-	}
-	else{
-
-		a_stack_top += 1;
-		action_s[a_stack_top] = action;
-		return 1;
-	}
-
-	
-	return 0;
-}
-
-uint8_t read_a_top(){ //Läs action stack top utn att ändra den
-
-	if((a_stack_top == -1)){
-
-		return 0; //Om stacken är tom, returna 0
-
-	}
-	else{
-
-		return action_s[a_stack_top];
-
-	}
-
-	return 0;
-}
-
-void pop_a_stack(){
-
-	if((a_stack_top != -1)){
-		a_stack_top -= 1;
-	}
-
-	return;
-}
