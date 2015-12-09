@@ -26,14 +26,16 @@ void think(){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if((s_ir_front < 10) && (s_ir_front > 2)){
+			if((s_ir_front <= 8) && (s_ir_front > 2)){
 					curr_action = BACKWARD;
 			}
 		
 			else if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
 				curr_action = SPIN_R;
 				if((t_vagg_v_f == 1) && (t_vagg_v_b == 1)){
-					curr_action = P_WEAK_L;
+					if(t_p_v != 0){
+						curr_action = P_WEAK_L;
+					}
 				}
 
 			}
@@ -43,7 +45,7 @@ void think(){
 			}
 
 			else if(t_vagg_front == 2){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
-				if(t_p_h == 0){
+				if(t_p_h != 0){
 					curr_action = P_WEAK;
 				}
 				else{
@@ -51,7 +53,7 @@ void think(){
 						curr_action = SPIN_L;
 					}
 					else{ //If there is a wall both left and right, turn 180 deg
-						curr_action = SPIN_180;
+						curr_action = SPIN_L;
 					}
 				}
 			}

@@ -27,8 +27,8 @@ int16_t old_deviation_from_wall = 0;
 int16_t derivata = 0;
 int16_t P = 0;
 int16_t D = 0;
-uint8_t pidk = 20; //20 är okej
-uint8_t pidd = 16; //16 ok ish
+uint8_t pidk = 7; //20 är okej
+uint8_t pidd = 3; //16 ok ish
 uint8_t front_sensor_active = 0;
 uint8_t regulate_side = 0; 
 uint8_t sensor_start = 0;
@@ -100,7 +100,7 @@ void update_sensor_data(){
 
 void autonom (){
 
-	debug = front_sensor_active;
+	debug = deviation_from_wall;
 
 	switch(curr_action){
 		case (EMPTY):
@@ -130,7 +130,7 @@ void autonom (){
 				regulate_side = NONE;
 			}
 
-			if(derivata > 6){
+			if(derivata > 5){ //6
 				regulate_side = NONE;
 			}
 
@@ -154,13 +154,13 @@ void autonom (){
 				control = P+D;
 				if(control > 0){
 					rspeed = 100 - control;
-					lspeed = 100;
+					lspeed = 100 + control;
 				}
 				else if(control < 0){
 					//nära höger vägg
 
-					lspeed = 100 + (control-15);
-					rspeed = 100;
+					lspeed = 100 + control;
+					rspeed = 100 - control;
 				}
 				else{
 					lspeed = 100;
@@ -182,7 +182,7 @@ void autonom (){
 			}
 
 			else{
-				setSpeed(100, 100, 1, 1);
+				setSpeed(70, 70, 1, 1);
 			}
 			
 			if(front_sensor_active == 0){
@@ -252,12 +252,9 @@ void autonom (){
 			}
 
 			if(t_gyro == 0x44){
-
 				dir++;
-
 				first_time = 1;
 				spinning = 0;
-				//dir += 1;
 				transmitByte_down(0x1E);
 				curr_action = FORWARD;
 				action_done();
@@ -275,12 +272,17 @@ void autonom (){
 
 			if(t_gyro == 0x44){
 
-				dir++;	
+				if(dir == 0){
+					dir = 3;
+				}
+				else{
+					dir--;
+				}	
 
 				spinning = 0;
 				first_time = 1;	
 				transmitByte_down(0x1E);
-				curr_action = FORWARD;
+				curr_action = EMPTY;
 				action_done();
 			}
 		break;
@@ -295,12 +297,9 @@ void autonom (){
 			}
 
 			if(t_gyro == 0x44){
-				
 				dir += 2;
-					
 				first_time = 1;
 				spinning = 0;
-				//dir += 1;
 				transmitByte_down(0x1E);
 				curr_action = FORWARD;
 				action_done();
@@ -314,7 +313,6 @@ void autonom (){
 			if(t_p_h == 0){
 				setSpeed(0, 0, FORWARD, FORWARD);
 				curr_action = EMPTY;
-
 				action_done();
 			}
 
@@ -333,7 +331,7 @@ void autonom (){
 
 		break;
 
-			case(P_WEAK_L):
+		case(P_WEAK_L):
 
 			if(t_p_v == 0){
 				setSpeed(0, 0, FORWARD, FORWARD);
@@ -391,9 +389,10 @@ void autonom (){
 			}
 			//Kolla så vi åker typ parallellt
 
-			setSpeed(20, 20, 0, 0);
+			setSpeed(30, 30
+				, 0, 0);
 							
-			if(s_ir_front > 7){
+			if(s_ir_front >= 9){
 				first_time = 1;
 				curr_action = EMPTY;
 				action_done();

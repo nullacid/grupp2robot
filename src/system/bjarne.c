@@ -21,6 +21,7 @@ uint8_t dir_right = 1;
 uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
 uint8_t button_autonom = 0; // 0 om manuellt läge, 1 om autonomt läge
+uint8_t prev_autonom = 0; // för att stanna om man switchar tillbaka till manuellt
 
 uint8_t b1 = 2;
 uint8_t b2 = 3;
@@ -42,7 +43,6 @@ int main(){
 	init_mem();
 	init_motors();
 	init_auto();
-
 
 	_delay_ms(1500);
 
@@ -71,11 +71,14 @@ int main(){
 		handle_messages();	
 
 		if (button_autonom == 1){	
-
 			think();	
 			autonom();
-			
 		}			
+		if((prev_autonom == 1) && (button_autonom == 0)){
+			setSpeed(0,0,FORWARD,FORWARD);
+		}
+		prev_autonom = button_autonom;
+
 	}
 }
 
