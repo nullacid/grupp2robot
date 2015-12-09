@@ -234,7 +234,10 @@ def getReflexToken():
 	if debug:
 		print("reflex token")
 	harald.sendData(b'\x57')
-	return int(harald.receiveData()[0])
+	data = int(harald.receiveData()[0])
+	if data > 40:
+		print("ANOMALY DETECTED")
+	return data
 
 	
 def getIRFToken():
@@ -331,12 +334,11 @@ def getPosition():
 	if debug:
 		print("position")
 	harald.sendData(b'\x9A')
-	mapSystem.sysPosX = int(harald.receiveData()[0])
-	mapSystem.sysPosY = int(harald.receiveData()[0])
+	mapSystem.sysPosX = int(harald.receiveData()[0]) - 1
+	mapSystem.sysPosY = int(harald.receiveData()[0]) - 1
 	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 def getDecision():
-
 	if debug:
 		print("decision")
 	harald.sendData(b'\x5B')
@@ -403,6 +405,7 @@ handle_dictionary_data = {
 
 #Gets all data from one command and then updates the screen.
 #ORDER DATA HAS TO BE TRANSMITTED IN
+#NOT CURRENTLY USED
 #-------
 #IRRF
 #IRRB
@@ -467,8 +470,8 @@ def getAllData():
 			mapSystem.dataDict["Update Map"] = "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
 
 	#Get System Position
-	mapSystem.sysPosX = int(harald.receiveData()[0])
-	mapSystem.sysPosY = int(harald.receiveData()[0])
+	mapSystem.sysPosX = int(harald.receiveData()[0]) - 1
+	mapSystem.sysPosY = int(harald.receiveData()[0]) - 1
 	mapSystem.dataDict["System Position"] = "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 	#Get Steering Decision
@@ -489,6 +492,12 @@ def getData():
 	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
+
+	#if mapSystem.dataIndex % 2 == 0:
+	#	getMap()
+	#	getPosition()
+
+	getMap()
 	
 	if mapSystem.dataIndex == 0:
 		harald.inc_status()
@@ -499,7 +508,7 @@ def getData():
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	
 
-
+#mainloop
 while(crayRunning):
 	getData()
 
