@@ -2,9 +2,9 @@ import time
 class MapSystem():
 	def __init__(self):
 		self.arrayMap = [["UNEXPLORED" for x in range(32)] for x in range(32)]
-		self.startPosition = (16,16)
-		self.sysPosX = 16
-		self.sysPosY = 16
+		self.startPosition = (15,15)
+		self.sysPosX = 15
+		self.sysPosY = 15
 		self.dataIndex = 0
 		
 		
