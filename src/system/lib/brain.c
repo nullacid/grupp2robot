@@ -338,8 +338,8 @@ void gen_adj_matrix(uint8_t home){
 					adj_matrix[tempx][tempy] = (lowestN +1);
 
 					if((rmem(tempx, tempy)->tileType == UNEXP) && !home){
-						//target_x = tempx;
-						//target_y = tempy;
+						target_x = tempx;
+						target_y = tempy;
 						target_found = 1;
 
 					}

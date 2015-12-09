@@ -27,9 +27,8 @@ int16_t old_deviation_from_wall = 0;
 int16_t derivata = 0;
 int16_t P = 0;
 int16_t D = 0;
-uint8_t pidk = 20; //10 är okej
-uint8_t pidd = 16; //11 ok ish
-uint8_t lidar_start = 0;
+uint8_t pidk = 20; //20 är okej
+uint8_t pidd = 16; //16 ok ish
 uint8_t front_sensor_active = 0;
 uint8_t regulate_side = 0; 
 uint8_t sensor_start = 0;
@@ -118,11 +117,8 @@ void autonom (){
 				else{
 					front_sensor_active = 0;
 				}
-
-
 				first_time = 0;
 			}
-
 
 			if((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //Decide which side to regulate on
 				regulate_side = RIGHT;
@@ -131,6 +127,10 @@ void autonom (){
 				regulate_side = NONE; //ÄNDRA MIG HALLÅ
 			}
 			else{
+				regulate_side = NONE;
+			}
+
+			if(derivata > 6){
 				regulate_side = NONE;
 			}
 
@@ -232,8 +232,7 @@ void autonom (){
 
 		case(NUDGE_FORWARD):
 
-			setSpeed(20,20,1,1);
-
+			setSpeed(30,30,1,1);
 			if(t_reflex > 3){
 				curr_action = EMPTY;
 				action_done();
@@ -254,12 +253,7 @@ void autonom (){
 
 			if(t_gyro == 0x44){
 
-				if(dir == 3){
-					dir = 0;
-				}
-				else{
-					dir +=1;
-				}
+				dir++;
 
 				first_time = 1;
 				spinning = 0;
@@ -280,12 +274,9 @@ void autonom (){
 			}
 
 			if(t_gyro == 0x44){
-				if(dir == 0){
-					dir = 3;
-				}
-				else{
-					dir -=1;
-				}			
+
+				dir++;	
+
 				spinning = 0;
 				first_time = 1;	
 				transmitByte_down(0x1E);
@@ -304,18 +295,8 @@ void autonom (){
 			}
 
 			if(t_gyro == 0x44){
-				if(dir == 0){
-					dir = 2;
-				}
-				else if(dir == 2){
-					dir = 0;
-				}	
-				else if(dir == 1){
-					dir = 3;
-				}
-				else{
-					dir = 1;
-				}	
+				
+				dir += 2;
 					
 				first_time = 1;
 				spinning = 0;
@@ -412,7 +393,7 @@ void autonom (){
 
 			setSpeed(20, 20, 0, 0);
 							
-			if(s_ir_front > 8){
+			if(s_ir_front > 7){
 				first_time = 1;
 				curr_action = EMPTY;
 				action_done();
@@ -460,7 +441,11 @@ void action_done(){
 			if (t_vagg_front == 2){ //IR WALL
 			wmem_auto(WALL, robot_pos_x, robot_pos_y - 1); 
 			}
-			
+			if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x +1 , robot_pos_y); 
+				wmem_auto(FLOOR, robot_pos_x +2 , robot_pos_y); 
+			}
+
 			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
 				wmem_auto(WALL, robot_pos_x +1 , robot_pos_y); 
 			}
@@ -470,11 +455,16 @@ void action_done(){
 				wmem_auto(FLOOR, robot_pos_x + 1, robot_pos_y); 
 			}
 
-			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //VÄNSTER IR WALL
+			if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x -1 , robot_pos_y); 
+				wmem_auto(FLOOR, robot_pos_x -2 , robot_pos_y); 
+			}
+
+			if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
 				wmem_auto(WALL, robot_pos_x - 1 , robot_pos_y); 
 			}
 
-			if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
+			if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
 				wmem_auto(WALL, robot_pos_x - 2, robot_pos_y); 
 				wmem_auto(FLOOR, robot_pos_x - 1, robot_pos_y); 
 			}
@@ -493,7 +483,11 @@ void action_done(){
 			if (t_vagg_front == 2){ //IR WALL
 			wmem_auto(WALL, robot_pos_x + 1, robot_pos_y); 
 			}
-			
+			if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + 1); 
+				wmem_auto(FLOOR, robot_pos_x , robot_pos_y + 2); 
+			}
+
 			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
 				wmem_auto(WALL, robot_pos_x, robot_pos_y +1); 
 			}
@@ -502,12 +496,15 @@ void action_done(){
 				wmem_auto(WALL, robot_pos_x, robot_pos_y + 2); 
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + 1); 
 			}
-
-			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //VÄNSTER IR WALL
+			if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x, robot_pos_y-1); 
+				wmem_auto(FLOOR, robot_pos_x, robot_pos_y-2); 
+			}
+			if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
 				wmem_auto(WALL, robot_pos_x, robot_pos_y - 1); 
 			}
 
-			if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
+			if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
 				wmem_auto(WALL, robot_pos_x, robot_pos_y - 2); 
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y - 1); 
 			}
@@ -526,7 +523,11 @@ void action_done(){
 			if (t_vagg_front == 2){ //IR WALL
 			wmem_auto(WALL, robot_pos_x, robot_pos_y + 1); 
 			}
-			
+			if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x -1 , robot_pos_y); 
+				wmem_auto(FLOOR, robot_pos_x -2 , robot_pos_y); 
+			}
+
 			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
 				wmem_auto(WALL, robot_pos_x -1 , robot_pos_y); 
 			}
@@ -535,12 +536,16 @@ void action_done(){
 				wmem_auto(WALL, robot_pos_x - 2, robot_pos_y); 
 				wmem_auto(FLOOR, robot_pos_x - 1, robot_pos_y); 
 			}
+			if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x +1 , robot_pos_y); 
+				wmem_auto(FLOOR, robot_pos_x +2 , robot_pos_y); 
+			}
 
-			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //VÄNSTER IR WALL
+			if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
 				wmem_auto(WALL, robot_pos_x + 1 , robot_pos_y); 
 			}
 
-			if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
+			if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
 				wmem_auto(WALL, robot_pos_x + 2, robot_pos_y); 
 				wmem_auto(FLOOR, robot_pos_x + 1, robot_pos_y); 
 			}
@@ -557,7 +562,11 @@ void action_done(){
 			if (t_vagg_front == 2){ //IR WALL
 			wmem_auto(WALL, robot_pos_x - 1, robot_pos_y); 
 			}
-			
+			if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x , robot_pos_y -1); 
+				wmem_auto(FLOOR, robot_pos_x, robot_pos_y -2); 
+			}
+
 			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
 				wmem_auto(WALL, robot_pos_x, robot_pos_y -1); 
 			}
@@ -566,12 +575,16 @@ void action_done(){
 				wmem_auto(WALL, robot_pos_x, robot_pos_y - 2); 
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y - 1); 
 			}
+			if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
+				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + 1); 
+				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + 2); 
+			}
 
-			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //VÄNSTER IR WALL
+			if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
 				wmem_auto(WALL, robot_pos_x, robot_pos_y + 1); 
 			}
 
-			if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
+			if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
 				wmem_auto(WALL, robot_pos_x, robot_pos_y + 2); 
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + 1); 
 			}
