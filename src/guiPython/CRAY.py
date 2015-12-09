@@ -34,10 +34,10 @@ pygame.font.init()
 debug = False
 
 """#FULLSCREEN MODE
-screenWidth = 1584
-screenHeight = 891
-squareWidth = screenHeight/33
-squareHeight = screenHeight/33
+screenWidth = 1536
+screenHeight = 864
+squareWidth = screenHeight/32
+squareHeight = screenHeight/32
 
 screen_size = [screenWidth,screenHeight]
 
@@ -46,15 +46,15 @@ offset = -15
 #dataOffset = 300
 
 """#SMALLSCREEN MODE
-screenWidth = 990
-screenHeight = 660
-squareWidth = screenHeight/33
-squareHeight = screenHeight/33
+screenWidth = 960
+screenHeight = 640
+squareWidth = screenHeight/32
+squareHeight = screenHeight/32
 
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
-offset = -10
+offset = -40
 #dataOffset = 220"""
 
 
@@ -91,23 +91,23 @@ def paintData(mapSystem):
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
 	#Start Position Circle
-	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(18 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(17 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
-	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
+	surface.blit(text, (36 * squareWidth, 17 * (5 * squareHeight) / 3))
 	
 	#Current Position Circle
-	pygame.draw.circle(surface, MAGENTA, [int(35 * squareWidth), int(19 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	pygame.draw.circle(surface, MAGENTA, [int(35 * squareWidth), int(18 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
 	text = "Current Position"
 	text = font.render(text, 0 , WHITE)
-	surface.blit(text, (36 * squareWidth, 19 * (5 * squareHeight) / 3))
+	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
 	
 	#Conneciton status
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
 	
 def paintMap(mapSystem):
-	for i in range(0,33):
-		for j in range(0,33):
+	for i in range(0,32):
+		for j in range(0,32):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 
 	#Draw startPosition
@@ -311,8 +311,8 @@ def getMap():
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
-	xCoord = int(msByte[0])
-	yCoord = int(lsByte[0] & b'\x3F'[0])
+	xCoord = int(msByte[0]) - 1
+	yCoord = int(lsByte[0] & b'\x3F'[0]) - 1
 	tileType = int(lsByte[0] >> 6)
 	if tileType != 0:
 		if tileType == 1:
@@ -401,6 +401,87 @@ handle_dictionary_data = {
 	"Debug" : getDebug
 }
 
+#Gets all data from one command and then updates the screen.
+#ORDER DATA HAS TO BE TRANSMITTED IN
+#-------
+#IRRF
+#IRRB
+#IRLF
+#IRLB
+#IRF
+#PR
+#PL
+#Gt
+#IRRt
+#IRLt
+#IRFt
+#Steering
+#Map
+#SysPos
+#Decision
+#Debug
+#-------
+def getAllData():
+	#Send command
+	harald.sendData(b'\x1D')
+
+	#Get IR sensor data
+	mapSystem.dataDict["IRrightFront"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRrightBack"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRleftFront"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRleftBack"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IR Front"] = int(harald.receiveData()[0])
+
+	#Get Parallel tokens
+	mapSystem.dataDict["Parallel Right"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["Parallel Left"] = int(harald.receiveData()[0])
+
+	#Get gyro token
+	mapSystem.dataDict["Gyro (token)"] = int(harald.receiveData()[0])
+
+	#Get IR token data
+	mapSystem.dataDict["IRright (token)"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IRleft (token)"] = int(harald.receiveData()[0])
+	mapSystem.dataDict["IR Front (token)"] = int(harald.receiveData()[0])
+
+	#Get Steering data. (Output to engine)
+	leftSteering = int(harald.receiveData()[0])
+	rightSteering = int(harald.receiveData()[0])
+	mapSystem.dataDict["Steering data"] = str(leftEngine) + "  " + str(rightEngine)
+
+	#Get Map data from change stack
+	msByteMap = harald.receiveData()
+	lsByteMap = harald.receiveData()
+	xCoordMap = int(msByteMap[0]) - 1
+	yCoordMap = int(lsByteMap[0] & b'\x3F'[0]) - 1
+	tileType = int(lsByteMap[0] >> 6)
+	if tileType != 0:
+		if tileType == 1:
+			tileType = "UNEXPLORED"
+		elif tileType == 2:
+			tileType = "OPEN"
+		elif tileType == 3:
+			tileType = "WALL"
+		if xCoord < 32 and yCoord < 32:
+			mapSystem.arrayMap[xCoord][yCoord] = tileType
+			mapSystem.dataDict["Update Map"] = "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+
+	#Get System Position
+	mapSystem.sysPosX = int(harald.receiveData()[0])
+	mapSystem.sysPosY = int(harald.receiveData()[0])
+	mapSystem.dataDict["System Position"] = "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
+
+	#Get Steering Decision
+	mapSystem.dataDict["Steering Decision"] = int(harald.receiveData()[0])
+	#Update the log for steering decision, great for debugging
+	mapSystem.updateLog("Steering Decision")
+
+	#Get Debug
+	mapSystem.dataDict["Debug"] = int(harald.receiveData()[0])
+
+	#Update Screen
+	paintMap(mapSystem)
+	paintData(mapSystem)
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
@@ -421,7 +502,7 @@ def getData():
 
 while(crayRunning):
 	getData()
-	
+
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
 			handle_dictionary_down[event.key]()

@@ -73,7 +73,6 @@ class Harald():
 			self.ourSocket.connect((self.targetDevice, self.port))
 			print("Connected to firefly module")
 			
-			print("SYNCING!")
 			#Clear any data from the old bluetooth connection
 			while not self.__doSync():
 				pass
