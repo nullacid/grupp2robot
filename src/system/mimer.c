@@ -1,6 +1,6 @@
 /*
  * Created: i den spirande vårens tid anno 1734 i väntan på vår herre jesus kristus återkomst
- * Author: Mikha'el and Eirikur aka the buzzmeister
+ * Author: Mikha'el and Eirikur
  * "Det är lätt med facit i hand,
  *  ändå var det folk som failade på logiktentan" - Peter
  */
@@ -16,6 +16,11 @@
 
 uint8_t cm_values[200] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 91, 86, 81, 76, 72, 69, 65, 62, 59, 57, 55, 52, 50, 48, 47, 45, 43, 42, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 29, 28, 27, 27, 26, 25, 25, 24, 24, 23, 23, 22, 22, 21, 21, 21, 20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
+uint32_t rotation_180 = 188000;
+uint32_t rotation_c_clockwise = 54400;	// left
+uint32_t rotation_clockwise = 91800;	// höger
+uint8_t gyro_offset = 10;
+	
 /*for ir-sensor, normal and token values*/	
 uint8_t IRLF = 0x01;
 uint8_t IRLB = 0x02;
@@ -246,9 +251,13 @@ void processCommand(unsigned char data){
 	else if(data == 0x16){
 		transmitIRLBT();
 	}
+	else if(data == 0x17){
+		transmitReflexT();
+	}
 	else if(data == 0x1D){
 		transmitALL();
 	}
+	
 	else if(data == 0x1c){
 		gyromode = 1;
 		rotation_direction = 0; // clockwise
@@ -267,6 +276,7 @@ void processCommand(unsigned char data){
 	}
 	else if(data == 0x21){ // reset reflex counter
 		segments_turned = 0;
+		transmitByte_up(0x33);
 	}
 }
 
@@ -285,10 +295,10 @@ void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 
 /* special values for FRONT sensor */
 void calcTokenFront(uint8_t *IRxx, uint8_t *IRxxT){
-	if(1 < *IRxx && *IRxx <= 12){
+	if(1 < *IRxx && *IRxx <= 13){
 		*IRxxT = 0x02;
 	}
-	else if(9 < *IRxx && *IRxx < 43){
+	else if(13 < *IRxx && *IRxx < 43){
 		*IRxxT = 0x01;
 	}
 	else{
@@ -310,10 +320,17 @@ void calcParallel(){
 	if (IRRF == 0 || IRRB == 0){
 		parallelR = 127;
 	}
+	
 	else{
 		parallelR = IRRF - IRRB;
 	}
-	parallelL = IRLF - IRLB;
+	if (IRLF == 0 || IRLB == 0){
+		parallelL = 127;
+	}
+	else{
+		parallelL = IRLF - IRLB;
+	}
+	
 }
 
 /*calculate middle point of gyro, called gyro_zero. uses 16 values. is called in the beginning of the program.*/
@@ -371,28 +388,28 @@ uint8_t single_measure(){
 /* to rotate either 90° clockwise/counterclockwise or 180°  */
 void gyro_gogo(){
 	
-	calibrate_gyro();
+	//calibrate_gyro();
 	
 	uint8_t angular_rate = 0x00;
 	uint32_t angular_sum = 0;
 	
 	if (rotation_direction == 2){ // 180 degrees
-		rotation_constant = 150000;
+		rotation_constant = rotation_180;
 	}
 	else if(rotation_direction == 1){ // counter-clockwise
-		rotation_constant = 70000;
+		rotation_constant = rotation_c_clockwise;
 	}
 	else if(rotation_direction == 0){  // clockwise
-		rotation_constant = 75000;
+		rotation_constant = rotation_clockwise;
 	}
 	
 	while(gyromode == 1){	// until rotation complete, spin
 		angular_rate = single_measure();
 			
-		if (angular_rate > (gyro_zero+10)){
+		if (angular_rate > (gyro_zero+gyro_offset)){
 			angular_rate -= gyro_zero;
 		}
-		else if(angular_rate < (gyro_zero-10)){
+		else if(angular_rate < (gyro_zero-gyro_offset)){
 			angular_rate = gyro_zero - angular_rate;
 		}
 		else{ 
@@ -401,7 +418,7 @@ void gyro_gogo(){
 		angular_sum += angular_rate;
 		
 		if (angular_sum > rotation_constant){
-			gyromode = 0;
+			gyromode = 0;	
 			gyro_token = 0x44;
 		}
 		
@@ -440,6 +457,9 @@ int main()
 	SPI_init();
 	calibrate_gyro(); // calibrate and initialize ADC
 	
+	uint8_t IR_FRONT_1 = 0x00;
+	uint8_t IR_FRONT_2 = 0x00;
+	
 	while(1){				
 		// usart
 		usart_gogo();
@@ -449,7 +469,8 @@ int main()
 		IRRB = adc_to_cm(adc_read(1));
 		IRLF = adc_to_cm(adc_read(2));
 		IRRF = adc_to_cm(adc_read(3));
-		IRF = adc_to_cm(adc_read(4));
+		
+		IRF = adc_to_cm(adc_read(4)); 
 		
 		usart_gogo();
 		
