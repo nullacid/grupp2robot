@@ -113,7 +113,7 @@ class Harald():
 	def __doSync(self):
 		self.sendData(b'\x26')
 
-		self.ourSocket.settimeout(2.0)
+		self.ourSocket.settimeout(5.0)
 
 		try:
 			while self.receiveData() != b'\x26':

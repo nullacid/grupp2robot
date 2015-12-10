@@ -8,7 +8,7 @@ class MapSystem():
 		self.dataIndex = 0
 		
 		
-		self.gyroFile = open("logs/gyro.swag", 'w', 1)
+		#self.gyroFile = open("logs/gyro.swag", 'w', 1)
 		self.IRFrontFile = open("logs/ir_front.swag", 'w', 1)
 		self.IRtokenFile = open("logs/IRtoken.swag", 'w', 1)
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
@@ -32,14 +32,14 @@ class MapSystem():
 						6 : "IR Front (token)",
 						7 : "Parallel Right",
 						8 : "Parallel Left",
-						9 : "Gyro (token)",
-						10 : "IRright (token)",
-						11 : "IRleft (token)",
-						12 : "Steering data",
-						13 : "Update Map",
-						14 : "System Position",
-						15 : "Steering Decision",
-						16 : "Debug"
+						#9 : "Gyro (token)",
+						9 : "IRright (token)",
+						10 : "IRleft (token)",
+						11 : "Steering data",
+						12 : "Update Map",
+						13 : "System Position",
+						14 : "Steering Decision",
+						15 : "Debug"
 		}
 		#Store values for each data type
 		self.dataDict = {
@@ -52,7 +52,6 @@ class MapSystem():
 						"IR Front (token)" : 1,
 						"Parallel Right" : 1,
 						"Parallel Left" : 1,
-						"Gyro (token)" : 1,
 						"IRright (token)" : 1,
 						"IRleft (token)" : 1,
 						"Steering data" : 1,
@@ -63,22 +62,21 @@ class MapSystem():
 		}
 		#Associates a data type name with a file
 		self.fileDict = {
-						"IR Front" : self.IRFrontFile,
-						"Gyro" : self.gyroFile,
-						"Steering Decision" : self.steeringDecisionFile,
-						"Steering data" : self.steeringDataFile,
-						"Parallel Right" : self.parallelRightFile,
-						"Parallel Left" : self.parallelLeftFile,
-						"Segments turned" : self.segmentsFile,
-						"Debug" : self.debugFile,
-						"IR Front (token)" : self.IRtokenFile,
-						"Update Map" : self.mapUpdateFile,
-						"IRrightFront" : self.irRightFile
+						#"IR Front" : self.IRFrontFile,
+						#"Steering Decision" : self.steeringDecisionFile,
+						#"Steering data" : self.steeringDataFile,
+						#"Parallel Right" : self.parallelRightFile,
+						#"Parallel Left" : self.parallelLeftFile,
+						#"Segments turned" : self.segmentsFile,
+						#"Debug" : self.debugFile,
+						#"IR Front (token)" : self.IRtokenFile,
+						#"Update Map" : self.mapUpdateFile,
+						#"IRrightFront" : self.irRightFile
 		}
 	#Increments index and loops it at 17
 	def incIndex(self):
 		self.dataIndex += 1
-		if self.dataIndex > 16:
+		if self.dataIndex > 15:
 			self.dataIndex = 0
 	
 	#Writes the data currently mapped to the input data type to the data type's log file

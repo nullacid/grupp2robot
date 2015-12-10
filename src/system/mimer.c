@@ -199,7 +199,7 @@ void transmitALL(){
 
 	transmitParallelR();
 	transmitParallelL();
-	transmitGyroT();
+	//transmitGyroT();
 	
 	transmitIRRFT();
 	transmitIRRBT();

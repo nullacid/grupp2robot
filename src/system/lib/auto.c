@@ -89,7 +89,7 @@ void update_sensor_data(){
 
 	t_p_h = receiveByte_down();;
 	t_p_v = receiveByte_down();
-	t_gyro = receiveByte_down();
+	//t_gyro = receiveByte_down();
 	t_vagg_h_f = receiveByte_down();
 	t_vagg_h_b = receiveByte_down();
 	t_vagg_v_f = receiveByte_down();

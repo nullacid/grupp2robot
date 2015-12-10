@@ -85,7 +85,7 @@ GREY = (139, 137, 137)
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
-	for i in range(0,17):
+	for i in range(0,16):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
@@ -393,7 +393,7 @@ handle_dictionary_data = {
 	"IR Front (token)" : getIRFToken,
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
-	"Gyro (token)" : getGyroToken,
+	#"Gyro (token)" : getGyroToken,
 	"IRright (token)" : getIRRFtoken,
 	"IRleft (token)" : getIRLFtoken,
 	"Steering data" : getSteering,
