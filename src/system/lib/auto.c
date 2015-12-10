@@ -443,7 +443,7 @@ void action_done(uint8_t update_map){
 				}
 				if (t_vagg_front == 1){ //IR WALL + 1 FLOOR
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y - 1); 
-				wmem_auto(WALL, robot_pos_x, robot_pos_y - 2); //LIDAR WALL
+				//wmem_auto(WALL, robot_pos_x, robot_pos_y - 2); //LIDAR WALL
 				}
 				if (t_vagg_front == 2){ //IR WALL
 				wmem_auto(WALL, robot_pos_x, robot_pos_y - 1); 
@@ -485,7 +485,7 @@ void action_done(uint8_t update_map){
 				}
 				if (t_vagg_front == 1){ //IR WALL + 1 FLOOR
 				wmem_auto(FLOOR, robot_pos_x +1 , robot_pos_y); 
-				wmem_auto(WALL, robot_pos_x +2 , robot_pos_y); //LIDAR WALL
+				//wmem_auto(WALL, robot_pos_x +2 , robot_pos_y); //LIDAR WALL
 				}
 				if (t_vagg_front == 2){ //IR WALL
 				wmem_auto(WALL, robot_pos_x + 1, robot_pos_y); 
@@ -525,7 +525,7 @@ void action_done(uint8_t update_map){
 				}
 				if (t_vagg_front == 1){ //IR WALL + 1 FLOOR
 				wmem_auto(FLOOR, robot_pos_x, robot_pos_y + 1); 
-				wmem_auto(WALL, robot_pos_x, robot_pos_y + 2); //LIDAR WALL
+				//wmem_auto(WALL, robot_pos_x, robot_pos_y + 2); //LIDAR WALL
 				}
 				if (t_vagg_front == 2){ //IR WALL
 				wmem_auto(WALL, robot_pos_x, robot_pos_y + 1); 
@@ -564,7 +564,7 @@ void action_done(uint8_t update_map){
 				}
 				if (t_vagg_front == 1){ //IR WALL + 1 FLOOR
 				wmem_auto(FLOOR, robot_pos_x -1 , robot_pos_y); 
-				wmem_auto(WALL, robot_pos_x -2 , robot_pos_y); //LIDAR WALL
+				//wmem_auto(WALL, robot_pos_x -2 , robot_pos_y); //LIDAR WALL
 				}
 				if (t_vagg_front == 2){ //IR WALL
 				wmem_auto(WALL, robot_pos_x - 1, robot_pos_y); 
