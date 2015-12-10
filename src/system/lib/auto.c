@@ -214,7 +214,12 @@ void autonom (){
 					}
 				}
 				curr_action = EMPTY;
-				action_done(UPDATE);
+				if((s_ir_front < 12)&&(s_ir_front > 1)){ //fuckar upp vår position annars
+					action_done(DONTUPDATE);
+				}
+				else{
+					action_done(UPDATE);
+				}
 			}
 			
 		break;

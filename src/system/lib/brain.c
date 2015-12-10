@@ -45,7 +45,7 @@ void think(){
 
 			}
 
-			else if(t_vagg_h_f != 2){
+			else if(t_vagg_h_f != 2){ // is it used?
 				curr_action = NUDGE_FORWARD;
 			}
 
