@@ -12,6 +12,7 @@
 #define NUDGE_FORWARD	7
 #define P_WEAK			8 //Weak parallelization
 #define P_WEAK_L		9
+#define NUDGE_TO_WALL	0xA
 
 #define NORTH	0
 #define	EAST	1
