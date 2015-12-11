@@ -19,6 +19,7 @@ uint8_t UNEXP 		= 1;	//Tile: Unexplored
 uint8_t FLOOR 		= 2;	//Tile: Floor
 uint8_t WALL 		= 3;	//Tile: Wall
 uint8_t OUTSIDE 	= 4;	//Tile: Outside
+uint8_t IWALL		= 5;
 uint8_t C_STACK_MAX = 100;  //Size of stack
 
 //-------------------------------------------------------------
@@ -46,7 +47,9 @@ uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 	else{
 
 		mapchange temp = {.x = x, .y = y, .t = t}; 
-
+		if(t == 5){
+			temp.t = 1;
+		}
 
 		c_stack_top += 1;
 		change_stack[c_stack_top] = temp;
