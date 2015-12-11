@@ -14,7 +14,9 @@ void gen_actions();
 uint8_t adj_matrix[32][32];
 
 uint8_t follow_wall = 1;
+uint8_t map_enclosed = 0;
 uint8_t startup = 1;
+void find_target();
 //För DFS
 uint8_t check = 0;
 uint8_t visited[32][32];
@@ -27,7 +29,7 @@ void think(){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if((s_ir_front <= 8) && (s_ir_front > 2)){
+			if((s_ir_front <= 9) && (s_ir_front > 2)){
 					curr_action = BACKWARD;
 			}
 		
@@ -72,30 +74,24 @@ void think(){
 				curr_action = FORWARD;
 			}
 
-			/*if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
-				follow_wall = 0;
-				mark_walls();
-				target_x = robot_pos_x;
-				target_y = robot_pos_y;
+			if(map_enclosed == 0){ //If we are following the outside wall
+				/*if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
+					follow_wall = 0;
+					map_enclosed = 1;
+					mark_walls();
+					find_target();
+					target_x = robot_pos_x;
+					target_y = robot_pos_y;
+				}
+				*/
 			}
-			*/
+			else if((robot_pos_x != target_x) && (robot_pos_y != target_y)){
 
+
+
+			}
 		}
-		else{ //Om vi ska kartlägga mitten
-
-		//	if((target_x == robot_pos_x) && (target_y == robot_pos_y)){
-		//		bfs(FINDUNEXP);
-		//	}
-
-		//	uint8_t SPIN_DIR;
-
-
-		}
-
-	}
-
-	//Om actionstacken är tom, räkna ut nästa target
-	//Fyll på actionstacken
+	}	
 
 	return;
 }
@@ -177,6 +173,12 @@ void find_path(){ //Kommer nog inte användas, man vill kunna stoppa in nudge os
 	}
 }
 
+
+void find_target(){
+
+	tuple left_list[20];
+
+}
 
 void gen_adj_matrix(uint8_t home){
 

@@ -48,6 +48,7 @@ mapchange gstack();
 void init_mem();
 
 
+int8_t c_stack_top ; 		//The top of the stack
 
 
 //----------------Constants------------------------------------

@@ -5,7 +5,6 @@
 //----------------Variables------------------------------------
 node mapmem[32][32];		//The map memory 33x33 tiles large
 mapchange change_stack[99];	//A stack where changes to the map will be waiting to be sent
-int8_t c_stack_top = -1; 		//The top of the stack
 int8_t a_stack_top = -1;
 
 
@@ -15,11 +14,11 @@ uint8_t action_s[50]; //The actions required to get to target
 
 
 //----------------Constants------------------------------------
-uint8_t UNEXP 		= 1;	//Tile: Unexplored
+uint8_t UNEXP 		= 0;	//Tile: Unexplored
 uint8_t FLOOR 		= 2;	//Tile: Floor
 uint8_t WALL 		= 3;	//Tile: Wall
 uint8_t OUTSIDE 	= 4;	//Tile: Outside
-uint8_t IWALL		= 5;
+uint8_t IWALL		= 1;
 uint8_t C_STACK_MAX = 100;  //Size of stack
 
 //-------------------------------------------------------------
@@ -31,13 +30,15 @@ void init_mem(){
 	target_x = 0; //Target tile
 	target_y = 0;
 	dir = 0;
-
+	c_stack_top = -1;
+	debug = 0;
 	//OKÄND SKA VARA 1, fixa
 	return;
 
 }
 
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
+
 
 	if(c_stack_top == (C_STACK_MAX-1)){
 
@@ -54,7 +55,6 @@ uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 		c_stack_top += 1;
 		change_stack[c_stack_top] = temp;
 	}
-
 	return 1;
 
 }
@@ -73,7 +73,6 @@ mapchange gstack(){
 		c_stack_top -= 1;
 
 		return data;
-
 	}
 }
 
@@ -91,13 +90,13 @@ void wmem(uint8_t data, uint8_t x, uint8_t y){
 }
 
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
-
 	//Denna kallar auto på, lägger till i change-stacken om ny data
-	if (mapmem[x][y].tileType != UNEXP){ //NY DATA, ska skickas upp
-		
+	if (mapmem[x][y].tileType != data){ //NY DATA, ska skickas upp
 		mapmem[x][y].tileType = data;
 		pstack(x, y, data);
 	}
+
+
 	return;
 }
 
