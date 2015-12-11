@@ -573,9 +573,10 @@ def getData():
 	#	getPosition()
 
 	getMap()
-	getPosition
+	getPosition()
 	#if mapSystem.dataIndex == 0:
-	#harald.inc_status()
+
+	harald.inc_status()
 	paintMap(mapSystem)
 	paintData(mapSystem)
 
