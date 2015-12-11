@@ -52,23 +52,32 @@ squareWidth = screenHeight/32
 squareHeight = screenHeight/32
 
 
-
-
-
-
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
 
-surface.set_colorkey(WHITE)
-
 offset = -40
 #dataOffset = 220"""
+
+#Define RGB colours
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+BLUE = (0,0,255)
+GREEN = (0,255,0)
+H4xx0R = (173,255,47)
+RED = (255,0,0)
+CYAN = (0,255,255)
+MAGENTA = (255,0,255)
+YELLOW = (255,255,0)
+GREY = (139, 137, 137)
+
+surface.set_colorkey(WHITE)
+
 
 tileUNEXPLORED = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 tileOPEN = pygame.transform.scale(pygame.image.load("tile_open.jpg"),(int(squareWidth),int(squareHeight)))
 tileWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileLEFTWALL = pygame.transform.scale(pygame.image.load("wall_tile_left.jpg"), (int(squareWidth), int(squareHeight)))
+tileLEFTWALL = pygame.transform.scale(pygame.image.load("tile_wall_left.jpg"), (int(squareWidth), int(squareHeight)))
 tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 
 
@@ -90,17 +99,6 @@ pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 crayRunning = True
 
 
-#Define RGB colours
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-BLUE = (0,0,255)
-GREEN = (0,255,0)
-H4xx0R = (173,255,47)
-RED = (255,0,0)
-CYAN = (0,255,255)
-MAGENTA = (255,0,255)
-YELLOW = (255,255,0)
-GREY = (139, 137, 137)
 
 
 	
