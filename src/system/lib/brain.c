@@ -5,7 +5,7 @@
 void find_next_wall();
 void find_empty_tile();
 
-void bfs();
+void bfs(uint8_t target);
 uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile);
 uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile);
 void gen_adj_matrix(uint8_t home);
@@ -17,7 +17,8 @@ uint8_t follow_wall = 1;
 uint8_t startup = 1;
 //För DFS
 uint8_t check = 0;
-//Är detta ok utan initialisering?
+uint8_t visited[32][32];
+void mark_walls();
 
 
 void think(){
@@ -71,14 +72,23 @@ void think(){
 				curr_action = FORWARD;
 			}
 
-			//if(dfs(robot_pos_x, robot_pos_x, OUTSIDE) == 1){
-			//	follow_wall = 0;
-			//}
+			/*if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
+				follow_wall = 0;
+				mark_walls();
+				target_x = robot_pos_x;
+				target_y = robot_pos_y;
+			}
+			*/
 
 		}
 		else{ //Om vi ska kartlägga mitten
 
-			//bfs();
+		//	if((target_x == robot_pos_x) && (target_y == robot_pos_y)){
+		//		bfs(FINDUNEXP);
+		//	}
+
+		//	uint8_t SPIN_DIR;
+
 
 		}
 
@@ -91,12 +101,15 @@ void think(){
 }
 
 
-void bfs(){
+void bfs(uint8_t target){
 //Används när vi vill hitta närmsta vägen till känd position
-	gen_adj_matrix(0); //Generates the adjacency matrix and sets target_x and y
-	gen_actions();	  //to the closest undiscovered tile.
+
+	gen_adj_matrix(target); //Generates the adjacency matrix and sets target_x and y
+	find_path();
+
 	return;
 }
+
 
 
 
@@ -107,7 +120,7 @@ struct tuple{
 		uint8_t y;
 };
 
-/*void gen_actions(){ //Kommer nog inte användas, man vill kunna stoppa in nudge osv.
+void find_path(){ //Kommer nog inte användas, man vill kunna stoppa in nudge osv.
 
 	uint8_t temp_x = target_x;
 	uint8_t temp_y = target_y;
@@ -121,69 +134,41 @@ struct tuple{
 
 	while((temp_x != robot_pos_x) && (temp_y != robot_pos_y)){ //While not at robot position
 
-		if((temp_x != target_x) && (temp_y != target_y)){ //Decide the initial dir of the robot
+			uint8_t curr_val = adj_matrix[temp_x][temp_y];
 
-			if(adj_matrix[temp_x-1][temp_y] < next_val){ //Left of target
-				next_dir = WEST;
-				next_val = adj_matrix[temp_x-1][temp_y];
+			if((adj_matrix[temp_x-1][temp_y] > curr_val) && (temp_x-1 != old_x) && (temp_y != old_y)){ //North
+				adj_matrix[temp_x-1][temp_y] = 254;
 			}
-			else if(adj_matrix[temp_x+1][temp_y] < next_val){ //Right of target
-				next_dir = EAST;
-				next_val = adj_matrix[temp_x+1][temp_y];
-			}
-			else if(adj_matrix[temp_x][temp_y-1] < next_val){ //north of target
-				next_dir = NORTH;
-				next_val = adj_matrix[temp_x][temp_y-1];
-			}
-			else{ //south of target
-				next_dir = SOUTH; 
-				next_val = adj_matrix[temp_x][temp_y+1];
+			else{
+				next_x = temp_x-1;
+				next_y = temp_y;
 			}
 
-			//Now the dir of the next tile has been decided
-			if(old_x > temp_x){ 
-				old_dir = EAST;
+			if((adj_matrix[temp_x][temp_y+1] > curr_val) && (temp_x != old_x) && (temp_y+1 != old_y)){ //East
+				adj_matrix[temp_x][temp_y+1] = 254;
 			}
-			else if(old_x < temp_x){
-				old_dir = WEST;
+			else{
+				next_x = temp_x;
+				next_y = temp_y+1;
 			}
-			else{ //old_x == temp_x => vi rör oss i y-led
-				if(old_y > temp_y){
-					old_dir = SOUTH;
-				}
-				else{
-					old_dir = NORTH;
-				}
-			}
-			//Båda directions är bestämda
 
-			if(old_y == SOUTH && next_x == WEST){
-				paction(SPIN_R);
+			if((adj_matrix[temp_x+1][temp_y] > curr_val) && (temp_x+1 != old_x) && (temp_y != old_y)){ //South
+				adj_matrix[temp_x+1][temp_y] = 254;
 			}
-			else if(old_y == SOUTH && next_x == EAST){
-				paction(SPIN_L);
+			else{
+				next_x = temp_x+1;
+				next_y = temp_y;
 			}
-			else if(old_y == WEST && next_x == NORTH){
-				paction(SPIN_R);
-			}
-			else if(old_y == WEST && next_x == SOUTH){
-				paction(SPIN_L);
-			}
-			else if(old_y == NORTH && next_x == EAST){
-				paction(SPIN_R);
-			}
-			else if(old_y == NORTH && next_x == WEST){
-				paction(SPIN_L);
-			}
-			else if(old_y == EAST && next_x == SOUTH){
-				paction(SPIN_R);
-			}
-			else if(old_y == EAST && next_x == NORTH){
-				paction(SPIN_L);
-			}
-		}
-		paction(FORWARD); //The first (last) action is always FORWARD;
 
+			if((adj_matrix[temp_x][temp_y-1] > curr_val) && (temp_x != old_x) && (temp_y-1 != old_y)){ //West
+				adj_matrix[temp_x][temp_y-1] = 254;
+			}
+			else{
+				next_x = temp_x;
+				next_y = temp_y-1;
+			}
+	
+			
 		old_x = temp_x;
 		old_y = temp_y;
 
@@ -191,7 +176,8 @@ struct tuple{
 		temp_y = next_y;
 	}
 }
-*/
+
+
 void gen_adj_matrix(uint8_t home){
 
 	uint8_t i;
@@ -199,8 +185,13 @@ void gen_adj_matrix(uint8_t home){
 	uint8_t list_front = 0;
 	tuple adj_list[99];
 
-	for(i = 0; i < 0; i++){
-		for(j = 0; j < 0; j++){
+
+	//1. Generate a list of tiles that are floor and unexplored tiles. 
+	//2. Iterate through the list and give each tile a number that is its lowest neighbour++
+	//3. When the list is empty, the coloring is done.
+
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
 
 			uint8_t temp = rmem(i,j)->tileType;
 
@@ -213,17 +204,20 @@ void gen_adj_matrix(uint8_t home){
 		}
 	}
 
+//----------Step 1 done------------------------
+
+
 	uint8_t target_found = 0;
 
 	while(!target_found){
 
-		int i;
+		uint8_t i;
 		for(i = 0; i < list_front; i++){
 			if(adj_list[i].x != 0){
 				uint8_t tempx = adj_list[i].x;
 				uint8_t tempy = adj_list[i].y;
 
-				uint8_t checkL = adj_matrix[tempx-1][tempy]; //Chack left
+				uint8_t checkL = adj_matrix[tempx-1][tempy]; //Check left
 				uint8_t checkR = adj_matrix[tempx+1][tempy]; //Check right
 				uint8_t checkU = adj_matrix[tempx][tempy-1]; //Check up
 				uint8_t checkD = adj_matrix[tempx][tempy+1]; //Check down
@@ -267,19 +261,25 @@ return;
 
 }
 
+void mark_walls(){
 
+	uint8_t i;
+	uint8_t j;
 
-uint8_t visited[32][32];
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+
+			if(visited[i][j] != 1){
+				wmem(WALL, i, j);
+			}
+		}
+	}
+}
+
 
 uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 //Används för att kolla om väggen runt är sluten.
 	//Return 1 om sökning lyckades, 0 om ingen väg finns
-
-	/*	uint8_t UNEXP 		= 1;	//Tile: Unexplored
-		uint8_t FLOOR 		= 2;	//Tile: Floor
-		uint8_t WALL 		= 3;	//Tile: Wall
-		uint8_t OUTSIDE 	= 4;	//Tile: Outside*/
-
 
 	uint8_t temp = 0;
 	temp = dfs_help(startx, starty, target_tile);

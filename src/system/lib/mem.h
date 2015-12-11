@@ -19,6 +19,9 @@
 #define	SOUTH	2	
 #define	WEST	3
 
+#define FINDHOME 	1
+#define FINDUNEXP 	0
+
 #include <avr/io.h>
 typedef struct {
 	uint8_t x;
@@ -52,6 +55,7 @@ uint8_t UNEXP;	//Tile: Unexplored
 uint8_t FLOOR;	//Tile: Floor
 uint8_t WALL;	//Tile: Wall
 uint8_t OUTSIDE;	//Tile: Outside
+uint8_t IWALL;
 uint8_t STACK_MAX;  //Size of stack
 
 //				Actions
