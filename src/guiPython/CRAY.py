@@ -4,7 +4,7 @@ import pygame
 from Harald import *
 
 #Import map system class
-from MapSystem import *
+from MapMaster2002 import *
 
 #from pygame.locals import *
 from pygame import *
@@ -152,23 +152,6 @@ def paintMap(mapSystem):
 	elif mapSystem.lastX == mapSystem.sysPosX and mapSystem.lastY == mapSystem.sysPosY - 1:
 		mapSystem.tileImg = tile_ship_down
  
-	"""if (lastX == int(mapSystem.sysPosX) and (lastY == int(mapSystem.sysPosY))): #same
-		tileImg = lastTile
-	elif (lastX == int(mapSystem.sysPosX) and (lastY == (int(mapSystem.sysPosY) +1))): #up
-		tileImg = tile_ship_up
-		lastTile = tileImg
-	elif (lastX == int(mapSystem.sysPosX) and lastY == (int(mapSystem.sysPosY) -1)): #down
-		tileImg = tile_ship_down
-		lastTile = tileImg
-	elif (lastX == (int(mapSystem.sysPosX)+ 1) and lastY == int(mapSystem.sysPosY)): #right
-		tileImg = tile_ship_right
-		lastTile = tileImg
-	elif (lastX == (int(mapSystem.sysPosX) - 1) and lastY == int(mapSystem.sysPosY)): #left
-		tileImg = tile_ship_left
-		lastTile = tileImg
-	else:
-		tileImg = lastTile"""
-
 		
 	surface.blit(mapSystem.tileImg,(int(mapSystem.sysPosX)*squareWidth, int(mapSystem.sysPosY*squareHeight)))
 
