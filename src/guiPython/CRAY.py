@@ -33,7 +33,7 @@ pygame.font.init()
 #Debugmode
 debug = False
 
-"""#FULLSCREEN MODE
+#FULLSCREEN MODE
 screenWidth = 1536
 screenHeight = 864
 squareWidth = screenHeight/32
@@ -74,18 +74,18 @@ GREY = (139, 137, 137)
 surface.set_colorkey(WHITE)
 
 
-tileUNEXPLORED = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileOPEN = pygame.transform.scale(pygame.image.load("tile_open.jpg"),(int(squareWidth),int(squareHeight)))
-tileWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileLEFTWALL = pygame.transform.scale(pygame.image.load("tile_wall_left.jpg"), (int(squareWidth), int(squareHeight)))
-tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileUNEXPLORED = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileOPEN = pygame.transform.scale(pygame.image.load("images/tile_open.jpg"),(int(squareWidth),int(squareHeight)))
+tileWALL = pygame.transform.scale(pygame.image.load("images/wall_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileLEFTWALL = pygame.transform.scale(pygame.image.load("images/tile_wall_left.jpg"), (int(squareWidth), int(squareHeight)))
+tileOUTSIDE = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 
 
-tile_ship_down = pygame.transform.scale(pygame.image.load("tile_ship_down.png"),(int(squareWidth),int(squareHeight)))
-tile_ship_up = pygame.transform.scale(pygame.image.load("tile_ship_up.png"),(int(squareWidth),int(squareHeight)))
-tile_ship_left = pygame.transform.scale(pygame.image.load("tile_ship_left.png"),(int(squareWidth),int(squareHeight)))
-tile_ship_right = pygame.transform.scale(pygame.image.load("tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
-tile_start = pygame.transform.scale(pygame.image.load("tile_start.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_down = pygame.transform.scale(pygame.image.load("images/tile_ship_down.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_up = pygame.transform.scale(pygame.image.load("images/tile_ship_up.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_left = pygame.transform.scale(pygame.image.load("images/tile_ship_left.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_right = pygame.transform.scale(pygame.image.load("images/tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
+tile_start = pygame.transform.scale(pygame.image.load("images/tile_start.png"),(int(squareWidth),int(squareHeight)))
 
 mapSystem.tileImg = tile_ship_up
 
@@ -577,7 +577,7 @@ def getData():
 	#if mapSystem.dataIndex == 0:
 	#harald.inc_status()
 	paintMap(mapSystem)
-	#paintData(mapSystem)
+	paintData(mapSystem)
 
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
