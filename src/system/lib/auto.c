@@ -268,7 +268,7 @@ void autonom (){
 				transmitByte_down(0x1E);
 				curr_action = PARALLELIZE;
 
-				action_done(UPDATE); //ändrad
+				action_done(DONTUPDATE);
 			}
 		break;
 
@@ -347,7 +347,7 @@ void autonom (){
 
 				if(parallell_cnt >= 10){
 					setSpeed(0, 0, FORWARD, FORWARD);
-					_delay_ms(100);
+					_delay_ms(200);
 					//dir = NORTH;
 					//curr_action = EMPTY;
 					curr_action = EMPTY;
