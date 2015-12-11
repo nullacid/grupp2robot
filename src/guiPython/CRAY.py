@@ -33,7 +33,7 @@ pygame.font.init()
 #Debugmode
 debug = False
 
-"""#FULLSCREEN MODE
+#FULLSCREEN MODE
 screenWidth = 1536
 screenHeight = 864
 squareWidth = screenHeight/32
@@ -52,10 +52,7 @@ squareWidth = screenHeight/32
 squareHeight = screenHeight/32
 
 
-tileUNEXPLORED = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileOPEN = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileWALL = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+
 
 
 
@@ -64,6 +61,12 @@ screen_size = [screenWidth, screenHeight]
 surface = pygame.display.set_mode(screen_size)
 offset = -40
 #dataOffset = 220"""
+
+tileUNEXPLORED = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileOPEN = pygame.transform.scale(pygame.image.load("tile_open.jpg"),(int(squareWidth),int(squareHeight)))
+tileWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileLEFTWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"), (int(squareWidth), int(squareHeight)))
+tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 
 
 
@@ -137,10 +140,13 @@ def paintSquare(tileType, xCoord, yCoord):
 		tileImg = tileWALL
 	elif tileType == "OUTSIDE":
 		tileImg = tileOUTSIDE
+	elif tileType == "LEFT WALL":
+		tileImg =
+
 		
 	surface.blit(tileImg,(xCoord*squareWidth, yCoord*squareHeight))
 	
-	pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
+	#pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
 	
 	
 def paintSquareNice(tileType, xCoord, yCoord):
@@ -339,19 +345,27 @@ def getMap():
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
-	xCoord = int(msByte[0]) - 1
-	yCoord = int(lsByte[0] & b'\x3F'[0]) - 1
+	xCoord = int(msByte[0])
+	yCoord = int(lsByte[0] & b'\x3F'[0])
 	tileType = int(lsByte[0] >> 6)
-	if tileType != 0:
-		if tileType == 1:
+
+	if xCoord != 0:
+		if tileType == 0:
 			tileType = "UNEXPLORED"
+		elif tileType == 1:
+			tileType = "LEFT WALL"
 		elif tileType == 2:
 			tileType = "OPEN"
 		elif tileType == 3:
 			tileType = "WALL"
+
+		xCoord -= 1
+		yCoord -= 1
+
 		if xCoord < 32 and yCoord < 32:
 			mapSystem.arrayMap[xCoord][yCoord] = tileType
 			return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+
 	return mapSystem.dataDict["Update Map"]
 	
 
