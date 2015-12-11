@@ -18,7 +18,7 @@ uint8_t cm_values[200] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 uint32_t rotation_180 = 188000;
 uint32_t rotation_c_clockwise = 54400;	// left
-uint32_t rotation_clockwise = 91800;	// höger
+uint32_t rotation_clockwise = 92000;	// höger
 uint8_t gyro_offset = 10;
 	
 /*for ir-sensor, normal and token values*/	
@@ -40,7 +40,7 @@ int8_t parallelR = 0x0c;
 /*reflex-sensor*/
 uint8_t reflex_previous = 0x00;
 uint8_t reflex_current = 0x00;
-uint16_t segments_turned = 0x00;
+uint8_t segments_turned = 0x00;
 uint8_t MR_Reflex = 0x00;
 
 /*GYRO*/
@@ -199,7 +199,7 @@ void transmitALL(){
 
 	transmitParallelR();
 	transmitParallelL();
-	//transmitGyroT();
+	transmitGyroT();
 	
 	transmitIRRFT();
 	transmitIRRBT();
