@@ -40,7 +40,7 @@ int8_t parallelR = 0x0c;
 /*reflex-sensor*/
 uint8_t reflex_previous = 0x00;
 uint8_t reflex_current = 0x00;
-uint8_t segments_turned = 0x00;
+uint16_t segments_turned = 0x00;
 uint8_t MR_Reflex = 0x00;
 
 /*GYRO*/
@@ -199,7 +199,7 @@ void transmitALL(){
 
 	transmitParallelR();
 	transmitParallelL();
-	transmitGyroT();
+	//transmitGyroT();
 	
 	transmitIRRFT();
 	transmitIRRBT();
