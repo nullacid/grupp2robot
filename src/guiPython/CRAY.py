@@ -51,6 +51,14 @@ screenHeight = 640
 squareWidth = screenHeight/32
 squareHeight = screenHeight/32
 
+
+tileUNEXPLORED = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileOPEN = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileWALL = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+
+
+
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
@@ -117,18 +125,35 @@ def paintMap(mapSystem):
 	pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
 	pygame.display.flip()
-			
+
+	
 def paintSquare(tileType, xCoord, yCoord):
-	colour = BLACK
+	tileImg = tileUNEXPLORED
 	if tileType == "UNEXPLORED":
-		colour = GREY
+		tileImg = tileUNEXPLORED
 	elif tileType == "OPEN":
-		colour = WHITE
+		tileImg = tileOPEN
 	elif tileType == "WALL":
-		colour = GREEN
+		tileImg = tileWALL
 	elif tileType == "OUTSIDE":
-		colour = MAGENTA
+		tileImg = tileOUTSIDE
+		
+	surface.blit(tileImg,(xCoord*squareWidth, yCoord*squareHeight))
+	
 	pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
+	
+	
+def paintSquareNice(tileType, xCoord, yCoord):
+	tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
+	if tileType == "UNEXPLORED":
+		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
+	elif tileType == "OPEN":
+		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
+	elif tileType == "WALL":
+		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
+	elif tileType == "OUTSIDE":
+		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
+	surface.blit(tile,xCoord*squareWidth, yCoord*squareHeight)
 	
 	
 #key binding handles
