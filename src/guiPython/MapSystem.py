@@ -6,6 +6,11 @@ class MapSystem():
 		self.sysPosX = 15
 		self.sysPosY = 15
 		self.dataIndex = 0
+
+		self.lastX = 15
+		self.lastY = 15
+
+		self.tileImg = None
 		
 		
 		#self.gyroFile = open("logs/gyro.swag", 'w', 1)

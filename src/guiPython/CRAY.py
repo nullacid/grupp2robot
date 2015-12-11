@@ -74,6 +74,9 @@ tile_ship_up = pygame.transform.scale(pygame.image.load("tile_ship_up.png"),(int
 tile_ship_left = pygame.transform.scale(pygame.image.load("tile_ship_left.png"),(int(squareWidth),int(squareHeight)))
 tile_ship_right = pygame.transform.scale(pygame.image.load("tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
 tile_start = pygame.transform.scale(pygame.image.load("tile_start.png"),(int(squareWidth),int(squareHeight)))
+
+mapSystem.tileImg = tile_ship_up
+
 #A blank icon
 icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
@@ -83,10 +86,6 @@ pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 #Global variable for when the game is running
 crayRunning = True
 
-
-lastX = 15
-lastY = 15
-lastTile = tile_ship_up
 
 #Define RGB colours
 BLACK = (0,0,0)
@@ -130,6 +129,7 @@ def paintData(mapSystem):
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
 	
 def paintMap(mapSystem):
+
 	for i in range(0,32):
 		for j in range(0,32):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
@@ -142,7 +142,16 @@ def paintMap(mapSystem):
 
 	#Draw currentPosition
 	
-	if (lastX == int(mapSystem.sysPosX) and (lastY == int(mapSystem.sysPosY))): #same
+	if mapSystem.lastX == mapSystem.sysPosX + 1 and mapSystem.lastY == mapSystem.sysPosY:
+		mapSystem.tileImg = tile_ship_left
+	elif mapSystem.lastX == mapSystem.sysPosX - 1 and mapSystem.lastY == mapSystem.sysPosY:
+		mapSystem.tileImg = tile_ship_right
+	elif mapSystem.lastX == mapSystem.sysPosX and mapSystem.lastY == mapSystem.sysPosY + 1:
+		mapSystem.tileImg = tile_ship_up
+	elif mapSystem.lastX == mapSystem.sysPosX and mapSystem.lastY == mapSystem.sysPosY - 1:
+		mapSystem.tileImg = tile_ship_down
+ 
+	"""if (lastX == int(mapSystem.sysPosX) and (lastY == int(mapSystem.sysPosY))): #same
 		tileImg = lastTile
 	elif (lastX == int(mapSystem.sysPosX) and (lastY == (int(mapSystem.sysPosY) +1))): #up
 		tileImg = tile_ship_up
@@ -156,8 +165,11 @@ def paintMap(mapSystem):
 	elif (lastX == (int(mapSystem.sysPosX) - 1) and lastY == int(mapSystem.sysPosY)): #left
 		tileImg = tile_ship_left
 		lastTile = tileImg
+	else:
+		tileImg = lastTile"""
+
 		
-	surface.blit(tile_start,(int(mapSystem.sysPosX)*squareWidth, int(mapSystem.sysPosY*squareHeight)))
+	surface.blit(mapSystem.tileImg,(int(mapSystem.sysPosX)*squareWidth, int(mapSystem.sysPosY*squareHeight)))
 
 	#pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
@@ -392,6 +404,10 @@ def getPosition():
 	if debug:
 		print("position")
 	harald.sendData(b'\x9A')
+
+	mapSystem.lastX = mapSystem.sysPosX
+	mapSystem.lastY = mapSystem.sysPosY
+
 	mapSystem.sysPosX = int(harald.receiveData()[0]) - 1
 	mapSystem.sysPosY = int(harald.receiveData()[0]) - 1
 	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
@@ -547,20 +563,20 @@ def getAllData():
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
-	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
-	mapSystem.updateLog(currentDataSlot)
+	#currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
+	#mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
+	#mapSystem.updateLog(currentDataSlot)
 
 	#if mapSystem.dataIndex % 2 == 0:
 	#	getMap()
 	#	getPosition()
 
 	getMap()
-	
-	if mapSystem.dataIndex == 0:
-		harald.inc_status()
-		paintMap(mapSystem)
-		paintData(mapSystem)
+	getPosition
+	#if mapSystem.dataIndex == 0:
+	#harald.inc_status()
+	paintMap(mapSystem)
+	#paintData(mapSystem)
 
 	
 	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
