@@ -59,13 +59,16 @@ squareHeight = screenHeight/32
 screen_size = [screenWidth, screenHeight]
 
 surface = pygame.display.set_mode(screen_size)
+
+surface.set_colorkey(WHITE)
+
 offset = -40
 #dataOffset = 220"""
 
 tileUNEXPLORED = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 tileOPEN = pygame.transform.scale(pygame.image.load("tile_open.jpg"),(int(squareWidth),int(squareHeight)))
 tileWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileLEFTWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"), (int(squareWidth), int(squareHeight)))
+tileLEFTWALL = pygame.transform.scale(pygame.image.load("wall_tile_left.jpg"), (int(squareWidth), int(squareHeight)))
 tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 
 
