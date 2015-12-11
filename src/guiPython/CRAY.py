@@ -369,22 +369,17 @@ def getMap():
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
-	xCoord = int(msByte[0])
-	yCoord = int(lsByte[0] & b'\x3F'[0])
+	xCoord = int(msByte[0]) - 1
+	yCoord = int(lsByte[0] & b'\x3F'[0]) - 1
 	tileType = int(lsByte[0] >> 6)
 
-	if xCoord != 0:
-		if tileType == 0:
-			tileType = "UNEXPLORED"
-		elif tileType == 1:
+	if tileType != 0:
+		if tileType == 1:
 			tileType = "LEFT WALL"
 		elif tileType == 2:
 			tileType = "OPEN"
 		elif tileType == 3:
 			tileType = "WALL"
-
-		xCoord -= 1
-		yCoord -= 1
 
 		if xCoord < 32 and yCoord < 32:
 			mapSystem.arrayMap[xCoord][yCoord] = tileType
