@@ -69,7 +69,11 @@ tileLEFTWALL = pygame.transform.scale(pygame.image.load("wall_tile.jpg"), (int(s
 tileOUTSIDE = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(int(squareWidth),int(squareHeight)))
 
 
-
+tile_ship_down = pygame.transform.scale(pygame.image.load("tile_ship_down.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_up = pygame.transform.scale(pygame.image.load("tile_ship_up.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_left = pygame.transform.scale(pygame.image.load("tile_ship_left.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_right = pygame.transform.scale(pygame.image.load("tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
+tile_start = pygame.transform.scale(pygame.image.load("tile_start.png"),(int(squareWidth),int(squareHeight)))
 #A blank icon
 icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
 #This caption
@@ -78,6 +82,11 @@ pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
 
 #Global variable for when the game is running
 crayRunning = True
+
+
+lastX = 15
+lastY = 15
+lastTile = tile_ship_up
 
 #Define RGB colours
 BLACK = (0,0,0)
@@ -102,7 +111,11 @@ def paintData(mapSystem):
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
 	#Start Position Circle
+	
+	#surface.blit(tile_start,(15*squareWidth, 15*squareHeight))
+	
 	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(17 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 17 * (5 * squareHeight) / 3))
@@ -122,10 +135,35 @@ def paintMap(mapSystem):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 
 	#Draw startPosition
-	pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
+	#pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
+
+	surface.blit(tile_start,(int(mapSystem.startPosition[0])*squareWidth, int(mapSystem.startPosition[1])*squareHeight))
 	
+
 	#Draw currentPosition
-	pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
+	
+	if (lastX == int(mapSystem.sysPosX) and (lastY == int(mapSystem.sysPosY))): #same
+		tileImg = lastTile
+	elif (lastX == int(mapSystem.sysPosX) and (lastY == (int(mapSystem.sysPosY) +1))): #up
+		tileImg = tile_ship_up
+		lastTile = tileImg
+	elif (lastX == int(mapSystem.sysPosX) and lastY == (int(mapSystem.sysPosY) -1)): #down
+		tileImg = tile_ship_down
+		lastTile = tileImg
+	elif (lastX == (int(mapSystem.sysPosX)+ 1) and lastY == int(mapSystem.sysPosY)): #right
+		tileImg = tile_ship_right
+		lastTile = tileImg
+	elif (lastX == (int(mapSystem.sysPosX) - 1) and lastY == int(mapSystem.sysPosY)): #left
+		tileImg = tile_ship_left
+		lastTile = tileImg
+		
+	surface.blit(tile_start,(int(mapSystem.sysPosX)*squareWidth, int(mapSystem.sysPosY*squareHeight)))
+
+	#pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
+	
+	lastX = mapSystem.sysPosX
+	lastY = mapSystem.sysPosY
+	
 	
 	pygame.display.flip()
 
@@ -147,20 +185,6 @@ def paintSquare(tileType, xCoord, yCoord):
 	surface.blit(tileImg,(xCoord*squareWidth, yCoord*squareHeight))
 	
 	#pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
-	
-	
-def paintSquareNice(tileType, xCoord, yCoord):
-	tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
-	if tileType == "UNEXPLORED":
-		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
-	elif tileType == "OPEN":
-		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
-	elif tileType == "WALL":
-		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
-	elif tileType == "OUTSIDE":
-		tile = pygame.transform.scale(pygame.image.load("white_tile.jpg"),(squareWidth,squareHeight))
-	surface.blit(tile,xCoord*squareWidth, yCoord*squareHeight)
-	
 	
 #key binding handles
 def handle_quit():
