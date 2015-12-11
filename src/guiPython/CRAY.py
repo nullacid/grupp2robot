@@ -33,7 +33,7 @@ pygame.font.init()
 #Debugmode
 debug = False
 
-#FULLSCREEN MODE
+"""#FULLSCREEN MODE
 screenWidth = 1536
 screenHeight = 864
 squareWidth = screenHeight/32
@@ -141,7 +141,7 @@ def paintSquare(tileType, xCoord, yCoord):
 	elif tileType == "OUTSIDE":
 		tileImg = tileOUTSIDE
 	elif tileType == "LEFT WALL":
-		tileImg =
+		tileImg = tileLEFTWALL
 
 		
 	surface.blit(tileImg,(xCoord*squareWidth, yCoord*squareHeight))
