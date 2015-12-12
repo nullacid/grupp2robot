@@ -59,6 +59,9 @@ surface = pygame.display.set_mode(screen_size)
 offset = -40
 #dataOffset = 220"""
 
+mapSquareWidth = squareWidth
+mapSquareHeight = squareHeight
+
 #Define RGB colours
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -74,20 +77,55 @@ GREY = (139, 137, 137)
 surface.set_colorkey(WHITE)
 
 
-tileUNEXPLORED = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileOPEN = pygame.transform.scale(pygame.image.load("images/tile_open.jpg"),(int(squareWidth),int(squareHeight)))
-tileWALL = pygame.transform.scale(pygame.image.load("images/wall_tile.jpg"),(int(squareWidth),int(squareHeight)))
-tileLEFTWALL = pygame.transform.scale(pygame.image.load("images/tile_wall_left.jpg"), (int(squareWidth), int(squareHeight)))
-tileOUTSIDE = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(squareWidth),int(squareHeight)))
+tileUNEXPLORED = None
+tileOPEN = None
+tileWALL = None
+tileLEFTWALL = None
+tileOUTSIDE = None
 
 
-tile_ship_down = pygame.transform.scale(pygame.image.load("images/tile_ship_down.png"),(int(squareWidth),int(squareHeight)))
-tile_ship_up = pygame.transform.scale(pygame.image.load("images/tile_ship_up.png"),(int(squareWidth),int(squareHeight)))
-tile_ship_left = pygame.transform.scale(pygame.image.load("images/tile_ship_left.png"),(int(squareWidth),int(squareHeight)))
-tile_ship_right = pygame.transform.scale(pygame.image.load("images/tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
-tile_start = pygame.transform.scale(pygame.image.load("images/tile_start.png"),(int(squareWidth),int(squareHeight)))
+tile_ship_down = None
+tile_ship_up = None
+tile_ship_left = None
+tile_ship_right = None
+tile_start = None
+
+
+
+#Rescales all images to the current squareSize
+def rescale():
+	global tileUNEXPLORED
+	global tileOPEN
+	global tileWALL
+	global tileLEFTWALL
+	global tileOUTSIDE
+	global tile_ship_right
+	global tile_ship_up
+	global tile_ship_left
+	global tile_ship_down
+	global tile_start
+
+	tileUNEXPLORED = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileOPEN = pygame.transform.scale(pygame.image.load("images/tile_open.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileWALL = pygame.transform.scale(pygame.image.load("images/wall_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileLEFTWALL = pygame.transform.scale(pygame.image.load("images/tile_wall_left.jpg"), (int(mapSquareWidth), int(mapSquareHeight)))
+	tileOUTSIDE = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+
+
+	tile_ship_down = pygame.transform.scale(pygame.image.load("images/tile_ship_down.png"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tile_ship_up = pygame.transform.scale(pygame.image.load("images/tile_ship_up.png"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tile_ship_left = pygame.transform.scale(pygame.image.load("images/tile_ship_left.png"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tile_ship_right = pygame.transform.scale(pygame.image.load("images/tile_ship_right.png"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tile_start = pygame.transform.scale(pygame.image.load("images/tile_start.png"),(int(mapSquareWidth),int(mapSquareHeight)))
+
+tile_ship_right_data = pygame.transform.scale(pygame.image.load("images/tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
+tile_start_data = pygame.transform.scale(pygame.image.load("images/tile_start.png"),(int(squareWidth),int(squareHeight)))
+
+rescale()
 
 mapSystem.tileImg = tile_ship_up
+
+
 
 #A blank icon
 icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
@@ -111,31 +149,31 @@ def paintData(mapSystem):
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
 	#Start Position Marker
-	surface.blit(tile_start, (34*squareWidth, int(17 * (5 * squareHeight) / 3)))
+	surface.blit(tile_start_data, (34*squareWidth, int(17 * (5 * squareHeight) / 3)))
 
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 17 * (5 * squareHeight) / 3))
 	
 	#Current Position Circle
-	surface.blit(tile_ship_right, (34*squareWidth, int(18 * (5 * squareHeight) / 3)))
+	surface.blit(tile_ship_right_data, (34*squareWidth, int(18 * (5 * squareHeight) / 3)))
 	text = "Current Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
 	
-	#Conneciton status
+	#Connection status
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
 	
 def paintMap(mapSystem):
 
-	for i in range(0,32):
-		for j in range(0,32):
+	for i in range(0,len(mapSystem.arrayMap)):
+		for j in range(0,len(mapSystem.arrayMap)):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 
 	#Draw startPosition
 	#pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
 
-	surface.blit(tile_start,(int(mapSystem.startPosition[0])*squareWidth, int(mapSystem.startPosition[1])*squareHeight))
+	surface.blit(tile_start,(int(mapSystem.startPosition[0])*mapSquareWidth, int(mapSystem.startPosition[1])*mapSquareHeight))
 	
 
 	#Draw currentPosition
@@ -150,7 +188,7 @@ def paintMap(mapSystem):
 		mapSystem.tileImg = tile_ship_down
  
 		
-	surface.blit(mapSystem.tileImg,(int(mapSystem.sysPosX)*squareWidth, int(mapSystem.sysPosY*squareHeight)))
+	surface.blit(mapSystem.tileImg,(int(mapSystem.sysPosX)*mapSquareWidth, int(mapSystem.sysPosY*mapSquareHeight)))
 
 	#pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
 	
@@ -175,7 +213,7 @@ def paintSquare(tileType, xCoord, yCoord):
 		tileImg = tileLEFTWALL
 
 		
-	surface.blit(tileImg,(xCoord*squareWidth, yCoord*squareHeight))
+	surface.blit(tileImg,(xCoord*mapSquareWidth, yCoord*mapSquareHeight))
 	
 	#pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
 	
@@ -362,23 +400,33 @@ def getMap():
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
-	xCoord = int(msByte[0]) - 1
-	yCoord = int(lsByte[0] & b'\x3F'[0]) - 1
-	tileType = int(lsByte[0] >> 6)
+	if msByte == b'\xFF' and lsByte == b'\xFF':
+		global mapSquareWidth
+		global mapSquareHeight
 
-	if tileType != 0:
-		if tileType == 1:
-			tileType = "LEFT WALL"
-		elif tileType == 2:
-			tileType = "OPEN"
-		elif tileType == 3:
-			tileType = "WALL"
+		mapSystem.resize()
+		mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
+		mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
+		rescale()
 
-		if xCoord < 32 and yCoord < 32:
-			mapSystem.arrayMap[xCoord][yCoord] = tileType
-			return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+	else:
+		xCoord = int(msByte[0]) + mapSystem.coordinateOffsetX
+		yCoord = int(lsByte[0] & b'\x3F'[0]) + mapSystem.coordinateOffsetY
+		tileType = int(lsByte[0] >> 6)
 
-	return mapSystem.dataDict["Update Map"]
+		if tileType != 0:
+			if tileType == 1:
+				tileType = "LEFT WALL"
+			elif tileType == 2:
+				tileType = "OPEN"
+			elif tileType == 3:
+				tileType = "WALL"
+
+			if xCoord < len(mapSystem.arrayMap) and yCoord < len(mapSystem.arrayMap):
+				mapSystem.arrayMap[xCoord][yCoord] = tileType
+				return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+
+		return mapSystem.dataDict["Update Map"]
 	
 
 def getPosition():
@@ -389,8 +437,8 @@ def getPosition():
 	mapSystem.lastX = mapSystem.sysPosX
 	mapSystem.lastY = mapSystem.sysPosY
 
-	mapSystem.sysPosX = int(harald.receiveData()[0]) - 1
-	mapSystem.sysPosY = int(harald.receiveData()[0]) - 1
+	mapSystem.sysPosX = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetX
+	mapSystem.sysPosY = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetY
 	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
 def getDecision():
@@ -405,9 +453,9 @@ def getDebug():
 	if debug:
 		print("debug")
 	harald.sendData(b'\x4E')
-	data = harald.receiveData()
-	out = twos_comp(int(hex(data[0]),16), 8)
-	return out
+	data = int(harald.receiveData()[0])
+	#out = twos_comp(int(hex(data[0]),16), 8)
+	return data
 	
 def twos_comp(val, bits):
     if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
@@ -555,6 +603,8 @@ def getData():
 	getMap()
 	getPosition()
 	mapSystem.dataDict["Steering Decision"] = getDecision()
+	#mapSystem.dataDict["IR Front"] = getIRF()
+	mapSystem.dataDict["Debug"] = getDebug()
 
 
 

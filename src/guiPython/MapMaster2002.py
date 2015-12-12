@@ -1,4 +1,5 @@
-import time
+
+
 class MapMaster2002():
 	def __init__(self):
 		self.arrayMap = [["UNEXPLORED" for x in range(32)] for x in range(32)]
@@ -10,8 +11,10 @@ class MapMaster2002():
 		self.lastX = 15
 		self.lastY = 15
 
+		self.coordinateOffsetX = - 1
+		self.coordinateOffsetY = - 1
+
 		self.tileImg = None
-		
 		
 		#self.gyroFile = open("logs/gyro.swag", 'w', 1)
 		self.IRFrontFile = open("logs/ir_front.swag", 'w', 1)
@@ -67,17 +70,19 @@ class MapMaster2002():
 		}
 		#Associates a data type name with a file
 		self.fileDict = {
-						#"IR Front" : self.IRFrontFile,
-						#"Steering Decision" : self.steeringDecisionFile,
-						#"Steering data" : self.steeringDataFile,
-						#"Parallel Right" : self.parallelRightFile,
-						#"Parallel Left" : self.parallelLeftFile,
-						#"Segments turned" : self.segmentsFile,
-						#"Debug" : self.debugFile,
-						#"IR Front (token)" : self.IRtokenFile,
-						#"Update Map" : self.mapUpdateFile,
-						#"IRrightFront" : self.irRightFile
+						"IR Front" : self.IRFrontFile,
+						"Steering Decision" : self.steeringDecisionFile,
+						"Steering data" : self.steeringDataFile,
+						"Parallel Right" : self.parallelRightFile,
+						"Parallel Left" : self.parallelLeftFile,
+						"Segments turned" : self.segmentsFile,
+						"Debug" : self.debugFile,
+						"IR Front (token)" : self.IRtokenFile,
+						"Update Map" : self.mapUpdateFile,
+						"IRrightFront" : self.irRightFile
 		}
+
+
 	#Increments index and loops it at 17
 	def incIndex(self):
 		self.dataIndex += 1
@@ -88,4 +93,65 @@ class MapMaster2002():
 	def updateLog(self, dataType):
 		if dataType in self.fileDict:
 			self.fileDict[dataType].write(str(round(time.clock(), 1)) + "s " + str(self.dataDict[dataType]) + "\n")
-		
+
+	#Resizes the map to only include the found walls
+	def resize(self):
+		leftmostWall = 32
+		rightmostWall = 0
+
+		upmostWall = 32
+		downmostWall = 0
+
+		for row in range(0,32):
+			firstFound = False
+			lastFound = False
+			for col in range(0,32):
+				if not firstFound:
+					if self.arrayMap[col][row] == "WALL":
+						firstFound = True
+						if col < leftmostWall:
+							leftmostWall = col
+				elif not lastFound:
+					if self.arrayMap[col][row] == "UNEXPLORED":
+						lastFound = True
+						if col > rightmostWall:
+							rightmostWall = col
+
+		for col in range(0,32):
+			firstFound = False
+			lastFound = False
+			for row in range(0,32):
+				if not firstFound:
+					if self.arrayMap[col][row] == "WALL":
+						firstFound = True
+						if row < upmostWall:
+							upmostWall = row
+				elif not lastFound:
+					if self.arrayMap[col][row] == "UNEXPLORED":
+						lastFound = True
+						if row > downmostWall:
+							downmostWall = row
+
+		diff = 0
+		if downmostWall - upmostWall >= rightmostWall - leftmostWall:
+			diff = downmostWall - upmostWall
+		else:
+			diff = rightmostWall - leftmostWall
+
+		#Create new arrayMap
+		newArray = [["UNEXPLORED" for x in range(diff)] for x in range(diff)]
+		for row in range(0, diff):
+			for col in range(0, diff):
+				newArray[col][row] = self.arrayMap[col + leftmostWall][row + upmostWall]
+
+
+		self.arrayMap = newArray
+		self.coordinateOffsetX = self.coordinateOffsetX - leftmostWall
+		self.coordinateOffsetY = self.coordinateOffsetY - upmostWall
+
+		self.sysPosX = self.sysPosX - leftmostWall
+		self.sysPosY = self.sysPosY - upmostWall
+		self.lastX = self.lastX - leftmostWall
+		self.lastY = self.lastY - upmostWall
+
+		self.startPosition = (15 - leftmostWall, 15 - upmostWall)
