@@ -1,10 +1,8 @@
 /*
- * Kommunikationsmodul.c
- *
  * Created: 03/11/2015 10:42:37
  * Author : Peter Victor
+ * "Ah, sweet alcohol. Like a true friend, you replace the anger with better, louder anger." -Erik
  */ 
-
 #define F_CPU 14.7456E6
 #define BAUD 7
 #define DATASLOTS 19
@@ -15,6 +13,7 @@
 
 int main(void)
 {
+	/*Initializes usart communication and set variables*/
 	init_USART_up(BAUD);
 	init_USART_down(BAUD);
     
@@ -57,9 +56,6 @@ int main(void)
 
 				while(datalength != 0){
 					returnDataArray[i] = receiveByte_down_to();
-					//if(datalength > 1){
-					//	transmitSendNext_down();
-					//}
 					datalength--;
 					i++;
 				}

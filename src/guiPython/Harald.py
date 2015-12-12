@@ -1,3 +1,9 @@
+"""
+	Created: November 2015
+ *  Author: Victor T and Peter T
+ * "It is not fair to ask of others what you are unwilling to do yourself." - Victor 
+
+"""
 import sys, os, traceback
 import select
 
