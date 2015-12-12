@@ -175,7 +175,7 @@ void autonom (){
 			
 			old_deviation_from_wall = deviation_from_wall;
 
-			if((t_reflex > 30)||((s_ir_front < 13)&&(s_ir_front > 1))){
+			if( (t_reflex > 30) || ( (s_ir_front < 13) && (s_ir_front > 1) ) ){
 				first_time = 1;
 
 				if(t_reflex > 26){ //var 20
@@ -271,28 +271,6 @@ void autonom (){
 				action_done(DONTUPDATE);
 			}
 		break;
-
-		/*case (SPIN_180):
-			
-			if(first_time){
-				spinning = 1;
-				first_time = 0;
-				setSpeed(70, 70, 1, 0); //Höger hjulpar bakåt
-				transmitByte_down(0x20);
-			}
-
-			if(t_gyro == 0x44){
-				dir += 2;
-				first_time = 1;
-				spinning = 0;
-				transmitByte_down(0x1E);
-				curr_action = FORWARD;
-				action_done(DONTUPDATE);
-			}
-
-		break;
-		*/
-//------------------------------------------------------------------------
 
 		case(P_WEAK):
 
@@ -414,8 +392,6 @@ void action_done(uint8_t update_map){
 
 	if(update_map == 1){
 		switch(dir){
-
-
 			case(0):
 				temp_x = 0;
 				temp_y = -1;
@@ -436,41 +412,46 @@ void action_done(uint8_t update_map){
 				temp_y = 0;
 			break;
 		}
-			if(t_vagg_front != 2){
-				wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
-			}
-			else if (t_vagg_front == 2){ //IR WALL
-				wmem_auto(WALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
-			}
-			
-			if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
-				wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); 
-				wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); 
-			}
 
-			if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //HÖGER IR WALL + 1 FLOOR
-				wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2); 
-				wmem_auto(FLOOR, robot_pos_x - temp_y, robot_pos_y + temp_x); 
+		if(t_vagg_front != 2){
+			wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
+		}
+		else if (t_vagg_front == 2){ //IR WALL
+			wmem_auto(WALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
+		}
+		
+		if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
+			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); 
+			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); 
+		}
+
+		if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //HÖGER IR WALL + 1 FLOOR
+			wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2); 
+			wmem_auto(FLOOR, robot_pos_x - temp_y, robot_pos_y + temp_x); 
+		}
+
+		if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
+			wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); 
+		}	
+
+		if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
+			wmem_auto(FLOOR, robot_pos_x + temp_y , robot_pos_y - temp_x); 
+			wmem_auto(FLOOR, robot_pos_x + temp_y * 2 , robot_pos_y - temp_x * 2); 
+		}
+
+		if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
+			if(rmem_auto(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) != WALL){
+				wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 	
 			}
+			wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
+		}
 
-			if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
-				wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); 
-			}	
-
-			if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
-				wmem_auto(FLOOR, robot_pos_x + temp_y , robot_pos_y - temp_x); 
-				wmem_auto(FLOOR, robot_pos_x + temp_y * 2 , robot_pos_y - temp_x * 2); 
-			}
-
-			if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
-				wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 
-				wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
-			}
-
-			if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
+		if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
+			if(rmem_auto(robot_pos_x + temp_y, robot_pos_y - temp_x) != WALL){
 				wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
 			}
-		}	
+		}
+	}	
 }
 
 void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
