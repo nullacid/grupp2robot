@@ -14,14 +14,19 @@
 #include "lib\usart.h"
 #include <avr/interrupt.h>
 
+
+
+/*Map of values in centimeters, index corresponds to a value in volts*/
 uint8_t cm_values[200] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 91, 86, 81, 76, 72, 69, 65, 62, 59, 57, 55, 52, 50, 48, 47, 45, 43, 42, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 29, 28, 27, 27, 26, 25, 25, 24, 24, 23, 23, 22, 22, 21, 21, 21, 20, 20, 20, 19, 19, 19, 18, 18, 18, 17, 17, 17, 16, 16, 16, 16, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
-uint32_t rotation_180 = 188000;
-uint32_t rotation_c_clockwise = 54400;	// left
-uint32_t rotation_clockwise = 92000;	// höger
+
+/*Constants for rotation with gyroscope*/
+uint32_t rotation_180 = 188000;			
+uint32_t rotation_c_clockwise = 54400;	// left turn
+uint32_t rotation_clockwise = 92000;	// höger turn
 uint8_t gyro_offset = 10;
 	
-/*for ir-sensor, normal and token values*/	
+/*IR-sensor, normal and token values*/	
 uint8_t IRLF = 0x01;
 uint8_t IRLB = 0x02;
 uint8_t IRRF = 0x03;
@@ -37,7 +42,7 @@ uint8_t IRFT = 0x0a;
 int8_t parallelL = 0x0b;
 int8_t parallelR = 0x0c;
 
-/*reflex-sensor*/
+/*Reflex-sensor*/
 uint8_t reflex_previous = 0x00;
 uint8_t reflex_current = 0x00;
 uint8_t segments_turned = 0x00;
@@ -50,8 +55,9 @@ uint8_t gyro_zero = 0x00;
 int rotation_direction = 0;
 uint8_t gyro_token = 0x00;
 
-uint8_t usart_data;
 
+
+uint8_t usart_data;
 uint8_t spi_tranceiver(uint8_t data);
 uint8_t single_measure();
 void usart_gogo();
@@ -68,7 +74,7 @@ void adc_init()
 	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
 }
 
-/* slave select - for SPI */
+/* Slave select - for SPI */
 void set_ss(int mode){
 	if (mode == 0){
 		PORTB &= (mode<<PORTB4);
@@ -93,7 +99,7 @@ void SPI_init()
 	set_ss(1);
 }
 
-/*to transfer/recieve data via SPI */
+/*function for transfer/recieve data via SPI */
 uint8_t spi_tranceiver(uint8_t data)
 {
 	// Load data into the buffer
@@ -156,6 +162,7 @@ void transmitIRLB(){
 void transmitIRF(){
 	transmitByte_up(IRF);
 }
+
 void transmitParallelR(){
 	transmitByte_up(parallelR);
 }
@@ -196,21 +203,14 @@ void transmitALL(){
 	transmitIRLF();
 	transmitIRLB();
 	transmitIRF();
-
 	transmitGyroT();
-	
-	
 	transmitParallelR();
 	transmitParallelL();
-	
-	
-	
 	transmitIRRFT();
 	transmitIRRBT();
 	transmitIRLFT();
 	transmitIRLBT();
 	transmitIRFT();
-	
 	transmitReflexT();
 }
 
