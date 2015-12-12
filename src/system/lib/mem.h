@@ -50,7 +50,7 @@ void init_mem();
 
 int8_t c_stack_top ; 		//The top of the stack
 
-
+uint8_t next_action;
 //----------------Constants------------------------------------
 uint8_t UNEXP;	//Tile: Unexplored
 uint8_t FLOOR;	//Tile: Floor
@@ -64,10 +64,22 @@ uint8_t STACK_MAX;  //Size of stack
 
 //-------------------------------------------------------------
 
+uint8_t land_o_hoy;
+
+
 uint8_t debug;
 
+uint8_t map_enclosed;
 uint8_t home_x;
 uint8_t home_y;
+
+uint8_t lets_go_home;
+uint8_t button_autonom; // 0 om manuellt läge, 1 om autonomt läge
+
+
+uint8_t island_x;
+uint8_t island_y;
+uint8_t follow_island;
 
 uint8_t robot_pos_x;	// Start in the middle of the map
 uint8_t robot_pos_y;

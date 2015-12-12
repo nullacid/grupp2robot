@@ -20,7 +20,6 @@ uint8_t dir_left = 1; //0 or 1 = back or forward
 uint8_t dir_right = 1;
 uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
-uint8_t button_autonom = 0; // 0 om manuellt läge, 1 om autonomt läge
 uint8_t prev_autonom = 0; // för att stanna om man switchar tillbaka till manuellt
 
 uint8_t b1 = 2;
@@ -294,7 +293,7 @@ void handle_messages(){
 
 void init_motors(){
 	
-
+	button_autonom = 0;
 	PORTB=0x00; //Reset any output
 	PORTA=0x00; //Port A sets dir of motors (PA6, PA7)
 	DDRA |=(1 << DDA6) | (1 << DDA7) | (0<<DDA0) | (1 << DDA1 | (1 << DDA3));

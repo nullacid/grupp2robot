@@ -27,12 +27,33 @@ void init_mem(){
 
 	robot_pos_x = 16;	// Start in the middle of the map
 	robot_pos_y = 16;
+
+	follow_island = 0;
+	lets_go_home = 0;
 	target_x = 0; //Target tile
 	target_y = 0;
 	dir = 0;
 	c_stack_top = -1;
 	debug = 0;
 	//OKÄND SKA VARA 1, fixa
+	uint8_t i = 0;
+	land_o_hoy = 1;
+	map_enclosed = 0;
+	next_action = 0;
+
+	home_x = 16;
+	home_y = 16;
+
+	for(i = 0; i < 32; i++){
+
+		wmem(OUTSIDE, i, 0);
+		wmem(OUTSIDE, i, 32);
+		wmem(OUTSIDE, 0, i);
+		wmem(OUTSIDE, 32, i);
+
+	}
+
+
 	return;
 
 }
@@ -91,7 +112,7 @@ void wmem(uint8_t data, uint8_t x, uint8_t y){
 
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
 	//Denna kallar auto på, lägger till i change-stacken om ny data
-	if (mapmem[x][y].tileType != data){ //NY DATA, ska skickas upp
+	if ((mapmem[x][y].tileType != data) && (mapmem[x][y].tileType != WALL)){ //NY DATA, ska skickas upp
 		mapmem[x][y].tileType = data;
 		pstack(x, y, data);
 	}

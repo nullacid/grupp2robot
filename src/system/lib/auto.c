@@ -37,6 +37,8 @@ uint8_t regulate_side = 0;
 uint8_t sensor_start = 0;
 uint8_t old_action;
 
+uint16f_t temptemp_action_done_c = 0;
+
 void update_sensor_data(); 
 void init_auto();
 void action_done(uint8_t update_map);
@@ -175,7 +177,7 @@ void autonom (){
 			
 			old_deviation_from_wall = deviation_from_wall;
 
-			if( (t_reflex > 30) || ( (s_ir_front < 13) && (s_ir_front > 1) ) ){
+			if( (t_reflex > 30) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){
 				first_time = 1;
 
 				if(t_reflex > 26){ //var 20
@@ -192,10 +194,24 @@ void autonom (){
 						robot_pos_x++;
 					}
 				}
+
 				curr_action = EMPTY;
+				if(land_o_hoy == 0){
+					next_action = SPIN_L;
+					land_o_hoy = 1;
+					island_x = robot_pos_x;
+					island_y = robot_pos_y;
+					if(follow_island == 1){
+						follow_island = 0;
+					}
+					else{
+						follow_island = 1;
+					}
+					temptemp_action_done_c = 0;
+				}
+
 				if((s_ir_front < 13)&&(s_ir_front > 1)){ //fuckar upp vår position annars
 					setSpeed(0,0,FORWARD,FORWARD);
-					_delay_ms(100);
 					action_done(DONTUPDATE);
 				}
 				else{
@@ -266,9 +282,17 @@ void autonom (){
 				spinning = 0;
 				first_time = 1;	
 				transmitByte_down(0x1E);
-				curr_action = PARALLELIZE;
+
+				if(land_o_hoy == 1){
+					curr_action = PARALLELIZE;
+				}
+				else{
+					next_action = FORWARD;
+				}
 
 				action_done(DONTUPDATE);
+
+
 			}
 		break;
 
@@ -325,7 +349,6 @@ void autonom (){
 
 				if(parallell_cnt >= 10){
 					setSpeed(0, 0, FORWARD, FORWARD);
-					_delay_ms(200);
 					//dir = NORTH;
 					//curr_action = EMPTY;
 					curr_action = EMPTY;
@@ -374,6 +397,8 @@ void autonom (){
 
 void action_done(uint8_t update_map){
 
+	temptemp_action_done_c++;
+
 	if(dir>3){
 		dir -=4;
 	}
@@ -386,6 +411,17 @@ void action_done(uint8_t update_map){
 	transmitByte_down(0x21); //Reset reflex-segments
 	receiveByte_down();
 
+	if(next_action != 0){
+
+		curr_action = next_action;
+		next_action = 0;
+
+	}
+
+	//if(old_action != FORWARD){
+		setSpeed(0,0,FORWARD,FORWARD);
+		_delay_ms(100);
+	//}
 
 	int8_t temp_x = 0;
 	int8_t temp_y = 0;
@@ -413,46 +449,78 @@ void action_done(uint8_t update_map){
 			break;
 		}
 
+
+
+
+		wmem_auto(FLOOR, robot_pos_x, robot_pos_y);
+
 		if(t_vagg_front != 2){
 			wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
 		}
-		else if (t_vagg_front == 2){ //IR WALL
-			if(rmem(robot_pos_x + temp_x, robot_pos_y + temp_y) != WALL){
-				wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
-			}
+		else if((t_vagg_front == 2) || (old_action == BACKWARD) || (old_action == NUDGE_TO_WALL)){ //IR WALL
+			wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
+			
 		}
 		
-		if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
+		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //HÖGER IR FLOOR
 			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); 
 			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); 
 		}
 
-		if (t_vagg_h_f == 1 && t_vagg_h_b == 1){ //HÖGER IR WALL + 1 FLOOR
+		if ((t_vagg_h_f == 1) && (t_vagg_h_b == 1)){ //HÖGER IR WALL + 1 FLOOR
 			wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2); 
 			wmem_auto(FLOOR, robot_pos_x - temp_y, robot_pos_y + temp_x); 
 		}
 
-		if (t_vagg_h_f == 2 && t_vagg_h_b == 2){ //HÖGER IR WALL
+		if ((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //HÖGER IR WALL
 			wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); 
 		}	
 
-		if (t_vagg_v_f == 0 && t_vagg_v_b == 0){ //VÄNSTER IR FLOOR
-			wmem_auto(FLOOR, robot_pos_x + temp_y , robot_pos_y - temp_x); 
+		if ((t_vagg_v_f == 0) && (t_vagg_v_b == 0)){ //VÄNSTER IR FLOOR
 			wmem_auto(FLOOR, robot_pos_x + temp_y * 2 , robot_pos_y - temp_x * 2); 
+			wmem_auto(FLOOR, robot_pos_x + temp_y , robot_pos_y - temp_x); 
 		}
 
-		if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
-			if(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) != WALL){
-				wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 	
-			}
+		if ((t_vagg_v_f == 1) && (t_vagg_v_b == 1)){ //VÄNSTER IR WALL + 1 FLOOR
+			wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 				
 			wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
 		}
 
-		if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
-			if(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) != WALL){
-				wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
+		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){ //VÄNSTER IR WALL
+			wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
+			
+		}
+
+		if(temptemp_action_done_c > 1){ // dfs om vi har mer grejjs att leta efter.
+			//if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
+			if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
+				if(map_enclosed == 0){
+					map_enclosed = 1;
+					mark_walls(); //Set all tiles outside the map to walls
+
+					pstack(0xFF, 0xFF, 0xFF);
+				}
 			}
 		}
+
+		if(follow_island == 1){
+			if(temptemp_action_done_c > 3){
+				if((robot_pos_x == island_x) && (robot_pos_y == island_y) ){
+					land_o_hoy = 0;
+					curr_action = PARALLELIZE;
+					next_action = SPIN_L;
+				}
+			}
+		}
+		if(done() == 1){
+			lets_go_home = 1;
+		}
+		if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
+			button_autonom = 0;
+			setSpeed(0,0,FORWARD,FORWARD);
+			curr_action = 0;
+		}
+		debug = temptemp_action_done_c;
 	}	
 }
 

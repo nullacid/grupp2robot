@@ -14,13 +14,12 @@ void gen_actions();
 uint8_t adj_matrix[32][32];
 
 uint8_t follow_wall = 1;
-uint8_t map_enclosed = 0;
+
 uint8_t startup = 1;
 void find_target();
 //För DFS
 uint8_t check = 0;
 uint8_t visited[32][32];
-void mark_walls();
 
 
 void think(){
@@ -29,13 +28,13 @@ void think(){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if((s_ir_front <= 9) && (s_ir_front > 2)){
+			if((s_ir_front < 9) && (s_ir_front > 2)){
 					curr_action = BACKWARD;
 			}
 		
 			else if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
-				curr_action = SPIN_R;
-
+					curr_action = SPIN_R;
+				
 				if((s_ir_front > 12) && (s_ir_front < 30)){
 					curr_action = NUDGE_TO_WALL;
 				}
@@ -75,20 +74,45 @@ void think(){
 			}
 
 			if(map_enclosed == 0){ //If we are following the outside wall
-				/*if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
-					follow_wall = 0;
-					map_enclosed = 1;
-					mark_walls();
-					find_target();
-					target_x = robot_pos_x;
-					target_y = robot_pos_y;
-				}
-				*/
+				//	map_enclosed = 1;
+				//	mark_walls();
+				//	find_target();
+			//	}
 			}
-			else if((robot_pos_x != target_x) && (robot_pos_y != target_y)){
+			else if(map_enclosed == 1){
 
+				uint8_t temp_x, temp_y;
 
+				switch(dir){
+					case(0):
+						temp_x = 0;
+						temp_y = -1;
+					break;
 
+					case(1):
+						temp_x = 1;
+						temp_y = 0;
+					break;
+
+					case(2):
+						temp_x = 0;
+						temp_y = 1;
+					break;
+
+					case(3):
+						temp_x = -1;
+						temp_y = 0;
+					break;
+				} 
+
+				debug = land_o_hoy;
+
+				if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x)->tileType == IWALL) || 
+					(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2)->tileType == IWALL)){ //VÄNSTER IR WALL
+						land_o_hoy = 0;
+						curr_action = PARALLELIZE;
+						next_action = SPIN_L;
+				}
 			}
 		}
 	}	
@@ -276,6 +300,22 @@ void mark_walls(){
 			}
 		}
 	}
+}
+
+uint8_t done(){
+
+	uint8_t answer = 1;
+	uint8_t i;
+	uint8_t j;
+
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+			if(rmem(i,j)->tileType == UNEXP){
+				answer = 0;
+			}			
+		}
+	}
+	return answer;
 }
 
 

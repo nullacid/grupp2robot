@@ -3,5 +3,6 @@
 
 
 void think();
+void mark_walls();
 
 #endif
