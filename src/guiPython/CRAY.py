@@ -267,9 +267,6 @@ def handle_SPACE():
 	
 #Functions for getting data from the system (called autonomously)
 #They get data from the system and formats it into data that makes sense for humans.
-
-#Så här kan man göra om en byte till int :)
-#print(int(b'\x54'[0]))
 def getIRF():
 	if debug:
 		print ("IRF")
@@ -397,17 +394,16 @@ def getSteering():
 def getMap():
 	if debug:
 		print("map")
+
 	harald.sendData(b'\x98')
 	msByte = harald.receiveData()
 	lsByte = harald.receiveData()
 	if msByte == b'\xFF' and lsByte == b'\xFF':
-		global mapSquareWidth
-		global mapSquareHeight
-
-		mapSystem.resize()
-		mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
-		mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
-		rescale()
+			global mapSquareWidth
+			global mapSquareHeight
+			mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
+			mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
+			rescale()
 
 	else:
 		xCoord = int(msByte[0]) + mapSystem.coordinateOffsetX
@@ -608,10 +604,10 @@ def getData():
 
 
 
-	#if mapSystem.dataIndex == 0:
-	harald.inc_status()
-	paintMap(mapSystem)
-	paintData(mapSystem)
+	if mapSystem.dataIndex == 0:
+		harald.inc_status()
+		paintMap(mapSystem)
+		paintData(mapSystem)
 
 	#mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	

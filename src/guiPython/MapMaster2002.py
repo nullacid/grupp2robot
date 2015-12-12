@@ -94,7 +94,7 @@ class MapMaster2002():
 		if dataType in self.fileDict:
 			self.fileDict[dataType].write(str(round(time.clock(), 1)) + "s " + str(self.dataDict[dataType]) + "\n")
 
-	#Resizes the map to only include the found walls
+	#Resizes the map to only include the found area
 	def resize(self):
 		leftmostWall = 32
 		rightmostWall = 0
@@ -102,12 +102,12 @@ class MapMaster2002():
 		upmostWall = 32
 		downmostWall = 0
 
-		for row in range(0,32):
+		for row in range(0,len(self.arrayMap)):
 			firstFound = False
 			lastFound = False
-			for col in range(0,32):
+			for col in range(0,len(self.arrayMap)):
 				if not firstFound:
-					if self.arrayMap[col][row] == "WALL":
+					if self.arrayMap[col][row] != "UNEXPLORED":
 						firstFound = True
 						if col < leftmostWall:
 							leftmostWall = col
@@ -117,12 +117,12 @@ class MapMaster2002():
 						if col > rightmostWall:
 							rightmostWall = col
 
-		for col in range(0,32):
+		for col in range(0,len(self.arrayMap)):
 			firstFound = False
 			lastFound = False
-			for row in range(0,32):
+			for row in range(0,len(self.arrayMap)):
 				if not firstFound:
-					if self.arrayMap[col][row] == "WALL":
+					if self.arrayMap[col][row] != "UNEXPLORED":
 						firstFound = True
 						if row < upmostWall:
 							upmostWall = row
@@ -138,20 +138,26 @@ class MapMaster2002():
 		else:
 			diff = rightmostWall - leftmostWall
 
-		#Create new arrayMap
-		newArray = [["UNEXPLORED" for x in range(diff)] for x in range(diff)]
-		for row in range(0, diff):
-			for col in range(0, diff):
-				newArray[col][row] = self.arrayMap[col + leftmostWall][row + upmostWall]
+		if diff > 5:
+			#Create new arrayMap
+			newArray = [["UNEXPLORED" for x in range(diff)] for x in range(diff)]
+			for row in range(0, diff):
+				for col in range(0, diff):
+					newArray[col][row] = self.arrayMap[col + leftmostWall][row + upmostWall]
 
 
-		self.arrayMap = newArray
-		self.coordinateOffsetX = self.coordinateOffsetX - leftmostWall
-		self.coordinateOffsetY = self.coordinateOffsetY - upmostWall
+			self.arrayMap = newArray
+			self.coordinateOffsetX = self.coordinateOffsetX - leftmostWall
+			self.coordinateOffsetY = self.coordinateOffsetY - upmostWall
 
-		self.sysPosX = self.sysPosX - leftmostWall
-		self.sysPosY = self.sysPosY - upmostWall
-		self.lastX = self.lastX - leftmostWall
-		self.lastY = self.lastY - upmostWall
+			self.sysPosX = self.sysPosX - leftmostWall
+			self.sysPosY = self.sysPosY - upmostWall
+			self.lastX = self.lastX - leftmostWall
+			self.lastY = self.lastY - upmostWall
 
-		self.startPosition = (15 - leftmostWall, 15 - upmostWall)
+			self.startPosition = (15 - leftmostWall, 15 - upmostWall)
+			#Resizingg succesful
+			return True
+		else:
+			#Resizing denied
+			return False
