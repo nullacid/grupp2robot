@@ -33,7 +33,7 @@ pygame.font.init()
 #Debugmode
 debug = False
 
-#FULLSCREEN MODE
+"""#FULLSCREEN MODE
 screenWidth = 1536
 screenHeight = 864
 squareWidth = screenHeight/32
