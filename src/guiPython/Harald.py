@@ -102,7 +102,7 @@ class Harald():
 
 	def __attemptReceive(self):
 		data = None
-		self.ourSocket.settimeout(2.0)
+		self.ourSocket.settimeout(4.0)
 		try:
 			data = self.ourSocket.recv(1)
 			return data
