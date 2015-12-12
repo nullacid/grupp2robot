@@ -417,7 +417,9 @@ void action_done(uint8_t update_map){
 			wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
 		}
 		else if (t_vagg_front == 2){ //IR WALL
-			wmem_auto(WALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
+			if(rmem(robot_pos_x + temp_x, robot_pos_y + temp_y) != WALL){
+				wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
+			}
 		}
 		
 		if (t_vagg_h_f == 0 && t_vagg_h_b == 0){ //HÖGER IR FLOOR
@@ -440,14 +442,14 @@ void action_done(uint8_t update_map){
 		}
 
 		if (t_vagg_v_f == 1 && t_vagg_v_b == 1){ //VÄNSTER IR WALL + 1 FLOOR
-			if(rmem_auto(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) != WALL){
+			if(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) != WALL){
 				wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 	
 			}
 			wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
 		}
 
 		if (t_vagg_v_f == 2 && t_vagg_v_b == 2){ //VÄNSTER IR WALL
-			if(rmem_auto(robot_pos_x + temp_y, robot_pos_y - temp_x) != WALL){
+			if(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) != WALL){
 				wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
 			}
 		}
