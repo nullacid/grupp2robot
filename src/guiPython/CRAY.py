@@ -23,7 +23,7 @@ if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 #Create bluetooth object
 harald = Harald()
 
-mapSystem = MapSystem()
+mapSystem = MapMaster2002()
 	
 #Initialize
 pygame.display.init()
@@ -110,18 +110,15 @@ def paintData(mapSystem):
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
-	#Start Position Circle
-	
-	#surface.blit(tile_start,(15*squareWidth, 15*squareHeight))
-	
-	pygame.draw.circle(surface, RED, [int(35 * squareWidth), int(17 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
-	
+	#Start Position Marker
+	surface.blit(tile_start, (34*squareWidth, int(17 * (5 * squareHeight) / 3)))
+
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 17 * (5 * squareHeight) / 3))
 	
 	#Current Position Circle
-	pygame.draw.circle(surface, MAGENTA, [int(35 * squareWidth), int(18 * (5 * squareHeight) / 3 + 10)], int(squareWidth / 2))
+	surface.blit(tile_ship_right, (34*squareWidth, int(18 * (5 * squareHeight) / 3)))
 	text = "Current Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
@@ -557,14 +554,16 @@ def getData():
 
 	getMap()
 	getPosition()
-	#if mapSystem.dataIndex == 0:
+	mapSystem.dataDict["Steering Decision"] = getDecision()
 
+
+
+	#if mapSystem.dataIndex == 0:
 	harald.inc_status()
 	paintMap(mapSystem)
 	paintData(mapSystem)
 
-	
-	mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
+	#mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
 	
 
 #mainloop

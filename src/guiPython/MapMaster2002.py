@@ -1,5 +1,5 @@
 import time
-class MapSystem():
+class MapMaster2002():
 	def __init__(self):
 		self.arrayMap = [["UNEXPLORED" for x in range(32)] for x in range(32)]
 		self.startPosition = (15,15)
