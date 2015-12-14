@@ -44,6 +44,8 @@ void init_mem(){
 	home_x = 16;
 	home_y = 16;
 
+	map_complete = 0;
+
 	for(i = 0; i < 32; i++){
 
 		wmem(OUTSIDE, i, 0);
@@ -52,7 +54,6 @@ void init_mem(){
 		wmem(OUTSIDE, 32, i);
 
 	}
-
 
 	return;
 
@@ -97,9 +98,9 @@ mapchange gstack(){
 	}
 }
 
-node* rmem(uint8_t x, uint8_t y){
+uint8_t rmem(uint8_t x, uint8_t y){
 
-	return &mapmem[x][y];
+	return mapmem[x][y].tileType;
 
 }
 

@@ -41,7 +41,7 @@ struct node{
 
 void wmem(uint8_t data, uint8_t x, uint8_t y); 		//Write to map-memory
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y);
-node* rmem(uint8_t x, uint8_t y); 				//Read from map-memory
+uint8_t rmem(uint8_t x, uint8_t y); 				//Read from map-memory
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t);	//Put data on change stack
 mapchange gstack(); 
 
@@ -66,7 +66,7 @@ uint8_t STACK_MAX;  //Size of stack
 
 uint8_t land_o_hoy;
 
-
+uint8_t map_complete;
 uint8_t debug;
 
 uint8_t map_enclosed;

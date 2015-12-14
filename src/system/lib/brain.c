@@ -24,18 +24,18 @@ uint8_t visited[32][32];
 
 void think(){
 
-	if(curr_action == EMPTY){
+	if((curr_action == EMPTY) && (map_complete == 0)){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if((s_ir_front < 9) && (s_ir_front > 2)){
+			if((s_ir_front < 9) && (s_ir_front > 2)){ //If to close to the wall, back up a bit
 					curr_action = BACKWARD;
 			}
 		
 			else if(((t_vagg_h_f == 0) && (t_vagg_h_b == 0)) || ((t_vagg_h_f == 1) && (t_vagg_h_b == 1))){ //If there is no wall to the right of the robot
 					curr_action = SPIN_R;
 				
-				if((s_ir_front > 12) && (s_ir_front < 30)){
+				if((s_ir_front > 12) && (s_ir_front < 30)){ 
 					curr_action = NUDGE_TO_WALL;
 				}
 
@@ -47,9 +47,14 @@ void think(){
 
 			}
 
-			else if(t_vagg_h_f != 2){ // is it used?
+			else if( (t_vagg_h_f != 2) && (t_vagg_h_b == 2) ){ //If there is no wall to the right of the robot
 				curr_action = NUDGE_FORWARD;
 			}
+
+
+//			else if(t_vagg_h_b != 2){
+//				curr_action = NUDGE_FORWARD;
+//			}
 
 			else if(t_vagg_front == 2){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
 				if(t_p_h != 0){
@@ -107,8 +112,8 @@ void think(){
 
 				debug = land_o_hoy;
 
-				if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x)->tileType == IWALL) || 
-					(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2)->tileType == IWALL)){ //VÄNSTER IR WALL
+				if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == IWALL) || 
+					(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == IWALL)){ //VÄNSTER IR WALL
 						land_o_hoy = 0;
 						curr_action = PARALLELIZE;
 						next_action = SPIN_L;
@@ -219,7 +224,7 @@ void gen_adj_matrix(uint8_t home){
 	for(i = 0; i < 32; i++){
 		for(j = 0; j < 32; j++){
 
-			uint8_t temp = rmem(i,j)->tileType;
+			uint8_t temp = rmem(i,j);
 
 			if((temp == FLOOR) || (temp == UNEXP)){
 				tuple temptup = {.x = i, .y = j};
@@ -263,7 +268,7 @@ void gen_adj_matrix(uint8_t home){
 					}
 					adj_matrix[tempx][tempy] = (lowestN +1);
 
-					if((rmem(tempx, tempy)->tileType == UNEXP) && !home){
+					if((rmem(tempx, tempy) == UNEXP) && !home){
 						target_x = tempx;
 						target_y = tempy;
 						target_found = 1;
@@ -287,20 +292,6 @@ return;
 
 }
 
-void mark_walls(){
-
-	uint8_t i;
-	uint8_t j;
-
-	for(i = 0; i < 32; i++){
-		for(j = 0; j < 32; j++){
-
-			if(visited[i][j] != 1){
-				wmem(WALL, i, j);
-			}
-		}
-	}
-}
 
 uint8_t done(){
 
@@ -310,7 +301,7 @@ uint8_t done(){
 
 	for(i = 0; i < 32; i++){
 		for(j = 0; j < 32; j++){
-			if(rmem(i,j)->tileType == UNEXP){
+			if(rmem(i,j) == IWALL){
 				answer = 0;
 			}			
 		}
@@ -323,10 +314,6 @@ uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 //Används för att kolla om väggen runt är sluten.
 	//Return 1 om sökning lyckades, 0 om ingen väg finns
 
-	uint8_t temp = 0;
-	temp = dfs_help(startx, starty, target_tile);
-
-
 	int i;
 	int j;
 	for(i = 0; i < 32; i++){
@@ -335,33 +322,37 @@ uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 		}
 	}
 
-	return temp;
-
+	return dfs_help(startx, starty, target_tile);
 
 }
 
 uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile){ //Kanske behöver göras iterativt
-	if(visited[startx][starty] != 1){
+	if(visited[startx][starty] == 0){
+		visited[startx][starty] = 1;
 
-		if (rmem(startx, starty)->tileType == target_tile){
+		if (rmem(startx, starty) == target_tile){
 			return 1;
 
 		}
-		else if(rmem(startx, starty)->tileType == WALL){
+		else if(rmem(startx, starty) == WALL){
 			return 0;
 		}
 		else{
-			check = dfs_help(startx-1, starty, target_tile);
-			if (check == 1){return 1;}
-			check = dfs_help(startx, starty+1, target_tile);
-			if (check == 1){return 1;}
-			check = dfs_help(startx+1, starty, target_tile);
-			if (check == 1){return 1;}
-			check = dfs_help(startx, starty-1, target_tile);
-			if (check == 1){return 1;}
+			if(dfs_help(startx,starty-1,target_tile)){ // down
+				return 1;
+			}
+			if(dfs_help(startx-1,starty,target_tile)){ // left
+				return 1;
+			}
+			if(dfs_help(startx,starty+1,target_tile)){ // up
+				return 1;
+			}
+			if(dfs_help(startx+1,starty,target_tile)){ // right
+				return 1;
+			}
 			return 0;
 		}
-		visited[startx][starty] = 1;
+		
 	}
 	return 0;
 
