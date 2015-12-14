@@ -65,7 +65,7 @@ class MapMaster2002():
 						3 : "IRleftFront",
 						4 : "IRleftBack",
 						5 : "Distance Covered",
-						6 : "Steering Data",
+						6 : "Steering data",
 						8 : "System Position",
 						7 : "Steering Decision",
 						9 : "Update Map",
@@ -106,8 +106,6 @@ class MapMaster2002():
 						"IRleftBack" : self.IRLBfile,
 						"Steering Decision" : self.steeringDecisionFile,
 						"Steering data" : self.steeringDataFile,
-						"Parallel Right" : self.parallelRightFile,
-						"Parallel Left" : self.parallelLeftFile,
 						"Distance Covered" : self.segmentsFile,
 						"Debug" : self.debugFile
 		}
@@ -116,7 +114,7 @@ class MapMaster2002():
 	#Increments index and loops it at the end of indexDict.
 	def incIndex(self):
 		self.dataIndex += 1
-		if self.dataIndex > len(indexDict):
+		if self.dataIndex >= len(self.indexDict):
 			self.dataIndex = 0
 	
 	#Writes the data currently mapped to the input data type to the data type's log file
