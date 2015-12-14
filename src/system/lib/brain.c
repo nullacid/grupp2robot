@@ -6,8 +6,8 @@ void find_next_wall();
 void find_empty_tile();
 
 void bfs(uint8_t target);
-uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile);
-uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile);
+uint8_t dfs(uint8_t startx, uint8_t starty);
+uint8_t dfs_help(uint8_t startx, uint8_t starty);
 void gen_adj_matrix(uint8_t home);
 void gen_actions();
 
@@ -28,7 +28,7 @@ void think(){
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
-			if((s_ir_front < 9) && (s_ir_front > 2)){ //If to close to the wall, back up a bit
+			if((s_ir_front < 11) && (s_ir_front > 2)){ //If to close to the wall, back up a bit
 					curr_action = BACKWARD;
 			}
 		
@@ -62,7 +62,7 @@ void think(){
 				}
 				else{
 
-					if((s_ir_front > 12) && (s_ir_front < 30)){
+					if((s_ir_front > 13) && (s_ir_front < 30)){
 						curr_action = NUDGE_TO_WALL;
 					}
 
@@ -109,8 +109,6 @@ void think(){
 						temp_y = 0;
 					break;
 				} 
-
-				debug = land_o_hoy;
 
 				if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == IWALL) || 
 					(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == IWALL)){ //VÄNSTER IR WALL
@@ -309,7 +307,44 @@ uint8_t done(){
 	return answer;
 }
 
+uint8_t dfs(uint8_t startx, uint8_t starty){
+	int i;
+	int j;
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+			visited[i][j] = 0;
+		}
+	}
+	return dfs_help(startx, starty);
+}
 
+uint8_t dfs_help(uint8_t startx, uint8_t starty){
+	if(visited[startx][starty] == 0){
+		if(rmem(startx,starty) == OUTSIDE){
+			return 1;
+		}
+		if(rmem(startx,starty) == WALL){
+			return 0;
+		}
+		visited[startx][starty] = 1;
+		
+		if(dfs_help(startx,starty-1) == 1){
+			return 1;
+		}
+		if(dfs_help(startx+1,starty) == 1){
+			return 1;
+		}
+		if(dfs_help(startx,starty+1) == 1){
+			return 1;
+		}
+		if(dfs_help(startx-1,starty) == 1){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/*
 uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
 //Används för att kolla om väggen runt är sluten.
 	//Return 1 om sökning lyckades, 0 om ingen väg finns
@@ -357,3 +392,4 @@ uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile){ //Kanske 
 	return 0;
 
 }
+*/

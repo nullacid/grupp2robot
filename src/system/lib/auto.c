@@ -227,7 +227,7 @@ void autonom (){
 					temptemp_action_done_c = 0;
 				}
 
-				if((s_ir_front < 13)&&(s_ir_front > 1)){ //fuckar upp vår position annars
+				if((s_ir_front < 14)&&(s_ir_front > 1)){ //fuckar upp vår position annars
 					setSpeed(0,0,FORWARD,FORWARD);
 					action_done(DONTUPDATE);
 				}
@@ -241,8 +241,11 @@ void autonom (){
 		case(NUDGE_FORWARD):
 
 			setSpeed(50,50,1,1);
-			if(t_reflex > 7){
+			if(t_reflex > 5){
 				curr_action = EMPTY;
+				if(t_vagg_h_b != 2){
+					next_action = LAST_NUDGE;
+				}
 				action_done(DONTUPDATE);
 			}
 
@@ -251,11 +254,19 @@ void autonom (){
 		case(NUDGE_TO_WALL):
 
 			setSpeed(50,50,1,1);
-			if(s_ir_front < 12){
+			if(s_ir_front < 13){
 				curr_action = EMPTY;
-				action_done(DONTUPDATE);
+				action_done(UPDATE);
 			}
 
+		break;
+
+		case(LAST_NUDGE):
+			setSpeed(50,50,1,1);
+			if(t_reflex > 5){
+				curr_action = SPIN_L;
+				action_done(UPDATE);
+			}
 		break;
 
 //---------------------------------SVÄNGA--------------------------------
@@ -396,7 +407,7 @@ void autonom (){
 
 			setSpeed(30, 30, 0, 0);
 							
-			if(s_ir_front >= 9){
+			if(s_ir_front >= 11){
 				first_time = 1;
 				curr_action = EMPTY;
 				action_done(UPDATE);
@@ -517,9 +528,11 @@ void action_done(uint8_t update_map){
 		if(follow_island == 1){
 			if(temptemp_action_done_c > 3){
 				if((robot_pos_x == island_x) && (robot_pos_y == island_y) ){
+				//	debug = 1;
 					land_o_hoy = 0;
 					curr_action = PARALLELIZE;
 					next_action = SPIN_L;
+					follow_island = 0;
 				}
 			}
 		}
@@ -532,6 +545,7 @@ void action_done(uint8_t update_map){
 			curr_action = SPIN_L;
 			map_complete = 1;
 		}
+
 		debug = lets_go_home;
 	}	
 }

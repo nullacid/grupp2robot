@@ -13,6 +13,7 @@
 #define P_WEAK			8 //Weak parallelization
 #define P_WEAK_L		9
 #define NUDGE_TO_WALL	0xA
+#define	LAST_NUDGE		0xB
 
 #define NORTH	0
 #define	EAST	1
@@ -64,6 +65,7 @@ uint8_t STACK_MAX;  //Size of stack
 
 //-------------------------------------------------------------
 
+uint8_t distance_covered;
 uint8_t land_o_hoy;
 
 uint8_t map_complete;
