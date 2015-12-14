@@ -3,6 +3,9 @@
  *  Author: Victor T and Peter T
  * "It is not fair to ask of others what you are unwilling to do yourself." - Victor 
 
+ * This file handles all bluetooth communication with the system.
+ * Functions are used in CRAY.py
+
 """
 import sys, os, traceback
 import select
@@ -20,48 +23,14 @@ class Harald():
 		self.port = 1
 		self.ourSocket = None
 		
+		#Connection Status is used for connection indicator in the gui
 		self.connectionstatus = 0
 
+		#Attempts to connect until connection is established
 		while not self.establishDirectConnection():
 			sleep(1)
-			pass
-		
-		
-	#Finds all nearby bluetooth devices and tries to connect to our firefly if it finds it
-	#Not used anymore.
-	def establishConnection(self):
-		self.ourSocket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-		print("performing inquiry...")
-		nearby_devices = []
-		try:
-			nearby_devices = bluetooth.discover_devices(
-			duration=8, lookup_names=True, flush_cache=True, lookup_class=False)
-		except IOError:
-			print("Can't find any bluetooth devices")
-
-		print("found %d devices" % len(nearby_devices))
-		for addr, name in nearby_devices:
-			try:
-				print("  %s - %s" % (addr, name))
-			except UnicodeEncodeError:
-				print("  %s - %s" % (addr, name.encode('utf-8', 'replace')))
-				
-		for i in range(0, len(nearby_devices)):
-			if nearby_devices[i][0] == fireflyMacAddr:
-				self.targetDevice = nearby_devices[i][0]
-				
-		if self.targetDevice != None:
-			try:
-				self.ourSocket.connect((self.targetDevice, self.port))
-				print("Connected to firefly module")
-				return True
-			except IOError:
-				print("Firefly module timed out, reattempting to connect")
-				return False
-		else:
-			print("Failed to connect to firefly module, reattemping to connect")
-			return False
-		
+			pass	
+			
 	#Establishes a connection to our firefly module without looking for it first.
 	#Returns true if it connects, false otherwise.
 	def establishDirectConnection(self):
@@ -75,6 +44,7 @@ class Harald():
 		#Disable timeout to give enough time for connection
 		self.ourSocket.settimeout(None)
 
+		#Attempts to connect, throws IOError.
 		try:
 			self.ourSocket.connect((self.targetDevice, self.port))
 			print("Connected to firefly module")
@@ -92,8 +62,9 @@ class Harald():
 	def sendData(self, data):	
 		if self.targetDevice != None:
 			self.ourSocket.send(data)
-			#print("sent data: " + str(hex(data[0])))
 			
+	#Attempts to receive one byte of data from the bluetooth module, and reconnects to the bluetooth module
+	#if it receives false from __attempReceive()
 	def receiveData(self):
 		if self.targetDevice != None:
 			data = self.__attemptReceive()
@@ -102,10 +73,9 @@ class Harald():
 					sleep(1)
 				return b'\xff'
 			else:
-				#print("Received data: " + str(hex(data[0])))
 				return data
 				
-
+	#Attempts to receive one byte of data, returns false if it times out, otherwise returns the data
 	def __attemptReceive(self):
 		data = None
 		self.ourSocket.settimeout(4.0)
@@ -116,6 +86,8 @@ class Harald():
 			print("timeout yo")
 			return False
 
+	#Sends a sync byte to the communication module in the system. If the system still has data to send from
+	#an earlier transmission, these will be swallowed by this function.
 	def __doSync(self):
 		self.sendData(b'\x26')
 
@@ -128,6 +100,7 @@ class Harald():
 		except bluetooth.BluetoothError:
 			return False
 
+	#Increments connection status indicator
 	def inc_status(self):
 		if self.connectionstatus < 3:
 			self.connectionstatus += 1
