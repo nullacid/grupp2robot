@@ -155,9 +155,12 @@ crayRunning = True
 
 #Paints the data field with all sensor data
 def paintData(mapSystem):
-	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
+	pygame.draw.rect(surface, BLACK, [18*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
+
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
-	for i in range(0, len(mapSystem.indexDict)):
+
+	#Loops through all data values (disregarding some values that are presented other ways)
+	for i in range(0, len(mapSystem.indexDict) - 2):
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))

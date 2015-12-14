@@ -1,3 +1,12 @@
+/*
+ * Created: November 2015
+ * Author : Peter T and Victor T
+ * "Ah, sweet alcohol. Like a true friend, you replace the anger with better, louder anger." -Erik
+ * 
+ * Implementation of USART in the system.
+ * 
+ */ 
+
 #include "usart.h"
 #include <util/delay.h>
 
@@ -19,7 +28,7 @@ void init_USART_up(unsigned int baud){
 	UCSR0B = (0<<UCSZ02)|(1<<RXEN0)|(1<<TXEN0);	
 
 }
-
+/* Initializes USART. */
 void init_USART_down(unsigned int baud){
 	/* Set baud rate */
 	UBRR1H = (unsigned char)(baud>>8);
@@ -37,6 +46,7 @@ void init_USART_down(unsigned int baud){
 	UCSR1B = (0<<UCSZ12)|(1<<RXEN1)|(1<<TXEN1);
 }
 
+/* Attempts to receive a byte with a timeout. */
 unsigned char receiveByte_up_to()
 {
 	int counter = 0;
@@ -51,6 +61,7 @@ unsigned char receiveByte_up_to()
 	return data;
 }
 
+/* Attempts to receive a byte with a timeout. */
 unsigned char receiveByte_down_to(){
 	int counter = 0;
 	while(!(UCSR1A & (1<<RXC1))){
@@ -121,11 +132,13 @@ void waitForSendNext_up(){
 	_delay_ms(50);
 }
 
+/* Empties the USART buffer. */
 void flushUSART_down(){
 	int dummy;
 	while ( UCSR1A & (1<<RXC0) ) dummy = UDR1;
 }
 
+/* Empties the USART buffer. */
 void flushUSART_up(){
 	int dummy;
 	while ( UCSR0A & (1<<RXC0) ) dummy = UDR0;

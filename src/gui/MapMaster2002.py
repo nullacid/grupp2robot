@@ -66,9 +66,9 @@ class MapMaster2002():
 						4 : "IRleftBack",
 						5 : "Distance Covered",
 						6 : "Steering data",
+						#7 : "Steering Decision",
 						8 : "System Position",
-						7 : "Steering Decision",
-						9 : "Update Map"#,
+						9 : "Update Map",#,
 
 						#10 : "IR Front (token)",
 						#11 : "Parallel Right",
@@ -76,7 +76,7 @@ class MapMaster2002():
 						#13 : "IRright (token)",
 						#14 : "IRleft (token)",
 
-						#15 : "Debug"
+						7 : "Debug"
 		}
 		#Store values for each data type, the keys correspond to the values in indexDict
 		self.dataDict = {

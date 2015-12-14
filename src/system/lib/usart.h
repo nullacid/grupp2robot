@@ -1,3 +1,11 @@
+/*
+ * Created: November 2015
+ * Author : Peter T and Victor T
+ * "Ah, sweet alcohol. Like a true friend, you replace the anger with better, louder anger." -Erik
+ * 
+ * Header file for USART communication. USART is implemented in the system as asynchrońous communication
+ * 
+ */ 
 
 #ifndef USART_H
 #define USART_H
