@@ -1,22 +1,48 @@
+"""
+	Created: November 2015
+ *  Author: Victor T and Peter T
+ * "It is not fair to ask of others what you are unwilling to do yourself." - Victor 
 
+ * This class handles CRAY's representation of the map and the system's position.
+ * It also stores all data that the system has to offer.
+
+"""
 
 class MapMaster2002():
 	def __init__(self):
+
+		#2d-array that the map is stored in. The different tiles are
+		#"UNEXPLORED"
+		#"OPEN"
+		#"WALL"
+		#"LEFT WALL" 
 		self.arrayMap = [["UNEXPLORED" for x in range(32)] for x in range(32)]
+
+
 		self.startPosition = (15,15)
+
+		#System's current position
 		self.sysPosX = 15
 		self.sysPosY = 15
-		self.dataIndex = 0
-
+		
+		#System's position from the last time it was gathered from the system.
+		#Used for choosing the direction of the sprite in the GUI.
 		self.lastX = 15
 		self.lastY = 15
 
+		#Offset in coordinates from the values sent by the system.
+		#Initiated as -1 because the system has a larger array for its map (for pathfinding).
 		self.coordinateOffsetX = - 1
 		self.coordinateOffsetY = - 1
 
+		#The sprite used for painting the system. Set in CRAY.py
 		self.tileImg = None
+
+		#Index used for iterating through the different sensor values.
+		self.dataIndex = 0
 		
-		#self.gyroFile = open("logs/gyro.swag", 'w', 1)
+		#Data Files used for logging data
+		#Data will only be logged if self.logData is set to True
 		self.IRFrontFile = open("logs/ir_front.swag", 'w', 1)
 		self.IRtokenFile = open("logs/IRtoken.swag", 'w', 1)
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
@@ -27,6 +53,8 @@ class MapMaster2002():
 		self.debugFile = open("logs/debug.swag", 'w', 1)
 		self.irRightFile = open("logs/irRight.swag", 'w', 1)
 		self.segmentsFile = open("logs/segments.swag", 'w', 1)
+
+		self.logData = False
 		
 
 		#Dictionary used for looping over data types
@@ -40,7 +68,6 @@ class MapMaster2002():
 						6 : "IR Front (token)",
 						7 : "Parallel Right",
 						8 : "Parallel Left",
-						#9 : "Gyro (token)",
 						9 : "IRright (token)",
 						10 : "IRleft (token)",
 						11 : "Steering data",
@@ -49,7 +76,7 @@ class MapMaster2002():
 						14 : "Steering Decision",
 						15 : "Debug"
 		}
-		#Store values for each data type
+		#Store values for each data type, the keys correspond to the values in indexDict
 		self.dataDict = {
 						"IR Front" : 1,
 						"IRrightFront" : 1,
@@ -83,25 +110,28 @@ class MapMaster2002():
 		}
 
 
-	#Increments index and loops it at 17
+	#Increments index and loops it at the end of indexDict.
 	def incIndex(self):
 		self.dataIndex += 1
-		if self.dataIndex > 15:
+		if self.dataIndex > len(indexDict):
 			self.dataIndex = 0
 	
 	#Writes the data currently mapped to the input data type to the data type's log file
+	#Won't do anything if self.logData is set to False
 	def updateLog(self, dataType):
-		if dataType in self.fileDict:
+		if dataType in self.fileDict and self.logData:
 			self.fileDict[dataType].write(str(round(time.clock(), 1)) + "s " + str(self.dataDict[dataType]) + "\n")
 
 	#Resizes the map to only include the found area
 	def resize(self):
+		#Values used to compare which wall is the furthest in a specific direction.
+		#Initially set to the opposite direction's max value i.e. the worst value it can have.
 		leftmostWall = 32
 		rightmostWall = 0
-
 		upmostWall = 32
 		downmostWall = 0
 
+		#Finds the leftmost and rightmost wall
 		for row in range(0,len(self.arrayMap)):
 			firstFound = False
 			lastFound = False
@@ -117,6 +147,7 @@ class MapMaster2002():
 						if col > rightmostWall:
 							rightmostWall = col
 
+		#Finds the upmost and downmost wall
 		for col in range(0,len(self.arrayMap)):
 			firstFound = False
 			lastFound = False
@@ -132,32 +163,28 @@ class MapMaster2002():
 						if row > downmostWall:
 							downmostWall = row
 
+		#Finds the largest difference between x and y coordinate to determine the size of the resized map
 		diff = 0
 		if downmostWall - upmostWall >= rightmostWall - leftmostWall:
 			diff = downmostWall - upmostWall
 		else:
 			diff = rightmostWall - leftmostWall
 
-		if diff > 5:
-			#Create new arrayMap
-			newArray = [["UNEXPLORED" for x in range(diff)] for x in range(diff)]
-			for row in range(0, diff):
-				for col in range(0, diff):
-					newArray[col][row] = self.arrayMap[col + leftmostWall][row + upmostWall]
+		#Create new arrayMap with the new size and creates a deep copy of the old array.
+		newArray = [["UNEXPLORED" for x in range(diff)] for x in range(diff)]
+		for row in range(0, diff):
+			for col in range(0, diff):
+				newArray[col][row] = self.arrayMap[col + leftmostWall][row + upmostWall]
 
+		self.arrayMap = newArray
 
-			self.arrayMap = newArray
-			self.coordinateOffsetX = self.coordinateOffsetX - leftmostWall
-			self.coordinateOffsetY = self.coordinateOffsetY - upmostWall
+		#Change the offset values so that new map (and position) data will be placed correctly
+		self.coordinateOffsetX = self.coordinateOffsetX - leftmostWall
+		self.coordinateOffsetY = self.coordinateOffsetY - upmostWall
 
-			self.sysPosX = self.sysPosX - leftmostWall
-			self.sysPosY = self.sysPosY - upmostWall
-			self.lastX = self.lastX - leftmostWall
-			self.lastY = self.lastY - upmostWall
-
-			self.startPosition = (15 - leftmostWall, 15 - upmostWall)
-			#Resizingg succesful
-			return True
-		else:
-			#Resizing denied
-			return False
+		#Updates system position to the new map.
+		self.sysPosX = self.sysPosX - leftmostWall
+		self.sysPosY = self.sysPosY - upmostWall
+		self.lastX = self.lastX - leftmostWall
+		self.lastY = self.lastY - upmostWall
+		self.startPosition = (15 - leftmostWall, 15 - upmostWall)
