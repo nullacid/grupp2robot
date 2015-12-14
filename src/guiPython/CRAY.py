@@ -1,64 +1,77 @@
+"""
+	Created: November 2015
+ *  Author: Peter T and Victor T
+ * "It is not fair to ask of others what you are unwilling to do yourself." - Victor 
+
+ * Main file for the CRAY super computer.
+
+"""
 
 import pygame
+from pygame import *
+
 #Import bluetooth class
 from Harald import *
 
 #Import map system class
 from MapMaster2002 import *
 
-#from pygame.locals import *
-from pygame import *
-
 
 import sys, os, traceback
-
-from time import *
-
 
 #Center the screen
 if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
-	
+debug = False
+fullscreenMode = False
 
 #Create bluetooth object
 harald = Harald()
 
+#Create map object
 mapSystem = MapMaster2002()
 	
 #Initialize
 pygame.display.init()
 pygame.font.init()
 
+#Declare screen related values
+screenWidth = None
+screenHeight = None
+squareWidth = None
+squareHeight = None
 
-#Debugmode
-debug = False
+screen_size = None
 
-"""#FULLSCREEN MODE
-screenWidth = 1536
-screenHeight = 864
-squareWidth = screenHeight/32
-squareHeight = screenHeight/32
+surface = None
+offset = None
 
-screen_size = [screenWidth,screenHeight]
+#Initialize screen values to fullscreen mode
+if fullscreenMode:
+	screenWidth = 1536
+	screenHeight = 864
+	squareWidth = screenHeight/32
+	squareHeight = screenHeight/32
 
-surface = pygame.display.set_mode(screen_size, FULLSCREEN)
-offset = -15
-#dataOffset = 300
+	screen_size = [screenWidth,screenHeight]
 
-"""#SMALLSCREEN MODE
-screenWidth = 960
-screenHeight = 640
-squareWidth = screenHeight/32
-squareHeight = screenHeight/32
+	surface = pygame.display.set_mode(screen_size, FULLSCREEN)
+	offset = -15
 
+#Initialize screen values to smaller screen mode
+else:
+	screenWidth = 960
+	screenHeight = 640
+	squareWidth = screenHeight/32
+	squareHeight = screenHeight/32
 
-screen_size = [screenWidth, screenHeight]
+	screen_size = [screenWidth, screenHeight]
 
-surface = pygame.display.set_mode(screen_size)
+	surface = pygame.display.set_mode(screen_size)
+	offset = -40
 
-offset = -40
-#dataOffset = 220"""
-
+#These values are changed when map size is changed, some parts of the GUI use these values
+#Others used squareWidth/Height
 mapSquareWidth = squareWidth
 mapSquareHeight = squareHeight
 
@@ -74,15 +87,15 @@ MAGENTA = (255,0,255)
 YELLOW = (255,255,0)
 GREY = (139, 137, 137)
 
+#Makes white pixels transparent
 surface.set_colorkey(WHITE)
 
-
+#Values used for storing images to be painted on the GUI. set in rescale()
 tileUNEXPLORED = None
 tileOPEN = None
 tileWALL = None
 tileLEFTWALL = None
 tileOUTSIDE = None
-
 
 tile_ship_down = None
 tile_ship_up = None
@@ -118,28 +131,29 @@ def rescale():
 	tile_ship_right = pygame.transform.scale(pygame.image.load("images/tile_ship_right.png"),(int(mapSquareWidth),int(mapSquareHeight)))
 	tile_start = pygame.transform.scale(pygame.image.load("images/tile_start.png"),(int(mapSquareWidth),int(mapSquareHeight)))
 
+#Sets special sizes for the markers used in the data sections (these won't change when map changes size)
 tile_ship_right_data = pygame.transform.scale(pygame.image.load("images/tile_ship_right.png"),(int(squareWidth),int(squareHeight)))
 tile_start_data = pygame.transform.scale(pygame.image.load("images/tile_start.png"),(int(squareWidth),int(squareHeight)))
 
+#Sets the tiles.
 rescale()
 
+#Sets the initial tile to be painted for system position
 mapSystem.tileImg = tile_ship_up
 
 
 
-#A blank icon
+#Removes the silly pygame icon from the pygame window
 icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
-#This caption
-pygame.display.set_caption("M/S SEA++ TEST PROGRAM")
+#Sets window name
+pygame.display.set_caption("CRAY™ Super Computer: Connected to M/S Sea++")
 
 
 #Global variable for when the game is running
 crayRunning = True
 
 
-
-
-	
+#Paints the data field with all sensor data
 def paintData(mapSystem):
 	pygame.draw.rect(surface, BLACK, [15*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
@@ -148,36 +162,32 @@ def paintData(mapSystem):
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
 		
-	#Start Position Marker
+	#Start position symbol for legend
 	surface.blit(tile_start_data, (34*squareWidth, int(17 * (5 * squareHeight) / 3)))
 
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 17 * (5 * squareHeight) / 3))
 	
-	#Current Position Circle
+	#Current position symbol for legend
 	surface.blit(tile_ship_right_data, (34*squareWidth, int(18 * (5 * squareHeight) / 3)))
 	text = "Current Position"
 	text = font.render(text, 0 , WHITE)
 	surface.blit(text, (36 * squareWidth, 18 * (5 * squareHeight) / 3))
 	
-	#Connection status
+	#Connection status indicator
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
 	
+#Paints the entire map
 def paintMap(mapSystem):
-
 	for i in range(0,len(mapSystem.arrayMap)):
 		for j in range(0,len(mapSystem.arrayMap)):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
 
 	#Draw startPosition
-	#pygame.draw.circle(surface, RED, [int(mapSystem.startPosition[0] * squareWidth + squareWidth / 2), int(mapSystem.startPosition[1] * squareWidth + squareHeight/2)], int(squareWidth / 2))
-
 	surface.blit(tile_start,(int(mapSystem.startPosition[0])*mapSquareWidth, int(mapSystem.startPosition[1])*mapSquareHeight))
-	
 
-	#Draw currentPosition
-	
+	#Draw currentPosition, compares last coordinates with current coordinates to determine direction
 	if mapSystem.lastX == mapSystem.sysPosX + 1 and mapSystem.lastY == mapSystem.sysPosY:
 		mapSystem.tileImg = tile_ship_left
 	elif mapSystem.lastX == mapSystem.sysPosX - 1 and mapSystem.lastY == mapSystem.sysPosY:
@@ -190,15 +200,13 @@ def paintMap(mapSystem):
 		
 	surface.blit(mapSystem.tileImg,(int(mapSystem.sysPosX)*mapSquareWidth, int(mapSystem.sysPosY*mapSquareHeight)))
 
-	#pygame.draw.circle(surface, MAGENTA, [int(mapSystem.sysPosX * squareWidth + squareWidth / 2), int(mapSystem.sysPosY * squareWidth + squareHeight/2)], int(squareWidth / 2))
-	
 	lastX = mapSystem.sysPosX
 	lastY = mapSystem.sysPosY
 	
-	
+	#Update Screen
 	pygame.display.flip()
 
-	
+#Paints a square give tile type and coordinates.
 def paintSquare(tileType, xCoord, yCoord):
 	tileImg = tileUNEXPLORED
 	if tileType == "UNEXPLORED":
@@ -207,17 +215,13 @@ def paintSquare(tileType, xCoord, yCoord):
 		tileImg = tileOPEN
 	elif tileType == "WALL":
 		tileImg = tileWALL
-	elif tileType == "OUTSIDE":
-		tileImg = tileOUTSIDE
 	elif tileType == "LEFT WALL":
 		tileImg = tileLEFTWALL
 
-		
 	surface.blit(tileImg,(xCoord*mapSquareWidth, yCoord*mapSquareHeight))
 	
-	#pygame.draw.rect(surface, colour, [xCoord*squareWidth, yCoord*squareHeight, squareWidth, squareHeight])
 	
-#key binding handles
+#Key binding handle for quitting the program (ESCAPE)
 def handle_quit():
 	global crayRunning
 	harald.ourSocket.close()
@@ -261,203 +265,6 @@ def spinR_down():
 def spinR_up():
 	harald.sendData(b'\x25')
 	
-def handle_SPACE():
-	pass
-	
-	
-#Functions for getting data from the system (called autonomously)
-#They get data from the system and formats it into data that makes sense for humans.
-def getIRF():
-	if debug:
-		print ("IRF")
-	
-	harald.sendData(b'\x48')
-	data = harald.receiveData()
-	return int(data[0])
-	
-def getIRRF():
-	if debug:
-		print("IRRF")
-	harald.sendData(b'\x49')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRRB():
-	if debug:
-		print("IRRB")
-	harald.sendData(b'\x4A')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRLF():
-	if debug:
-		print("IRLF")
-	harald.sendData(b'\x4B')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRLB():
-	if debug:
-		print("IRLB")
-	harald.sendData(b'\x4C')
-	data = harald.receiveData()
-	return int(data[0])
-
-#NOT USED ATM
-def getGyro():
-	if debug:
-		print("gyro")
-	harald.sendData(b'\x8D')
-	msByte = harald.receiveData()
-	lsByte = harald.receiveData()
-	data = int(msByte[0])*256 + int(lsByte[0])
-	return data
-
-def getReflexToken():
-	if debug:
-		print("reflex token")
-	harald.sendData(b'\x57')
-	data = int(harald.receiveData()[0])
-	if data > 40:
-		print("ANOMALY DETECTED")
-	return data
-
-	
-def getIRFToken():
-	if debug:
-		print("IRF token")
-	harald.sendData(b'\x4F')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getParallelRight():
-	if debug:
-		print("parallelRight")
-	harald.sendData(b'\x50')
-	data = harald.receiveData()
-	out = twos_comp(int(hex(data[0]),16), 8)
-	return out
-
-def getParallelLeft():
-	if debug:
-		print("parallelleft")
-	harald.sendData(b'\x51')
-	data = harald.receiveData()
-	out = twos_comp(int(hex(data[0]),16), 8)
-	return out
-	
-def getGyroToken():
-	if debug:
-		print("gyrotoken")
-	harald.sendData(b'\x52')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRRFtoken():
-	if debug:
-		print("IRRFtoken")
-	harald.sendData(b'\x53')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRRBtoken():
-	if debug:
-		print("IRRBtoken")
-	harald.sendData(b'\x54')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRLFtoken():
-	if debug:
-		print("IRLFtoken")
-	harald.sendData(b'\x55')
-	data = harald.receiveData()
-	return int(data[0])
-
-def getIRLBtoken():
-	if debug:
-		print("IRLBtoken")
-	harald.sendData(b'\x56')
-	data = harald.receiveData()
-	return int(data[0])
-
-#First byte is left engine, second byte is right engine
-def getSteering():
-	if debug:
-		print("steering")
-	harald.sendData(b'\x99')
-	leftEngine = int(harald.receiveData()[0])
-	rightEngine = int(harald.receiveData()[0])
-	return str(leftEngine) + "  " + str(rightEngine)
-
-#Gets data from the map update stack in bjarne and updates the map graphically
-def getMap():
-	if debug:
-		print("map")
-
-	harald.sendData(b'\x98')
-	msByte = harald.receiveData()
-	lsByte = harald.receiveData()
-	if msByte == b'\xFF' and lsByte == b'\xFF':
-			global mapSquareWidth
-			global mapSquareHeight
-			mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
-			mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
-			rescale()
-
-	else:
-		xCoord = int(msByte[0]) + mapSystem.coordinateOffsetX
-		yCoord = int(lsByte[0] & b'\x3F'[0]) + mapSystem.coordinateOffsetY
-		tileType = int(lsByte[0] >> 6)
-
-		if tileType != 0:
-			if tileType == 1:
-				tileType = "LEFT WALL"
-			elif tileType == 2:
-				tileType = "OPEN"
-			elif tileType == 3:
-				tileType = "WALL"
-
-			if xCoord < len(mapSystem.arrayMap) and yCoord < len(mapSystem.arrayMap):
-				mapSystem.arrayMap[xCoord][yCoord] = tileType
-				return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
-
-		return mapSystem.dataDict["Update Map"]
-	
-
-def getPosition():
-	if debug:
-		print("position")
-	harald.sendData(b'\x9A')
-
-	mapSystem.lastX = mapSystem.sysPosX
-	mapSystem.lastY = mapSystem.sysPosY
-
-	mapSystem.sysPosX = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetX
-	mapSystem.sysPosY = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetY
-	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
-
-def getDecision():
-	if debug:
-		print("decision")
-	harald.sendData(b'\x5B')
-	data = harald.receiveData()
-	return int(data[0])
-
-	
-def getDebug():
-	if debug:
-		print("debug")
-	harald.sendData(b'\x4E')
-	data = int(harald.receiveData()[0])
-	#out = twos_comp(int(hex(data[0]),16), 8)
-	return data
-	
-def twos_comp(val, bits):
-    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
-        val = val - (1 << bits)        # compute negative value
-    return val                         # return positive value as is
-
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
 	K_ESCAPE: handle_quit,
@@ -467,7 +274,6 @@ handle_dictionary_down = {
 	K_d: right_down,
 	K_q: spinL_down,
 	K_e: spinR_down,
-	K_SPACE: handle_SPACE
 }
 
 
@@ -480,6 +286,140 @@ handle_dictionary_up = {
 	K_q: spinL_up,
 	K_e: spinR_up
 }
+	
+	
+#Functions for getting data from the system (called autonomously)
+#They get data from the system and formats it into data that makes sense for humans.
+def getIRF():	
+	harald.sendData(b'\x48')
+	return int(harald.receiveData()[0])
+	
+def getIRRF():
+	harald.sendData(b'\x49')
+	return int(harald.receiveData()[0])
+
+def getIRRB():
+	harald.sendData(b'\x4A')
+	return int(harald.receiveData()[0])
+
+def getIRLF():
+	harald.sendData(b'\x4B')
+	return int(harald.receiveData()[0])
+
+def getIRLB():
+	harald.sendData(b'\x4C')
+	return int(harald.receiveData()[0])
+
+def getReflexToken():
+	harald.sendData(b'\x57')
+	data = int(harald.receiveData()[0])
+	if data > 40:
+		print("ANOMALY DETECTED")
+	return data
+
+	
+def getIRFToken():
+	harald.sendData(b'\x4F')
+	return int(harald.receiveData()[0])
+
+def getParallelRight():
+	harald.sendData(b'\x50')
+	data = harald.receiveData()
+	return twos_comp(int(hex(data[0]),16), 8)
+
+def getParallelLeft():
+	harald.sendData(b'\x51')
+	data = harald.receiveData()
+	return twos_comp(int(hex(data[0]),16), 8)
+	
+
+def getIRRFtoken():
+	harald.sendData(b'\x53')
+	return int(harald.receiveData()[0])
+
+def getIRRBtoken():
+	harald.sendData(b'\x54')
+	return int(harald.receiveData()[0])
+
+def getIRLFtoken():
+	harald.sendData(b'\x55')
+	return int(harald.receiveData()[0])
+
+def getIRLBtoken():
+	harald.sendData(b'\x56')
+	return int(harald.receiveData()[0])
+
+#First byte is left engine, second byte is right engine
+def getSteering():
+	harald.sendData(b'\x99')
+	leftEngine = int(harald.receiveData()[0])
+	rightEngine = int(harald.receiveData()[0])
+	return str(leftEngine) + "  " + str(rightEngine)
+
+#Gets data from the map update stack in bjarne and updates the map graphically.
+#Resizes the map when system has finished mapping the outer wall
+def getMap():
+	harald.sendData(b'\x98')
+	msByte = harald.receiveData()
+	lsByte = harald.receiveData()
+	#Special value sent when system has decided that outer wall is done
+	if msByte == b'\xFF' and lsByte == b'\xFF':
+			global mapSquareWidth
+			global mapSquareHeight
+			#resizes map
+			mapSystem.resize()
+			mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
+			mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
+			#rescales images
+			rescale()
+
+	#Regular map data. Sent in format
+	# --xx xxxx - ttyy yyyy (- nothing, x xcoordinate, y ycoordinate, t tiletype)
+	else:
+		xCoord = int(msByte[0]) + mapSystem.coordinateOffsetX
+		yCoord = int(lsByte[0] & b'\x3F'[0]) + mapSystem.coordinateOffsetY
+		tileType = int(lsByte[0] >> 6)
+
+		if tileType != 0:
+			if tileType == 1:
+				tileType = "LEFT WALL"
+			elif tileType == 2:
+				tileType = "OPEN"
+			elif tileType == 3:
+				tileType = "WALL"
+			#Adds the tile to the mapsystem
+			if xCoord < len(mapSystem.arrayMap) and yCoord < len(mapSystem.arrayMap):
+				mapSystem.arrayMap[xCoord][yCoord] = tileType
+				return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+
+		return mapSystem.dataDict["Update Map"]
+	
+
+def getPosition():
+	harald.sendData(b'\x9A')
+
+	mapSystem.lastX = mapSystem.sysPosX
+	mapSystem.lastY = mapSystem.sysPosY
+
+	mapSystem.sysPosX = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetX
+	mapSystem.sysPosY = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetY
+	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
+
+def getDecision():
+	harald.sendData(b'\x5B')
+	return int(harald.receiveData()[0])
+	
+def getDebug():
+	harald.sendData(b'\x4E')
+	return int(harald.receiveData()[0])
+
+#Gets the twos complement value of a value
+def twos_comp(val, bits):
+    if (val & (1 << (bits - 1))) != 0: # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)        # compute negative value
+    return val                         # return positive value as is
+
+
 
 #dictionary for binding functions to names of sensor data we want to get, see MapSystem
 handle_dictionary_data = {
@@ -488,11 +428,10 @@ handle_dictionary_data = {
 	"IRrightBack" : getIRRB,
 	"IRleftFront" : getIRLF,
 	"IRleftBack" : getIRLB,
-	"Segments turned" : getReflexToken,
+	"Distance Covered" : getReflexToken,
 	"IR Front (token)" : getIRFToken,
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
-	#"Gyro (token)" : getGyroToken,
 	"IRright (token)" : getIRRFtoken,
 	"IRleft (token)" : getIRLFtoken,
 	"Steering data" : getSteering,
@@ -502,114 +441,23 @@ handle_dictionary_data = {
 	"Debug" : getDebug
 }
 
-#Gets all data from one command and then updates the screen.
-#ORDER DATA HAS TO BE TRANSMITTED IN
-#NOT CURRENTLY USED
-#-------
-#IRRF
-#IRRB
-#IRLF
-#IRLB
-#IRF
-#PR
-#PL
-#Gt
-#IRRt
-#IRLt
-#IRFt
-#Steering
-#Map
-#SysPos
-#Decision
-#Debug
-#-------
-def getAllData():
-	#Send command
-	harald.sendData(b'\x1D')
-
-	#Get IR sensor data
-	mapSystem.dataDict["IRrightFront"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["IRrightBack"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["IRleftFront"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["IRleftBack"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["IR Front"] = int(harald.receiveData()[0])
-
-	#Get Parallel tokens
-	mapSystem.dataDict["Parallel Right"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["Parallel Left"] = int(harald.receiveData()[0])
-
-	#Get gyro token
-	mapSystem.dataDict["Gyro (token)"] = int(harald.receiveData()[0])
-
-	#Get IR token data
-	mapSystem.dataDict["IRright (token)"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["IRleft (token)"] = int(harald.receiveData()[0])
-	mapSystem.dataDict["IR Front (token)"] = int(harald.receiveData()[0])
-
-	#Get Steering data. (Output to engine)
-	leftSteering = int(harald.receiveData()[0])
-	rightSteering = int(harald.receiveData()[0])
-	mapSystem.dataDict["Steering data"] = str(leftEngine) + "  " + str(rightEngine)
-
-	#Get Map data from change stack
-	msByteMap = harald.receiveData()
-	lsByteMap = harald.receiveData()
-	xCoordMap = int(msByteMap[0]) - 1
-	yCoordMap = int(lsByteMap[0] & b'\x3F'[0]) - 1
-	tileType = int(lsByteMap[0] >> 6)
-	if tileType != 0:
-		if tileType == 1:
-			tileType = "UNEXPLORED"
-		elif tileType == 2:
-			tileType = "OPEN"
-		elif tileType == 3:
-			tileType = "WALL"
-		if xCoord < 32 and yCoord < 32:
-			mapSystem.arrayMap[xCoord][yCoord] = tileType
-			mapSystem.dataDict["Update Map"] = "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
-
-	#Get System Position
-	mapSystem.sysPosX = int(harald.receiveData()[0]) - 1
-	mapSystem.sysPosY = int(harald.receiveData()[0]) - 1
-	mapSystem.dataDict["System Position"] = "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
-
-	#Get Steering Decision
-	mapSystem.dataDict["Steering Decision"] = int(harald.receiveData()[0])
-	#Update the log for steering decision, great for debugging
-	mapSystem.updateLog("Steering Decision")
-
-	#Get Debug
-	mapSystem.dataDict["Debug"] = int(harald.receiveData()[0])
-
-	#Update Screen
-	paintMap(mapSystem)
-	paintData(mapSystem)
 
 #Gets one data value from the system (decided by dataIndex in mapSystem)
 #Increments dataIndex so that the next data value will be gathered the next time this function is called.
 def getData():
-	#currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
-	#mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
-	#mapSystem.updateLog(currentDataSlot)
+	currentDataSlot = mapSystem.indexDict[mapSystem.dataIndex]
+	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
+	mapSystem.updateLog(currentDataSlot)
 
-	#if mapSystem.dataIndex % 2 == 0:
-	#	getMap()
-	#	getPosition()
-
-	getMap()
-	getPosition()
-	mapSystem.dataDict["Steering Decision"] = getDecision()
-	#mapSystem.dataDict["IR Front"] = getIRF()
-	mapSystem.dataDict["Debug"] = getDebug()
-
-
+	if mapSystem.dataIndex % 2 == 0:
+		getMap()
 
 	if mapSystem.dataIndex == 0:
 		harald.inc_status()
 		paintMap(mapSystem)
 		paintData(mapSystem)
 
-	#mapSystem.incIndex()	#This is essentially dataIndex++ but it loops it at 17
+	mapSystem.incIndex()
 	
 
 #mainloop

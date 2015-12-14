@@ -1,7 +1,7 @@
 """
 	Created: November 2015
- *  Author: Victor T and Peter T
- * "It is not fair to ask of others what you are unwilling to do yourself." - Victor 
+ *  Author: Peter T and Victor T
+ * "I have not told half of what I saw." - Marco Polo 
 
  * This class handles CRAY's representation of the map and the system's position.
  * It also stores all data that the system has to offer.
@@ -44,15 +44,15 @@ class MapMaster2002():
 		#Data Files used for logging data
 		#Data will only be logged if self.logData is set to True
 		self.IRFrontFile = open("logs/ir_front.swag", 'w', 1)
-		self.IRtokenFile = open("logs/IRtoken.swag", 'w', 1)
+		self.IRRFfile = open("logs/irrf.swag", 'w', 1)
+		self.IRRBfile = open("logs/irrb.swag", 'w', 1)
+		self.IRLFfile = open("logs/irlf_swag", 'w', 1)
+		self.IRLBfile = open("logs/irlb_swag", 'w', 1)
+		self.segmentsFile = open("logs/segments.swag", 'w', 1)
+
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
 		self.steeringDataFile = open("logs/steering_data.swag", 'w', 1)
-		self.mapUpdateFile = open("logs/map_updates.swag", 'w', 1)
-		self.parallelRightFile = open("logs/parallel_right.swag", 'w', 1)
-		self.parallelLeftFile = open("logs/parallel_left.swag", 'w', 1)
 		self.debugFile = open("logs/debug.swag", 'w', 1)
-		self.irRightFile = open("logs/irRight.swag", 'w', 1)
-		self.segmentsFile = open("logs/segments.swag", 'w', 1)
 
 		self.logData = False
 		
@@ -64,16 +64,18 @@ class MapMaster2002():
 						2 : "IRrightBack",
 						3 : "IRleftFront",
 						4 : "IRleftBack",
-						5 : "Segments turned",
-						6 : "IR Front (token)",
-						7 : "Parallel Right",
-						8 : "Parallel Left",
-						9 : "IRright (token)",
-						10 : "IRleft (token)",
-						11 : "Steering data",
-						12 : "Update Map",
-						13 : "System Position",
-						14 : "Steering Decision",
+						5 : "Distance Covered",
+						6 : "Steering Data",
+						8 : "System Position",
+						7 : "Steering Decision",
+						9 : "Update Map",
+
+						10 : "IR Front (token)",
+						11 : "Parallel Right",
+						12 : "Parallel Left",
+						13 : "IRright (token)",
+						14 : "IRleft (token)",
+
 						15 : "Debug"
 		}
 		#Store values for each data type, the keys correspond to the values in indexDict
@@ -83,7 +85,7 @@ class MapMaster2002():
 						"IRrightBack" : 1,
 						"IRleftFront" : 1,
 						"IRleftBack" : 1,
-						"Segments turned" : 1,
+						"Distance Covered" : 1,
 						"IR Front (token)" : 1,
 						"Parallel Right" : 1,
 						"Parallel Left" : 1,
@@ -98,15 +100,16 @@ class MapMaster2002():
 		#Associates a data type name with a file
 		self.fileDict = {
 						"IR Front" : self.IRFrontFile,
+						"IRrightFront" : self.IRRFfile,
+						"IRrightBack" : self.IRRBfile,
+						"IRleftFront" : self.IRLFfile,
+						"IRleftBack" : self.IRLBfile,
 						"Steering Decision" : self.steeringDecisionFile,
 						"Steering data" : self.steeringDataFile,
 						"Parallel Right" : self.parallelRightFile,
 						"Parallel Left" : self.parallelLeftFile,
-						"Segments turned" : self.segmentsFile,
-						"Debug" : self.debugFile,
-						"IR Front (token)" : self.IRtokenFile,
-						"Update Map" : self.mapUpdateFile,
-						"IRrightFront" : self.irRightFile
+						"Distance Covered" : self.segmentsFile,
+						"Debug" : self.debugFile
 		}
 
 

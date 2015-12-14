@@ -1,12 +1,13 @@
 """
 	Created: November 2015
  *  Author: Victor T and Peter T
- * "It is not fair to ask of others what you are unwilling to do yourself." - Victor 
+ * "Proof by anology is fraud." - Bjarne Stroustrup
 
  * This file handles all bluetooth communication with the system.
  * Functions are used in CRAY.py
 
 """
+
 import sys, os, traceback
 import select
 
