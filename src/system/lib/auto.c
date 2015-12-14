@@ -37,7 +37,7 @@ uint8_t regulate_side = 0;
 uint8_t sensor_start = 0;
 uint8_t old_action;
 
-uint16f_t temptemp_action_done_c = 0;
+uint16_t temptemp_action_done_c = 0;
 
 void update_sensor_data(); 
 void init_auto();
@@ -127,9 +127,26 @@ void autonom (){
 			}
 			
 			if(t_vagg_h_b == 2){
-				if(derivata > 6){ //6
+				if(derivata > 5){ //6
 					regulate_side = NONE;
 				}
+			}
+
+			if((t_vagg_h_f != 2) && (t_vagg_h_b == 2)){
+				curr_action = NUDGE_FORWARD;
+				if(dir == NORTH){
+					robot_pos_y--;
+				}
+				else if(dir == WEST){
+					robot_pos_x--;
+				}
+				else if(dir == SOUTH){
+					robot_pos_y++;
+				}
+				else{
+					robot_pos_x++;
+				}
+				break;
 			}
 			
 			deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
@@ -223,8 +240,8 @@ void autonom (){
 
 		case(NUDGE_FORWARD):
 
-			setSpeed(30,30,1,1);
-			if(t_reflex > 3){
+			setSpeed(50,50,1,1);
+			if(t_reflex > 7){
 				curr_action = EMPTY;
 				action_done(DONTUPDATE);
 			}
@@ -233,7 +250,7 @@ void autonom (){
 
 		case(NUDGE_TO_WALL):
 
-			setSpeed(30,30,1,1);
+			setSpeed(50,50,1,1);
 			if(s_ir_front < 12){
 				curr_action = EMPTY;
 				action_done(DONTUPDATE);
@@ -449,9 +466,6 @@ void action_done(uint8_t update_map){
 			break;
 		}
 
-
-
-
 		wmem_auto(FLOOR, robot_pos_x, robot_pos_y);
 
 		if(t_vagg_front != 2){
@@ -491,15 +505,12 @@ void action_done(uint8_t update_map){
 			
 		}
 
-		if(temptemp_action_done_c > 1){ // dfs om vi har mer grejjs att leta efter.
-			//if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
-			if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
-				if(map_enclosed == 0){
-					map_enclosed = 1;
-					mark_walls(); //Set all tiles outside the map to walls
-
-					pstack(0xFF, 0xFF, 0xFF);
-				}
+		if((temptemp_action_done_c > 1) && (map_enclosed == 0)){ // dfs om vi har mer grejs att leta efter.
+			if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
+			//if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
+				pstack(0xFF, 0xFF, 0xFF);			
+				map_enclosed = 1;
+				//mark_walls(); //Set all tiles outside the map to walls
 			}
 		}
 
@@ -512,15 +523,16 @@ void action_done(uint8_t update_map){
 				}
 			}
 		}
-		if(done() == 1){
+		if((done() == 1) && (map_enclosed == 1)){
 			lets_go_home = 1;
 		}
 		if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
 			button_autonom = 0;
 			setSpeed(0,0,FORWARD,FORWARD);
-			curr_action = 0;
+			curr_action = SPIN_L;
+			map_complete = 1;
 		}
-		debug = temptemp_action_done_c;
+		debug = lets_go_home;
 	}	
 }
 

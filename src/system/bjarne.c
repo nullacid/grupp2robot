@@ -64,7 +64,10 @@ int main(){
 			spd_left = 0;
 			setSpeed(0,0,FORWARD,FORWARD);
 		}
-		button_autonom = (PINA & 1);
+
+
+			button_autonom = (PINA & 1);
+
 
 		update_sensor_data();
 		handle_messages();	
