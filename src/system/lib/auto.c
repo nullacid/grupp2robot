@@ -241,7 +241,7 @@ void autonom (){
 		case(NUDGE_FORWARD):
 
 			setSpeed(50,50,1,1);
-			if(t_reflex > 5){
+			if(t_reflex > 4){
 				curr_action = EMPTY;
 				if(t_vagg_h_b != 2){
 					next_action = LAST_NUDGE;
@@ -263,8 +263,8 @@ void autonom (){
 
 		case(LAST_NUDGE):
 			setSpeed(50,50,1,1);
-			if(t_reflex > 5){
-				curr_action = SPIN_L;
+			if(t_reflex > 3){
+				curr_action = SPIN_R;
 				action_done(UPDATE);
 			}
 		break;
@@ -514,39 +514,41 @@ void action_done(uint8_t update_map){
 		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){ //VÄNSTER IR WALL
 			wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
 			
-		}
+		}		
+	}
 
-		if((temptemp_action_done_c > 1) && (map_enclosed == 0)){ // dfs om vi har mer grejs att leta efter.
-			if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
-			//if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
-				pstack(0xFF, 0xFF, 0xFF);			
-				map_enclosed = 1;
-				//mark_walls(); //Set all tiles outside the map to walls
+	if((temptemp_action_done_c > 1) && (map_enclosed == 0)){ // dfs om vi har mer grejs att leta efter.
+		if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
+		//if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
+			pstack(0xFF, 0xFF, 0xFF);			
+			map_enclosed = 1;
+		}
+	}
+
+	if(follow_island == 1){
+		if((temptemp_action_done_c > 3) || lets_go_home){
+			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
+				land_o_hoy = 0;
+				curr_action = PARALLELIZE;
+				next_action = SPIN_L;
+				follow_island = 0;
 			}
 		}
-
-		if(follow_island == 1){
-			if(temptemp_action_done_c > 3){
-				if((robot_pos_x == island_x) && (robot_pos_y == island_y) ){
-				//	debug = 1;
-					land_o_hoy = 0;
-					curr_action = PARALLELIZE;
-					next_action = SPIN_L;
-					follow_island = 0;
-				}
-			}
-		}
-		if((done() == 1) && (map_enclosed == 1)){
+	}
+	if(done() == 1){
+		if(map_enclosed == 1){
 			lets_go_home = 1;
 		}
-		if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
-			button_autonom = 0;
-			setSpeed(0,0,FORWARD,FORWARD);
-			curr_action = SPIN_L;
-			map_complete = 1;
-		}
+	}
 
-		debug = lets_go_home;
+
+
+
+	if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
+		
+		button_autonom = 0;
+		setSpeed(0,0,FORWARD,FORWARD);
+		map_complete = 1;
 	}	
 }
 
