@@ -46,8 +46,8 @@ class MapMaster2002():
 		self.IRFrontFile = open("logs/ir_front.swag", 'w', 1)
 		self.IRRFfile = open("logs/irrf.swag", 'w', 1)
 		self.IRRBfile = open("logs/irrb.swag", 'w', 1)
-		self.IRLFfile = open("logs/irlf_swag", 'w', 1)
-		self.IRLBfile = open("logs/irlb_swag", 'w', 1)
+		self.IRLFfile = open("logs/irlf.swag", 'w', 1)
+		self.IRLBfile = open("logs/irlb.swag", 'w', 1)
 		self.segmentsFile = open("logs/segments.swag", 'w', 1)
 
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
