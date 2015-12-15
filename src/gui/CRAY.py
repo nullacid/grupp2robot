@@ -399,8 +399,6 @@ def getMap():
 				if mapSystem.arrayMap[xCoord][yCoord] != "WALL":
 					mapSystem.arrayMap[xCoord][yCoord] = tileType
 					return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
-			else:
-				print("out of bounds")
 
 		return mapSystem.dataDict["Update Map"]
 	
