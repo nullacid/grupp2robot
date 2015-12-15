@@ -35,7 +35,7 @@ uint8_t pidd = 4; //16 ok ish
 uint8_t front_sensor_active = 0;
 uint8_t regulate_side = 0; 
 uint8_t sensor_start = 0;
-uint8_t old_action;
+uint8_t old_action = 0;
 
 uint16_t temptemp_action_done_c = 0;
 
@@ -115,7 +115,6 @@ void autonom (){
 			setSpeed(0, 0, 0, 0);
 			action_done(UPDATE);
 		break;
-
 //------------------------ÅKA FRAMMÅT--------------
 		case (FORWARD):
 
@@ -194,7 +193,7 @@ void autonom (){
 			
 			old_deviation_from_wall = deviation_from_wall;
 
-			if( (t_reflex > 30) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){
+			if( (t_reflex > 31) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){
 				first_time = 1;
 
 				if(t_reflex > 26){ //var 20
@@ -212,10 +211,14 @@ void autonom (){
 					}
 				}
 
+
+				first_time_on_island = 0;
 				curr_action = EMPTY;
 				if(land_o_hoy == 0){
+					
 					next_action = SPIN_L;
 					land_o_hoy = 1;
+					first_time_on_island = 1;
 					island_x = robot_pos_x;
 					island_y = robot_pos_y;
 					if(follow_island == 1){
@@ -224,7 +227,7 @@ void autonom (){
 					else{
 						follow_island = 1;
 					}
-					temptemp_action_done_c = 0;
+					
 				}
 
 				if((s_ir_front < 14)&&(s_ir_front > 1)){ //fuckar upp vår position annars
@@ -440,10 +443,8 @@ void action_done(uint8_t update_map){
 	receiveByte_down();
 
 	if(next_action != 0){
-
 		curr_action = next_action;
 		next_action = 0;
-
 	}
 
 	//if(old_action != FORWARD){
@@ -516,40 +517,6 @@ void action_done(uint8_t update_map){
 			
 		}		
 	}
-
-	if((temptemp_action_done_c > 1) && (map_enclosed == 0)){ // dfs om vi har mer grejs att leta efter.
-		if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
-		//if(dfs(robot_pos_x, robot_pos_y, OUTSIDE) == 0){
-			pstack(0xFF, 0xFF, 0xFF);			
-			map_enclosed = 1;
-		}
-	}
-
-	if(follow_island == 1){
-		if((temptemp_action_done_c > 3) || lets_go_home){
-			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
-				land_o_hoy = 0;
-				curr_action = PARALLELIZE;
-				next_action = SPIN_L;
-				follow_island = 0;
-			}
-		}
-	}
-	if(done() == 1){
-		if(map_enclosed == 1){
-			lets_go_home = 1;
-		}
-	}
-
-
-
-
-	if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
-		
-		button_autonom = 0;
-		setSpeed(0,0,FORWARD,FORWARD);
-		map_complete = 1;
-	}	
 }
 
 void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){

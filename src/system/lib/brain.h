@@ -3,6 +3,6 @@
 
 
 void think();
-void mark_walls();
+void think_hard();
 
 #endif

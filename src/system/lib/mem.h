@@ -95,6 +95,7 @@ uint8_t motor_l;
 uint8_t dir;
 uint8_t curr_action;
 
+uint8_t first_time_on_island;
 
 uint8_t s_LIDAR_u;
 uint8_t s_LIDAR_l;

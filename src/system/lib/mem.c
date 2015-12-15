@@ -45,6 +45,7 @@ void init_mem(){
 	home_y = 16;
 
 	map_complete = 0;
+	first_time_on_island = 0;
 
 	for(i = 0; i < 32; i++){
 

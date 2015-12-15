@@ -17,14 +17,19 @@ uint8_t follow_wall = 1;
 
 uint8_t startup = 1;
 void find_target();
+void mark_walls();
+uint8_t done();
 //För DFS
 uint8_t check = 0;
 uint8_t visited[32][32];
+uint8_t first_time_on_island = 0;
 
 
 void think(){
 
-	if((curr_action == EMPTY) && (map_complete == 0)){
+	debug = lets_go_home;
+
+	if((curr_action == EMPTY) && (map_complete == 0)){	
 
 		if(follow_wall == 1){ //Om vi ska följa högerväggen
 
@@ -50,11 +55,6 @@ void think(){
 			else if( (t_vagg_h_f != 2) && (t_vagg_h_b == 2) ){ //If there is no wall to the right of the robot
 				curr_action = NUDGE_FORWARD;
 			}
-
-
-//			else if(t_vagg_h_b != 2){
-//				curr_action = NUDGE_FORWARD;
-//			}
 
 			else if(t_vagg_front == 2){ //If the robot has a wall right in front of it, turn where there is an empty tile, right is prefered
 				if(t_p_h != 0){
@@ -110,14 +110,18 @@ void think(){
 					break;
 				} 
 
-				if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == IWALL) || 
-					(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == IWALL)){ //VÄNSTER IR WALL
-						land_o_hoy = 0;
-						curr_action = PARALLELIZE;
-						next_action = SPIN_L;
+				if((lets_go_home == 0) && (follow_island == 0)){
+					if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == IWALL) || 
+						(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == IWALL)){ //VÄNSTER IR WALL
+							land_o_hoy = 0;
+							first_time_on_island = 1;
+							curr_action = PARALLELIZE;
+							next_action = SPIN_L;
+					}
 				}
 			}
-		}
+		} 
+		think_hard();
 	}	
 
 	return;
@@ -133,7 +137,38 @@ void bfs(uint8_t target){
 	return;
 }
 
+void think_hard(){
 
+	if(map_enclosed == 0){ // dfs om vi har mer grejs att leta efter.
+		//if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
+		if(dfs(robot_pos_x, robot_pos_y) == 0){
+			pstack(0xFF, 0xFF, 0xFF);			
+			map_enclosed = 1;
+			mark_walls();
+		}
+	}
+
+	if(done() == 1){
+		if(map_enclosed == 1){
+			lets_go_home = 1;
+		}
+	}
+
+	if(follow_island == 1){
+		if((first_time_on_island == 0) || lets_go_home){
+			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
+				land_o_hoy = 0;
+				curr_action = PARALLELIZE;
+				next_action = SPIN_L;
+			}
+		}
+	}
+
+	if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
+		setSpeed(0,0,FORWARD,FORWARD);
+		map_complete = 1;
+	}		
+}
 
 
 typedef struct tuple tuple;
@@ -235,7 +270,6 @@ void gen_adj_matrix(uint8_t home){
 
 //----------Step 1 done------------------------
 
-
 	uint8_t target_found = 0;
 
 	while(!target_found){
@@ -299,7 +333,7 @@ uint8_t done(){
 
 	for(i = 0; i < 32; i++){
 		for(j = 0; j < 32; j++){
-			if(rmem(i,j) == IWALL){
+			if(rmem(i,j) == UNEXP){
 				answer = 0;
 			}			
 		}
@@ -307,9 +341,24 @@ uint8_t done(){
 	return answer;
 }
 
+void mark_walls(){
+
+	uint8_t i;
+	uint8_t j;
+
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+			if(visited[i][j] == 0){
+				wmem(WALL,i,j);
+			}			
+		}
+	}
+}
+
+
 uint8_t dfs(uint8_t startx, uint8_t starty){
-	int i;
-	int j;
+	uint8_t i;
+	uint8_t j;
 	for(i = 0; i < 32; i++){
 		for(j = 0; j < 32; j++){
 			visited[i][j] = 0;

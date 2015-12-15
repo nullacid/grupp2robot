@@ -48,12 +48,10 @@ int main(){
 	while(1){
 
 		if(clk){
-
 			clk = 0;
 			PORTA &= 0xF7;
 		}
 		else{
-
 			clk = 1;
 			PORTA |= (1 << PORTA3);
 
@@ -64,17 +62,22 @@ int main(){
 			spd_left = 0;
 			setSpeed(0,0,FORWARD,FORWARD);
 		}
-
-
-			button_autonom = (PINA & 1);
+		button_autonom = (PINA & 1);
 
 
 		update_sensor_data();
 		handle_messages();	
 
-		if (button_autonom == 1){	
-			think();	
-			autonom();
+		debug = button_autonom;
+
+		if(button_autonom == 1){
+			if(map_complete == 0){	
+				think();	
+				autonom();
+			}
+			else{
+				setSpeed(0,0,1,1);
+			}
 		}			
 		if((prev_autonom == 1) && (button_autonom == 0)){
 			setSpeed(0,0,FORWARD,FORWARD);
