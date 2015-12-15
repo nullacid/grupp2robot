@@ -215,7 +215,7 @@ void autonom (){
 				first_time_on_island = 0;
 				curr_action = EMPTY;
 				if(land_o_hoy == 0){
-					
+
 					next_action = SPIN_L;
 					land_o_hoy = 1;
 					first_time_on_island = 1;
@@ -266,7 +266,7 @@ void autonom (){
 
 		case(LAST_NUDGE):
 			setSpeed(50,50,1,1);
-			if(t_reflex > 3){
+			if(t_reflex > 5){ //3
 				curr_action = SPIN_R;
 				action_done(UPDATE);
 			}
