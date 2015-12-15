@@ -10,6 +10,8 @@
 import pygame
 from pygame import *
 
+from math import *
+
 #Import bluetooth class
 from Harald import *
 
@@ -118,10 +120,10 @@ def rescale():
 	global tile_ship_down
 	global tile_start
 
-	tileUNEXPLORED = pygame.transform.scale(pygame.image.load("images/white_tile_test.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
-	tileOPEN = pygame.transform.scale(pygame.image.load("images/tile_open.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
-	tileWALL = pygame.transform.scale(pygame.image.load("images/wall_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
-	tileLEFTWALL = pygame.transform.scale(pygame.image.load("images/tile_wall_left.jpg"), (int(mapSquareWidth), int(mapSquareHeight)))
+	tileUNEXPLORED = pygame.transform.smoothscale(pygame.image.load("images/white_tile_test.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileOPEN = pygame.transform.smoothscale(pygame.image.load("images/tile_open.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileWALL = pygame.transform.smoothscale(pygame.image.load("images/wall_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileLEFTWALL = pygame.transform.smoothscale(pygame.image.load("images/tile_wall_left.jpg"), (int(mapSquareWidth), int(mapSquareHeight)))
 
 	tile_ship_down = pygame.transform.scale(pygame.image.load("images/tile_ship_down.png"),(int(mapSquareWidth),int(mapSquareHeight)))
 	tile_ship_up = pygame.transform.scale(pygame.image.load("images/tile_ship_up.png"),(int(mapSquareWidth),int(mapSquareHeight)))
@@ -139,8 +141,6 @@ rescale()
 #Sets the initial tile to be painted for system position
 mapSystem.tileImg = tile_ship_up
 
-def myround(x, base=32):
-    return int(base * round(float(x)/base))
 
 
 #Removes the silly pygame icon from the pygame window
@@ -155,7 +155,7 @@ crayRunning = True
 
 #Paints the data field with all sensor data
 def paintData(mapSystem):
-	pygame.draw.rect(surface, BLACK, [18*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
+	pygame.draw.rect(surface, BLACK, [20*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
 
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
 
@@ -369,8 +369,8 @@ def getMap():
 			global mapSquareHeight
 			#resizes map
 			mapSystem.resize()
-			mapSquareWidth = myround(screenHeight/len(mapSystem.arrayMap))
-			mapSquareHeight = myround(screenHeight/len(mapSystem.arrayMap))
+			mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
+			mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
 			#rescales images
 			rescale()
 
