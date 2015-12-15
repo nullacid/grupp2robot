@@ -243,11 +243,14 @@ void autonom (){
 
 		case(NUDGE_FORWARD):
 
-			setSpeed(50,50,1,1);
-			if(t_reflex > 4){
+			setSpeed(30,30,1,1);
+			if(t_reflex > 3){
 				curr_action = EMPTY;
 				if(t_vagg_h_b != 2){
 					next_action = LAST_NUDGE;
+				}
+				else{
+					next_action = NUDGE_FORWARD;
 				}
 				action_done(DONTUPDATE);
 			}
@@ -265,9 +268,9 @@ void autonom (){
 		break;
 
 		case(LAST_NUDGE):
-			setSpeed(50,50,1,1);
-			if(t_reflex > 5){ //3
-				curr_action = SPIN_R;
+			setSpeed(30,30,1,1);
+			if(t_reflex > 3){ //3
+				next_action = SPIN_R;
 				action_done(UPDATE);
 			}
 		break;
@@ -288,7 +291,7 @@ void autonom (){
 				spinning = 0;
 				transmitByte_down(0x1E);
 				curr_action = FORWARD;
-				action_done(DONTUPDATE);
+				action_done(UPDATE);
 			}
 		break;
 
@@ -481,10 +484,10 @@ void action_done(uint8_t update_map){
 		wmem_auto(FLOOR, robot_pos_x, robot_pos_y);
 
 		if(t_vagg_front != 2){
-			wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
+			//wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
 		}
 		else if((t_vagg_front == 2) || (old_action == BACKWARD) || (old_action == NUDGE_TO_WALL)){ //IR WALL
-			wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
+			//wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
 			
 		}
 		

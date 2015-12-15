@@ -5,10 +5,8 @@
 void find_next_wall();
 void find_empty_tile();
 
-void bfs(uint8_t target);
 uint8_t dfs(uint8_t startx, uint8_t starty);
 uint8_t dfs_help(uint8_t startx, uint8_t starty);
-void gen_adj_matrix(uint8_t home);
 void gen_actions();
 
 uint8_t adj_matrix[32][32];
@@ -18,7 +16,8 @@ uint8_t follow_wall = 1;
 uint8_t startup = 1;
 void find_target();
 void mark_walls();
-uint8_t done();
+uint8_t done_unexp();
+uint8_t done_iwall();
 //För DFS
 uint8_t check = 0;
 uint8_t visited[32][32];
@@ -128,14 +127,6 @@ void think(){
 }
 
 
-void bfs(uint8_t target){
-//Används när vi vill hitta närmsta vägen till känd position
-
-	gen_adj_matrix(target); //Generates the adjacency matrix and sets target_x and y
-	find_path();
-
-	return;
-}
 
 void think_hard(){
 
@@ -148,7 +139,7 @@ void think_hard(){
 		}
 	}
 
-	if(done() == 1){
+	if((done_unexp() == 1) || (done_iwall() == 1)){
 		if(map_enclosed == 1){
 			lets_go_home = 1;
 		}
@@ -165,6 +156,7 @@ void think_hard(){
 	}
 
 	if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
+		pstack(0xEE,0xEE,0xEE);
 		setSpeed(0,0,FORWARD,FORWARD);
 		map_complete = 1;
 	}		
@@ -325,7 +317,7 @@ return;
 }
 
 
-uint8_t done(){
+uint8_t done_unexp(){
 
 	uint8_t answer = 1;
 	uint8_t i;
@@ -340,6 +332,23 @@ uint8_t done(){
 	}
 	return answer;
 }
+
+uint8_t done_iwall(){
+
+	uint8_t answer = 1;
+	uint8_t i;
+	uint8_t j;
+
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+			if(rmem(i,j) == IWALL){
+				answer = 0;
+			}			
+		}
+	}
+	return answer;
+}
+
 
 void mark_walls(){
 
@@ -393,52 +402,3 @@ uint8_t dfs_help(uint8_t startx, uint8_t starty){
 	return 0;
 }
 
-/*
-uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t target_tile){
-//Används för att kolla om väggen runt är sluten.
-	//Return 1 om sökning lyckades, 0 om ingen väg finns
-
-	int i;
-	int j;
-	for(i = 0; i < 32; i++){
-		for(j = 0; j < 32; j++){
-			visited[i][j] = 0;
-		}
-	}
-
-	return dfs_help(startx, starty, target_tile);
-
-}
-
-uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t target_tile){ //Kanske behöver göras iterativt
-	if(visited[startx][starty] == 0){
-		visited[startx][starty] = 1;
-
-		if (rmem(startx, starty) == target_tile){
-			return 1;
-
-		}
-		else if(rmem(startx, starty) == WALL){
-			return 0;
-		}
-		else{
-			if(dfs_help(startx,starty-1,target_tile)){ // down
-				return 1;
-			}
-			if(dfs_help(startx-1,starty,target_tile)){ // left
-				return 1;
-			}
-			if(dfs_help(startx,starty+1,target_tile)){ // up
-				return 1;
-			}
-			if(dfs_help(startx+1,starty,target_tile)){ // right
-				return 1;
-			}
-			return 0;
-		}
-		
-	}
-	return 0;
-
-}
-*/
