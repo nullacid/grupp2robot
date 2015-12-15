@@ -133,7 +133,8 @@ void think_hard(){
 	if(map_enclosed == 0){ // dfs om vi har mer grejs att leta efter.
 		//if((robot_pos_x == home_x) && (robot_pos_y == home_y)){
 		if(dfs(robot_pos_x, robot_pos_y) == 0){
-			pstack(0xFF, 0xFF, 0xFF);			
+			//pstack(0xFF, 0xFF, 0xFF);		
+			enqueue(0xFF, 0xFF, 0xFF);	
 			map_enclosed = 1;
 			mark_walls();
 		}
@@ -156,7 +157,8 @@ void think_hard(){
 	}
 
 	if((lets_go_home == 1) && (robot_pos_x == home_x) && (robot_pos_y == home_y)){
-		pstack(0xEE,0xEE,0xEE);
+		//pstack(0xEE,0xEE,0xEE);
+		enqueue(0xEE, 0xEE, 0xEE);
 		setSpeed(0,0,FORWARD,FORWARD);
 		map_complete = 1;
 	}		

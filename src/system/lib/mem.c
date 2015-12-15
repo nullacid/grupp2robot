@@ -20,6 +20,7 @@ uint8_t WALL 		= 3;	//Tile: Wall
 uint8_t OUTSIDE 	= 4;	//Tile: Outside
 uint8_t IWALL		= 1;
 uint8_t C_STACK_MAX = 100;  //Size of stack
+uint8_t C_QUEUE_MAX = 100;
 
 //-------------------------------------------------------------
 
@@ -34,6 +35,7 @@ void init_mem(){
 	target_y = 0;
 	dir = 0;
 	c_stack_top = -1;
+	changeQ = 
 	debug = 0;
 	//OKÄND SKA VARA 1, fixa
 	uint8_t i = 0;
@@ -59,6 +61,38 @@ void init_mem(){
 	return;
 
 }
+
+uint8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
+	if(changeQ.sizeofIn == (C_QUEUE_MAX-1)){
+		return 0; //Return false, since the queue is full
+	}
+	else{
+		mapchange temp = {.x = x, .y = y, .t = t}; 
+		if(t == 5){
+			temp.t = 1;
+		}
+		changeQ.inbox[sizeofIn] = temp;
+		changeQ.sizeofIn++;
+	}
+}
+
+mapchange dequeue(){
+	if(changeQ.sizeofOut == 0){
+		while(!changeQ.sizeofIn == 0){
+			//pop value from inbox stack
+			mapchange toBeMoved = changeQ.inbox[sizeofIn];
+			changeQ.sizeofIn--;
+
+			//add to outbox stack
+			changeQ.outbox[sizeofOut] = toBeMoved;
+			changeQ.sizeofOut++;
+		}
+	}
+	mapchange data = changeQ.outbox[sizeofOut];
+	changeQ.sizeofOut--;
+	return data;
+}
+
 
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 
@@ -116,7 +150,8 @@ void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
 	//Denna kallar auto på, lägger till i change-stacken om ny data
 	if ((mapmem[x][y].tileType != data) && (mapmem[x][y].tileType != WALL)){ //NY DATA, ska skickas upp
 		mapmem[x][y].tileType = data;
-		pstack(x, y, data);
+		//pstack(x, y, data);
+		enqueue(x, y, data);
 	}
 
 

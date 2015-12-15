@@ -262,7 +262,8 @@ void handle_messages(){
 			
 			case (0x18):
 			//lägg kartdata i send-buffern
-				temp = gstack();
+				//temp = gstack();
+				temp = dequeue();
 				transmitByte_up(temp.x);
 				waitForSendNext_up();
 				transmitByte_up(temp.y | (temp.t<<6));

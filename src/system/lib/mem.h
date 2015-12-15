@@ -23,6 +23,7 @@
 #define FINDHOME 	1
 #define FINDUNEXP 	0
 
+
 #include <avr/io.h>
 typedef struct {
 	uint8_t x;
@@ -40,6 +41,17 @@ struct node{
 		uint8_t tileType;
 };
 
+typedef struct {
+		mapchange[100] inbox;
+		mapchange[50] outbox;
+
+		uint8_t sizeofIn;
+		uint8_t sizeofOut;
+} queue;
+
+uint8_t enqueue(uint8_t x, uint8_t y, uint8_t t);
+mapchange dequeue();
+
 void wmem(uint8_t data, uint8_t x, uint8_t y); 		//Write to map-memory
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y);
 uint8_t rmem(uint8_t x, uint8_t y); 				//Read from map-memory
@@ -48,6 +60,7 @@ mapchange gstack();
 
 void init_mem();
 
+queue changeQ;				//Change Queue for sending map data to pc.
 
 int8_t c_stack_top ; 		//The top of the stack
 
