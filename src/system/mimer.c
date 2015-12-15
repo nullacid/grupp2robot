@@ -289,7 +289,7 @@ void calcTokenIR(uint8_t *IRxx, uint8_t *IRxxT){
 	if(1 < *IRxx && *IRxx <= 32){
 		*IRxxT = 0x02;
 	}
-	else if(32 < *IRxx && *IRxx < 60){
+	else if(32 < *IRxx && *IRxx < 70){
 		*IRxxT = 0x01;
 	}
 	else{
