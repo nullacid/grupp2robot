@@ -22,8 +22,9 @@ import sys, os, traceback
 #Center the screen
 if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
-debug = False
 fullscreenMode = False
+
+
 
 #Create bluetooth object
 harald = Harald()
@@ -111,19 +112,16 @@ def rescale():
 	global tileOPEN
 	global tileWALL
 	global tileLEFTWALL
-	global tileOUTSIDE
 	global tile_ship_right
 	global tile_ship_up
 	global tile_ship_left
 	global tile_ship_down
 	global tile_start
 
-	tileUNEXPLORED = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
+	tileUNEXPLORED = pygame.transform.scale(pygame.image.load("images/white_tile_test.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
 	tileOPEN = pygame.transform.scale(pygame.image.load("images/tile_open.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
 	tileWALL = pygame.transform.scale(pygame.image.load("images/wall_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
 	tileLEFTWALL = pygame.transform.scale(pygame.image.load("images/tile_wall_left.jpg"), (int(mapSquareWidth), int(mapSquareHeight)))
-	tileOUTSIDE = pygame.transform.scale(pygame.image.load("images/white_tile.jpg"),(int(mapSquareWidth),int(mapSquareHeight)))
-
 
 	tile_ship_down = pygame.transform.scale(pygame.image.load("images/tile_ship_down.png"),(int(mapSquareWidth),int(mapSquareHeight)))
 	tile_ship_up = pygame.transform.scale(pygame.image.load("images/tile_ship_up.png"),(int(mapSquareWidth),int(mapSquareHeight)))
@@ -141,6 +139,8 @@ rescale()
 #Sets the initial tile to be painted for system position
 mapSystem.tileImg = tile_ship_up
 
+def myround(x, base=32):
+    return int(base * round(float(x)/base))
 
 
 #Removes the silly pygame icon from the pygame window
@@ -320,7 +320,6 @@ def getReflexToken():
 		print("ANOMALY DETECTED")
 	return data
 
-	
 def getIRFToken():
 	harald.sendData(b'\x4F')
 	return int(harald.receiveData()[0])
@@ -335,7 +334,6 @@ def getParallelLeft():
 	data = harald.receiveData()
 	return twos_comp(int(hex(data[0]),16), 8)
 	
-
 def getIRRFtoken():
 	harald.sendData(b'\x53')
 	return int(harald.receiveData()[0])
@@ -371,10 +369,16 @@ def getMap():
 			global mapSquareHeight
 			#resizes map
 			mapSystem.resize()
-			mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
-			mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
+			mapSquareWidth = myround(screenHeight/len(mapSystem.arrayMap))
+			mapSquareHeight = myround(screenHeight/len(mapSystem.arrayMap))
 			#rescales images
 			rescale()
+
+	#Special value sent when system has decided that it is finished
+	if msByte == b'\xEE' and lsByte == b'\xEE':
+		pygame.mixer.init()
+		pygame.mixer.music.load("sounds/SEGER.wav")
+		pygame.mixer.music.play(loops = 0, start = 0.0)
 
 	#Regular map data. Sent in format
 	# --xx xxxx - ttyy yyyy (- nothing, x xcoordinate, y ycoordinate, t tiletype)
@@ -392,8 +396,11 @@ def getMap():
 				tileType = "WALL"
 			#Adds the tile to the mapsystem
 			if xCoord < len(mapSystem.arrayMap) and yCoord < len(mapSystem.arrayMap):
-				mapSystem.arrayMap[xCoord][yCoord] = tileType
-				return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+				if mapSystem.arrayMap[xCoord][yCoord] != "WALL":
+					mapSystem.arrayMap[xCoord][yCoord] = tileType
+					return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+			else:
+				print("out of bounds")
 
 		return mapSystem.dataDict["Update Map"]
 	
@@ -410,7 +417,30 @@ def getPosition():
 
 def getDecision():
 	harald.sendData(b'\x5B')
-	return int(harald.receiveData()[0])
+	data = int(harald.receiveData()[0])
+	if data == 0:
+		data = "EMPTY"
+	elif data == 1:
+		data = "FORWARD"
+	elif data == 2:
+		data = "SPIN R"
+	elif data == 3:
+		data = "SPIN L"
+	elif data == 4:
+		data = "SPIN 180"
+	elif data == 5:
+		data = "PARAL"
+	elif data == 6:
+		data = "BACKWARD"
+	elif data == 7:
+		data = "NUDGE F"
+	elif data == 8:
+		data = "P WEAK"
+	elif data == 9:
+		data = "P WEAK L"
+	elif data == 10:
+		data = "NUDGE T W"
+	return data
 	
 def getDebug():
 	harald.sendData(b'\x4E')

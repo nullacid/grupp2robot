@@ -8,6 +8,8 @@
 
 """
 
+import time
+
 class MapMaster2002():
 	def __init__(self):
 
@@ -50,11 +52,13 @@ class MapMaster2002():
 		self.IRLBfile = open("logs/irlb.swag", 'w', 1)
 		self.segmentsFile = open("logs/segments.swag", 'w', 1)
 
+		self.systemPosFile = open("logs/sysPos.swag", 'w', 1)
+
 		self.steeringDecisionFile = open("logs/steering_decision.swag", 'w', 1)
 		self.steeringDataFile = open("logs/steering_data.swag", 'w', 1)
 		self.debugFile = open("logs/debug.swag", 'w', 1)
 
-		self.logData = False
+		self.logData = True
 		
 
 		#Dictionary used for looping over data types
@@ -66,9 +70,9 @@ class MapMaster2002():
 						4 : "IRleftBack",
 						5 : "Distance Covered",
 						6 : "Steering data",
-						#7 : "Steering Decision",
-						8 : "System Position",
-						9 : "Update Map",#,
+						7 : "Steering Decision",
+						9 : "System Position",
+						10 : "Update Map",#,
 
 						#10 : "IR Front (token)",
 						#11 : "Parallel Right",
@@ -76,26 +80,26 @@ class MapMaster2002():
 						#13 : "IRright (token)",
 						#14 : "IRleft (token)",
 
-						7 : "Debug"
+						8 : "Debug"
 		}
 		#Store values for each data type, the keys correspond to the values in indexDict
 		self.dataDict = {
-						"IR Front" : 1,
-						"IRrightFront" : 1,
-						"IRrightBack" : 1,
-						"IRleftFront" : 1,
-						"IRleftBack" : 1,
-						"Distance Covered" : 1,
-						"IR Front (token)" : 1,
-						"Parallel Right" : 1,
-						"Parallel Left" : 1,
-						"IRright (token)" : 1,
-						"IRleft (token)" : 1,
-						"Steering data" : 1,
-						"Update Map" : 1,
-						"System Position" : 1,
-						"Steering Decision" : 1,
-						"Debug" : 1
+						"IR Front" : 0,
+						"IRrightFront" : 0,
+						"IRrightBack" : 0,
+						"IRleftFront" : 0,
+						"IRleftBack" : 0,
+						"Distance Covered" : 0,
+						"IR Front (token)" : 0,
+						"Parallel Right" : 0,
+						"Parallel Left" : 0,
+						"IRright (token)" : 0,
+						"IRleft (token)" : 0,
+						"Steering data" : 0,
+						"Update Map" : 0,
+						"System Position" : 0,
+						"Steering Decision" : 0,
+						"Debug" : 0
 		}
 		#Associates a data type name with a file
 		self.fileDict = {
@@ -107,7 +111,8 @@ class MapMaster2002():
 						"Steering Decision" : self.steeringDecisionFile,
 						"Steering data" : self.steeringDataFile,
 						"Distance Covered" : self.segmentsFile,
-						"Debug" : self.debugFile
+						"Debug" : self.debugFile,
+						"System Position" : self.systemPosFile
 		}
 
 
