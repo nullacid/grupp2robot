@@ -113,7 +113,7 @@ void autonom (){
 	switch(curr_action){
 		case (EMPTY):
 			setSpeed(0, 0, 0, 0);
-			action_done(UPDATE);
+			//action_done(UPDATE);
 		break;
 //------------------------ÅKA FRAMMÅT--------------
 		case (FORWARD):
@@ -126,7 +126,7 @@ void autonom (){
 			}
 			
 			if(t_vagg_h_b == 2){
-				if(derivata > 5){ //6
+				if(derivata > 3){ //4
 					regulate_side = NONE;
 				}
 			}
@@ -270,6 +270,7 @@ void autonom (){
 		case(LAST_NUDGE):
 			setSpeed(30,30,1,1);
 			if(t_reflex > 3){ //3
+				curr_action = EMPTY;
 				next_action = SPIN_R;
 				action_done(UPDATE);
 			}
@@ -290,8 +291,10 @@ void autonom (){
 				first_time = 1;
 				spinning = 0;
 				transmitByte_down(0x1E);
+
 				curr_action = FORWARD;
-				action_done(UPDATE);
+				action_done(DONTUPDATE);
+
 			}
 		break;
 
@@ -316,6 +319,8 @@ void autonom (){
 				spinning = 0;
 				first_time = 1;	
 				transmitByte_down(0x1E);
+
+				curr_action = EMPTY;
 
 				if(land_o_hoy == 1){
 					curr_action = PARALLELIZE;
@@ -358,7 +363,7 @@ void autonom (){
 			if(t_p_v == 0){
 				setSpeed(0, 0, FORWARD, FORWARD);
 				curr_action = EMPTY;
-				action_done(UPDATE);
+				action_done(DONTUPDATE);
 			}
 
 			else if(t_p_v == 127){
@@ -445,15 +450,13 @@ void action_done(uint8_t update_map){
 	transmitByte_down(0x21); //Reset reflex-segments
 	receiveByte_down();
 
-	if(next_action != 0){
+	if((next_action != 0) && (curr_action == 0)){
 		curr_action = next_action;
 		next_action = 0;
 	}
 
-	//if(old_action != FORWARD){
-		setSpeed(0,0,FORWARD,FORWARD);
-		_delay_ms(100);
-	//}
+	setSpeed(0,0,FORWARD,FORWARD);
+	_delay_ms(100);
 
 	int8_t temp_x = 0;
 	int8_t temp_y = 0;
