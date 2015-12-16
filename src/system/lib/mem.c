@@ -66,7 +66,7 @@ void init_mem(){
 	}
 
 	changeQ.sizeofIn = -1;
-	changeQ.sizeofOut = 0;
+	changeQ.sizeofOut = -1;
 
 	return;
 
@@ -86,8 +86,8 @@ int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 mapchange dequeue(){
 
 
-	if(changeQ.sizeofOut == 0){
-		while(!changeQ.sizeofIn == 0){
+	if(changeQ.sizeofOut == -1){
+		while(!changeQ.sizeofIn == -1){
 			//pop value from inbox stack
 			changeQ.sizeofIn--;
 			mapchange toBeMoved = changeQ.inbox[changeQ.sizeofIn];
