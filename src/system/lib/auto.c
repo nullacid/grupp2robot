@@ -1,8 +1,11 @@
 /*
-	Author: 
-
-
-*/
+ * Created: November 2015
+ * Author : Mikael Å, Anton R, Michael S
+ * "One reason you should not use web applications to do your computing is that you lose control." -Richard Stallman
+ *
+ * The spine of the robot, translating actions into motion of the wheels, while providing the "eyes" updating the map memory
+ */ 
+ 
 #include "auto.h"
 #include "usart.h"
 #include "mem.h"
@@ -13,7 +16,7 @@
 
 #define UPDATE 			1
 #define DONTUPDATE 		0
-#define MAX_SPEED_R 	5 	//Max speed multiplier of right motors
+#define MAX_SPEED_R 	5 //5//Max speed multiplier of right motors
 #define MAX_SPEED_L 	5 	//Max speed multiplier of left motors
 #define PERFECT_DIST 	11	//Perfect distance from robot IR-sensors to wall	
 #define LEFT 			1 	//Which side to regulate on
@@ -177,7 +180,7 @@ void autonom (){
 			}
 			
 			old_deviation_from_wall = deviation_from_wall;
-
+												
 			if( (t_reflex > 31) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){ //Stopping condition				
 
 				if(t_reflex > 26){ //If the robot has traveled more than 26 reflex segments, it is considered to have moved a tile forward
@@ -443,9 +446,10 @@ void action_done(uint8_t update_map){
 		next_action = 0;
 	}
 
-	setSpeed(0,0,FORWARD,FORWARD);
-	_delay_ms(100); //Allow the robot to stop
-
+	//if(old_action == !FORWARD){
+		setSpeed(0,0,FORWARD,FORWARD);
+		_delay_ms(100); //Allow the robot to stop
+	//}	
 	int8_t temp_x = 0;
 	int8_t temp_y = 0;
 
