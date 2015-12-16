@@ -96,8 +96,8 @@ mapchange dequeue(){
 		}
 	}
 
-	changeQ.sizeofOut--;
 	mapchange data = changeQ.outbox[changeQ.sizeofOut];
+	changeQ.sizeofOut--;
 	return data;
 }
 
