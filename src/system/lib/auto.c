@@ -296,8 +296,8 @@ void autonom (){
 			if(first_time){
 				spinning = 1;
 				first_time = 0;
-				setSpeed(70, 70, 0, 1); //Höger hjulpar bakåt
-				transmitByte_down(0x1F);
+				setSpeed(70, 70, 0, 1);
+				transmitByte_down(0x1F); //Set mimer to turning mode
 			}
 
 			if(t_gyro == 0x44){
