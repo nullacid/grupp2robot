@@ -1,3 +1,9 @@
+/*
+ * Created: November 2015
+ * Author : Mikael Å, Anton R
+ * 
+ * Header file for brain.c
+ */ 
 #ifndef AUTO_H
 #define AUTO_H
 #include <avr/io.h>
