@@ -58,7 +58,7 @@ class MapMaster2002():
 		self.steeringDataFile = open("logs/steering_data.swag", 'w', 1)
 		self.debugFile = open("logs/debug.swag", 'w', 1)
 
-		self.logData = True
+		self.logData = False
 		
 
 		#Dictionary used for looping over data types
@@ -70,9 +70,9 @@ class MapMaster2002():
 						4 : "IRleftBack",
 						5 : "Distance Covered",
 						6 : "Steering data",
-						7 : "Steering Decision",
-						9 : "System Position",
-						10 : "Update Map",#,
+						#7 : "Steering Decision",
+						7 : "System Position",
+						8 : "Update Map"#,
 
 						#10 : "IR Front (token)",
 						#11 : "Parallel Right",
@@ -80,9 +80,10 @@ class MapMaster2002():
 						#13 : "IRright (token)",
 						#14 : "IRleft (token)",
 
-						8 : "Debug"
+						#8 : "Debug"
 		}
 		#Store values for each data type, the keys correspond to the values in indexDict
+		#Some of these values are not used anymore.
 		self.dataDict = {
 						"IR Front" : 0,
 						"IRrightFront" : 0,

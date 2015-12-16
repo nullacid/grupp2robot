@@ -293,63 +293,76 @@ handle_dictionary_up = {
 	
 #Functions for getting data from the system (called autonomously)
 #They get data from the system and formats it into data that makes sense for humans.
+#Functions marked as (not gathered anymore) were primarily used for debugging and are not used anymore.
+
+#IR Front Sensor
 def getIRF():	
 	harald.sendData(b'\x48')
 	return int(harald.receiveData()[0])
 	
+#IR Right Front Sensor
 def getIRRF():
 	harald.sendData(b'\x49')
 	return int(harald.receiveData()[0])
 
+#IR Right Back Sensor
 def getIRRB():
 	harald.sendData(b'\x4A')
 	return int(harald.receiveData()[0])
 
+#IR Left Front Sensor
 def getIRLF():
 	harald.sendData(b'\x4B')
 	return int(harald.receiveData()[0])
 
+#IR Left Back Sensor
 def getIRLB():
 	harald.sendData(b'\x4C')
 	return int(harald.receiveData()[0])
 
+#Covered Distance Token
 def getReflexToken():
 	harald.sendData(b'\x57')
-	data = int(harald.receiveData()[0])
-	if data > 40:
-		print("ANOMALY DETECTED")
-	return data
+	return int(harald.receiveData()[0])
 
+#IR Front Token (not gathered anymore)
 def getIRFToken():
 	harald.sendData(b'\x4F')
 	return int(harald.receiveData()[0])
 
+#Parallel Right Token (not gathered anymore)
 def getParallelRight():
 	harald.sendData(b'\x50')
 	data = harald.receiveData()
 	return twos_comp(int(hex(data[0]),16), 8)
 
+#Parallel Left Token (not gathered anymore)
 def getParallelLeft():
 	harald.sendData(b'\x51')
 	data = harald.receiveData()
 	return twos_comp(int(hex(data[0]),16), 8)
 	
+#IR Right Front Token (not gathered anymore)
 def getIRRFtoken():
 	harald.sendData(b'\x53')
 	return int(harald.receiveData()[0])
 
+#IR Right Back Token (not gathered anymore)
 def getIRRBtoken():
 	harald.sendData(b'\x54')
 	return int(harald.receiveData()[0])
 
+#IR Left Front Token (not gathered anymore)
 def getIRLFtoken():
 	harald.sendData(b'\x55')
 	return int(harald.receiveData()[0])
 
+#IR Left Back Token (not gathered anymore)
 def getIRLBtoken():
 	harald.sendData(b'\x56')
 	return int(harald.receiveData()[0])
 
+#Steering Data
 #First byte is left engine, second byte is right engine
 def getSteering():
 	harald.sendData(b'\x99')
@@ -402,7 +415,7 @@ def getMap():
 
 		return mapSystem.dataDict["Update Map"]
 	
-
+#System Position
 def getPosition():
 	harald.sendData(b'\x9A')
 
@@ -413,6 +426,7 @@ def getPosition():
 	mapSystem.sysPosY = int(harald.receiveData()[0]) + mapSystem.coordinateOffsetY
 	return "x: " + str(mapSystem.sysPosX) + "; y: " + str(mapSystem.sysPosY)
 
+#Get Steering Decision (not gathered anymore)
 def getDecision():
 	harald.sendData(b'\x5B')
 	data = int(harald.receiveData()[0])
@@ -440,6 +454,7 @@ def getDecision():
 		data = "NUDGE T W"
 	return data
 	
+#Get Debug value (can be set to whatever in bjarne) (not gathered anymore)
 def getDebug():
 	harald.sendData(b'\x4E')
 	return int(harald.receiveData()[0])
@@ -480,11 +495,12 @@ def getData():
 	mapSystem.dataDict[currentDataSlot] = handle_dictionary_data[currentDataSlot]()
 	mapSystem.updateLog(currentDataSlot)
 
+	#Update Map more often to keep up with the system. 
 	if mapSystem.dataIndex % 2 == 0:
 		getMap()
 
 	if mapSystem.dataIndex == len(mapSystem.indexDict) - 1:
-		harald.inc_status()
+		harald.inc_status()		#Update connection status indicator
 		paintMap(mapSystem)
 		paintData(mapSystem)
 
