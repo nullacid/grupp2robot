@@ -95,10 +95,16 @@ mapchange dequeue(){
 			changeQ.outbox[changeQ.sizeofOut] = toBeMoved;
 		}
 	}
-
-	mapchange data = changeQ.outbox[changeQ.sizeofOut];
-	changeQ.sizeofOut--;
-	return data;
+	//Q still empty?
+	if(changeQ.sizeofOut != -1){
+		mapchange data = changeQ.outbox[changeQ.sizeofOut];
+		changeQ.sizeofOut--;
+		return data;
+	}
+	else{
+		mapchange data = {.x = 0, .y = 0, .t = 0}; 
+		return data; //Return false, since the Q is empty
+	}
 }
 
 

@@ -7,11 +7,10 @@
 #define UPDATE 			1
 #define DONTUPDATE 		0
 
-#define MAX_SPEED_R 	5 //1 to 10, 10 is highest
-#define MAX_SPEED_L 	5
-#define PERFECT_DIST 	11 	//12
+#define MAX_SPEED_R 	5 	//Max speed multiplier of right motors
+#define MAX_SPEED_L 	5 	//Max speed multiplier of left motors
+#define PERFECT_DIST 	11	//Perfect distance from robot IR-sensors to wall
 
-#define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
 #define FOLlOW_WALL 	0
 #define MAP_REST 		1
 
@@ -20,23 +19,20 @@
 #define NONE 			0
 #define TURNED_RIGHT 	3
 
-int distance_LIDAR;
-uint8_t first_time;
+uint8_t first_time 				= 0;
 uint8_t NODBROMS 				= 0;
 uint8_t parallell_cnt 			= 0;
-
 int16_t deviation_from_wall 	= 0;
 int16_t old_deviation_from_wall = 0;
 int16_t derivata 				= 0;
 int16_t P 						= 0;
 int16_t D 						= 0;
 uint8_t pidk 					= 4; //20 är okej
-uint8_t pidd = 4; //16 ok ish
-uint8_t front_sensor_active = 0;
-uint8_t regulate_side = 0; 
-uint8_t sensor_start = 0;
-uint8_t old_action = 0;
-
+uint8_t pidd 					= 4; //16 ok ish
+uint8_t front_sensor_active 	= 0;
+uint8_t regulate_side 			= 0; 
+uint8_t sensor_start 			= 0;
+uint8_t old_action 				= 0;
 uint16_t temptemp_action_done_c = 0;
 
 void update_sensor_data(); 
@@ -46,32 +42,31 @@ void reset_reflex();
 
 
 void init_auto(){
-	distance_LIDAR = 0;
-	first_time = 1;
-	s_ir_front = 0;
-	t_vagg_front  = 0;
+	first_time 		= 1;
+	s_ir_front 		= 0;
+	t_vagg_front  	= 0;
 
-	s_ir_h_f = 0;
-	s_ir_h_b = 0;
-	s_ir_v_f = 0;
-	s_ir_v_b = 0;
+	s_ir_h_f 		= 0;
+	s_ir_h_b 		= 0;
+	s_ir_v_f 		= 0;
+	s_ir_v_b 		= 0;
 
 	//	Token parallell vänster/höger
 
-	t_p_h = 0;	// 0- parallell, 1- lite off , 2- mer off , FF - ej användbart
-	t_p_v = 0;	// 0- parallell, 1- lite off , 2- mer off , FF - aj användbart
+	t_p_h 			= 0;
+	t_p_v 			= 0;	
 
-	t_vagg_h_f = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-	t_vagg_h_b = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-	t_vagg_v_f = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-	t_vagg_v_b = 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
+	t_vagg_h_f 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
+	t_vagg_h_b 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
+	t_vagg_v_f 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
+	t_vagg_v_b 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
 
-	s_gyro_u = 0;
-	s_gyro_l = 0;
-	s_gyro = 0;
-	t_gyro = 0;		// bestäm vilka värden vi vill ha
+	s_gyro_u 		= 0;
+	s_gyro_l 		= 0;
+	s_gyro 			= 0;
+	t_gyro 			= 0;		// bestäm vilka värden vi vill ha
 
-	spinning = 0;
+	spinning 		= 0;
 
 
 	wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Mark start tile as foor
