@@ -1,4 +1,10 @@
-
+/*
+ * Created: November 2015
+ * Author : Mikael Å, Anton R,
+ * 
+ *
+ * Contains the memory structure used by bjarne.c and auto.c
+ */ 
 #include "mem.h"
 
 
@@ -8,21 +14,21 @@ mapchange change_stack[99];	//A stack where changes to the map will be waiting t
 int8_t a_stack_top = -1;
 
 uint8_t action_s[50]; //The actions required to get to target
-
 //-------------------------------------------------------------
 
 
 //----------------Constants------------------------------------
 uint8_t UNEXP 		= 0;	//Tile: Unexplored
 uint8_t FLOOR 		= 2;	//Tile: Floor
-uint8_t WALL 		= 3;	//Tile: Wall
+uint8_t WALL 		= 3;	//Tile: Outer Wall
 uint8_t OUTSIDE 	= 4;	//Tile: Outside
-uint8_t IWALL		= 1;
+uint8_t IWALL		= 1;	//Tile: Inner wall
 uint8_t C_STACK_MAX = 100;  //Size of stack
-uint8_t C_QUEUE_MAX = 100;
+uint8_t C_QUEUE_MAX = 100;	//Size of queue
 
 //-------------------------------------------------------------
 
+// Initialize and set standard value on all constants and memory positions
 void init_mem(){
 
 	robot_pos_x = 16;	// Start in the middle of the map
@@ -35,7 +41,6 @@ void init_mem(){
 	dir = 0;
 	c_stack_top = -1;
 	debug = 0;
-	//OKÄND SKA VARA 1, fixa
 	land_o_hoy = 1;
 	map_enclosed = 0;
 	next_action = 0;
@@ -48,7 +53,7 @@ void init_mem(){
 
 	distance_covered = 0;
 
-
+	// Set the outer layer of the map to OUTSIDE for the dfs
 	uint8_t i = 0;
 	for(i = 0; i < 32; i++){
 
@@ -74,6 +79,7 @@ void init_mem(){
 
 }
 
+// Enqueue mapdata in the queue
 int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 	if(changeQ.sizeofIn == (C_QUEUE_MAX-1)){
 		return 0; //Return false, since the queue is full
@@ -84,7 +90,7 @@ int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 		changeQ.inbox[changeQ.sizeofIn] = temp;
 	}
 }
-
+// Dequeue mapdata from the queue
 mapchange dequeue(){
 	if(changeQ.sizeofOut == -1){
 		while(changeQ.sizeofIn > -1){
@@ -109,7 +115,7 @@ mapchange dequeue(){
 	}
 }
 
-
+// Push mapdata on the stack
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 
 
@@ -125,9 +131,9 @@ uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 		change_stack[c_stack_top] = temp;
 	}
 	return 1;
-
 }
 
+// pop something from the stack
 mapchange gstack(){
 
 	if (c_stack_top == -1){
@@ -145,12 +151,14 @@ mapchange gstack(){
 	}
 }
 
+// Read tiletype from map-memory on position x,y
 uint8_t rmem(uint8_t x, uint8_t y){
 
 	return mapmem[x][y].tileType;
 
 }
 
+// Write tiletype to map-memory on position x,y
 void wmem(uint8_t data, uint8_t x, uint8_t y){
 
 	mapmem[x][y].tileType = data;
@@ -158,14 +166,14 @@ void wmem(uint8_t data, uint8_t x, uint8_t y){
 	return;
 }
 
+// Write tiletype to map-memory and enqueue the element in the queue. 
+// This is used in the auto-mode.
 void wmem_auto(uint8_t data, uint8_t x, uint8_t y){
-	//Denna kallar auto på, lägger till i change-stacken om ny data
-	if ((mapmem[x][y].tileType != data) && (mapmem[x][y].tileType != WALL)){ //NY DATA, ska skickas upp
+	// Only enqueue if the data is different from its previous value.
+	if ((mapmem[x][y].tileType != data) && (mapmem[x][y].tileType != WALL)){
 		mapmem[x][y].tileType = data;
-		//pstack(x, y, data);
 		enqueue(x, y, data);
 	}
-
 
 	return;
 }
