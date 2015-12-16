@@ -74,7 +74,7 @@ void init_mem(){
 
 int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 	if(changeQ.sizeofIn == (C_QUEUE_MAX-1)){
-		return -1; //Return false, since the queue is full
+		return 0; //Return false, since the queue is full
 	}
 	else{
 		mapchange temp = {.x = x, .y = y, .t = t}; 
@@ -85,7 +85,7 @@ int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 
 mapchange dequeue(){
 	if(changeQ.sizeofOut == -1){
-		while(changeQ.sizeofIn != -1){
+		while(changeQ.sizeofIn > -1){
 			//pop value from inbox stack
 			mapchange toBeMoved = changeQ.inbox[changeQ.sizeofIn];
 			changeQ.sizeofIn--;
