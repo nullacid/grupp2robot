@@ -1,3 +1,14 @@
+/*
+	Created: November 2015
+ *  Author: Mikael Å and Anton R
+ * "Jag gillar inte länkade listor" - Bjarne Stroustrup
+
+ * This is the main file for the steering module.
+ * It handles the motors and messages from the communication module.
+ * The system's decision making is done in other files, but are called from the main function here.
+
+*/
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -6,8 +17,10 @@
 #include "lib/auto.h"
 #include "lib/brain.h"
 
-#define FORWARD 1
+
+#define FORWARD 1 //Values for motor direction
 #define BACK 0
+
 #define false 0
 #define true 1
 #define bool uint8_t
@@ -22,10 +35,6 @@ uint8_t spd_left = 0; //0 to 100 = procent of full speed
 uint8_t spd_right = 0;
 uint8_t prev_autonom = 0; // för att stanna om man switchar tillbaka till manuellt
 
-uint8_t b1 = 2;
-uint8_t b2 = 3;
-uint8_t b3 = 4;
-uint8_t b4 = 5;
 
 bool new_message = false;
 mapchange temp = {.x = 0, .y = 0, .t = 0};
@@ -36,27 +45,17 @@ uint8_t clk = 0;
 
 int main(){
 	
-	
+	//Initialize USART communication with value 10 to get a baud rate of 115200.
 	init_USART_up(10);
 	init_USART_down(10);
-	init_mem();
-	init_motors();
-	init_auto();
+	init_mem();		//Initialize Map Memory
+	init_motors();	//Initialize motors
+	init_auto();	//Initialize autonomous algorithm
 
 	_delay_ms(1500);
 
 	while(1){
-
-		if(clk){
-			clk = 0;
-			PORTA &= 0xF7;
-		}
-		else{
-			clk = 1;
-			PORTA |= (1 << PORTA3);
-
-		}		
-
+		//Stop system when autonomous/manual switch is turned
 		if(button_autonom != (PINA & 1)){
 			spd_right = 0;
 			spd_left = 0;
@@ -65,21 +64,20 @@ int main(){
 		button_autonom = (PINA & 1);
 
 
-		update_sensor_data();
-		handle_messages();	
+		update_sensor_data();	//get sensor data from sensor module
+		handle_messages();		//handle message from communication module
 
-		debug = button_autonom;
 
-		if(button_autonom == 1){
+		if(button_autonom == 1){	//in autonomous mode?
 			if(map_complete == 0){	
-				think();	
-				autonom();
+				think();			//get next action
+				autonom();			//do next action
 			}
 			else{
-				setSpeed(0,0,1,1);
+				setSpeed(0,0,1,1);	//stop if map is finished
 			}
 		}			
-		if((prev_autonom == 1) && (button_autonom == 0)){
+		if((prev_autonom == 1) && (button_autonom == 0)){ //Stop any autonomous movement when switch is set to manual.
 			setSpeed(0,0,FORWARD,FORWARD);
 		}
 		prev_autonom = button_autonom;
@@ -87,123 +85,125 @@ int main(){
 	}
 }
 
-
+/*
+ *	Handles messages from communication module.
+ *	Messages are either steering commands or data fetches.
+ *	Steering commands are disregarded in autonomous mode.
+ */
 void handle_messages(){
 
 
-	if(checkUSARTflag_up()){	
+	if(checkUSARTflag_up()){	 //Is there a command from the communication module?
 
-		uint8_t message = receiveByte_up();	
+		uint8_t message = receiveByte_up();		//get the command
 		uint8_t message_cpy = message;
 
-		//plocka ut OP-koden
-		message_cpy &= 0x3F;
+		message_cpy &= 0x3F;		//get the op-code.
 		
 
-		if (button_autonom == 0){ //Manuellt läge
+		if (button_autonom == 0){ //Manual mode
 			
 				switch(message_cpy){
-					case (0): //pil UPP trycks ner
+					case (0): //W is pressed (go forward)
 
 						dir_left = FORWARD;
 						dir_right = FORWARD;
 						spd_left = spd_left + 50;
 						spd_right = spd_right + 50;
 					break;
-					case(1): //pil UPP släpps
+					case(1): //W is released (stop forward)
 						spd_left = spd_left - 50;
 						spd_right = spd_right - 50;
 					break;
-					case(2): //pil VÄNSTER trycks ner
+					case(2): //A is pressed (turn left)
 						dir_left = FORWARD;
 						spd_right = spd_right + 50;
 					break;
-					case(3): //pil VÄNSTER släpps
+					case(3): //A is released (stop left)
 						spd_right = spd_right - 50;
 					break;
-					case (4): //pil NER trycks ner
+					case (4): //S is pressed (go back)
 						dir_left = BACK;
 						dir_right = BACK;
 						spd_left = spd_left + 50;
 						spd_right = spd_right + 50;
 					break;
-					case(5): //pil NER släpps
+					case(5): //S is released (stop back)
 						spd_left = spd_left - 50;
 						spd_right = spd_right - 50;
 						dir_left = FORWARD;
 						dir_right = FORWARD;
 
 					break;
-					case(6): //pil HÖGER trycks ner
+					case(6): //D is pressed (turn right)
 						dir_right = FORWARD;
 						spd_left = spd_left + 50;
 					break;
-					case(7): //pil HÖGER släpps
+					case(7): //D is released (stop right)
 						spd_left = spd_left - 50;
 					break;
 
-					case(0x22): //Q trycks ner
+					case(0x22): //Q is pressed (spin left)
 						dir_right = FORWARD;
 						dir_left = BACK;
 						spd_left = 100;
 						spd_right = 100;
 
 					break;
-					case(0x23): //Q släpps
+					case(0x23): //Q is released (stop all)
 						dir_left = FORWARD;
 						spd_left = 0;
 						spd_right = 0;
 					break;
 
-					case(0x24): //E trycks ner
+					case(0x24): //E is pressed (spin right)
 						dir_right = BACK;
 						dir_left = FORWARD;
 						spd_left = 100;
 						spd_right = 100;
 					break;
-					case(0x25): //E släpps
+					case(0x25): //E is released (stop all)
 						dir_right = FORWARD;
 						spd_right = 0;
 						spd_left = 0;
 					break;
 
 				}
-			
+			//Set motor speed to determined values.
 			setSpeed(spd_left,spd_right,dir_left,dir_right);
 		}
 
-		switch(message_cpy){
+		switch(message_cpy){	//Data fetch commands
 			
 			case (0x08):
-				//lägg lidardata i send-buffern
+				//send IR Front sensor
 				transmitByte_up(s_ir_front);
 
 			break;
 			
 			case (0x09):
-			//lägg sensordata IR höger fram-data i send-buffern
+				//send IR Right Front Sensor
 				transmitByte_up(s_ir_h_f);
 
 			break;
 			
 			case (0x0A):
-			//lägg sensordata IR höger bak-data i send-buffern
+				//send IR Right Back Sensor
 				transmitByte_up(s_ir_h_b);
 			break;
 			
 			case (0x0B):
-			//lägg sensordata IR vänster fram-data i send-buffern
+				//send IR Left Front Sensor
 				transmitByte_up(s_ir_v_f);
 			break;
 			
 			case (0x0C):
-			//lägg sensordata IR vänster bak-data i send-buffern
+				//send IR Left Back Sensor
 				transmitByte_up(s_ir_v_b);
 			break;
 			
 			case (0x0D):
-			//send distance covered
-				
+				//send distance covered
 				transmitByte_up(distance_covered >> 8);
 				waitForSendNext_up();
 				transmitByte_up(distance_covered & 0xFF);
@@ -211,59 +211,48 @@ void handle_messages(){
 			break;
 			
 			case (0x0E):
-			//lägg debug
+				//send debug value (can be whatever we need it to be)
 				transmitByte_up(debug);
 			break;
 			
 			case (0x0F):
-			//lägg lidar-token i send-buffern
+				//send IR Front token 
 				transmitByte_up(t_vagg_front);
 			break;
 			
 			case (0x10):
-			//lägg parallell höger-token i send-buffern
+				//send Parallel right token
 				transmitByte_up(t_p_h);
 			break;
 			
 			case (0x11):
-			//lägg parallell vänster-token i send-buffern
+				//send Parallel left token
 				transmitByte_up(t_p_v);
 			break;
 			
-			case (0x12):
-			//lägg gyro-token i send-buffern
-				transmitByte_up(t_gyro);
-			break;
-			
 			case (0x13):
-			//lägg vägg höger fram-token i send-buffern
+				//send IR Right Front token
 				transmitByte_up(t_vagg_h_f);
 			break;
 			
 			case (0x14):
-			//lägg vägg höger bak-token i send-buffern
+				//send IR Right Back token
 				transmitByte_up(t_vagg_h_b);
 			break;
 			
 			case (0x15):
-			//lägg vägg vänster fram-token i send-buffern
+				//send IR Left Front token
 				transmitByte_up(t_vagg_v_f);
 			break;
 			
 			case (0x16):
-			//lägg vägg vänster bak-token i send-buffern
-				//transmitByte_up(t_vagg_v_b);
+				//Send IR Left Back Token
 				transmitByte_up(t_vagg_v_b);
 			break;
 			
-			case (0x17):
-			//lägg reflex-token i send-buffern
-				transmitByte_up(t_reflex);
-			break;
 			
 			case (0x18):
-			//lägg kartdata i send-buffern
-				//temp = gstack();
+				//Send mapdata from the change queue
 				temp = dequeue();
 				transmitByte_up(temp.x);
 				waitForSendNext_up();
@@ -271,28 +260,22 @@ void handle_messages(){
 			break;
 			
 			case (0x19):
-			//senaste styrbeslut i send-buffern
+				//send last motor output
 				transmitByte_up(motor_l);
 				waitForSendNext_up();
 				transmitByte_up(motor_r);
 			break;
 
 			case (0x1A):
-			//pos karta X och Y i send-buffern
+				//send current system position
 				transmitByte_up(robot_pos_x);
 				waitForSendNext_up();
 				transmitByte_up(robot_pos_y);
 			break;
 			
 			case (0x1B):
-			//pos i algoritm i send-buffern
+				//Send current action
 				transmitByte_up(curr_action);
-			break;
-			
-			case (0x1C):
-			//lägg tempKartdata i send-buffern
-
-
 			break;
 
 		}
