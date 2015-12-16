@@ -203,15 +203,10 @@ void handle_messages(){
 			
 			case (0x0D):
 			//send distance covered
-<<<<<<< HEAD
 				uint8_t lsDist = distanceCovered & 0xFF;
 				uint8_t msDist = distanceCovered >> 8;
 				
 				transmitByte_up(msDist);
-=======
-				
-				transmitByte_up(s_gyro_u);
->>>>>>> a30d7d28d55d8ba0af04d906380f95babe3e767f
 				waitForSendNext_up();
 				transmitByte_up(lsDist);
 
