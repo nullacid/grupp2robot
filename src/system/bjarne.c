@@ -203,6 +203,7 @@ void handle_messages(){
 			
 			case (0x0D):
 			//send distance covered
+				
 				transmitByte_up(s_gyro_u);
 				waitForSendNext_up();
 				transmitByte_up(s_gyro_l);
