@@ -4,113 +4,99 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+
+
+//-----DEFINES------
+
 #define UPDATE 			1
 #define DONTUPDATE 		0
-
 #define MAX_SPEED_R 	5 	//Max speed multiplier of right motors
 #define MAX_SPEED_L 	5 	//Max speed multiplier of left motors
-#define PERFECT_DIST 	11	//Perfect distance from robot IR-sensors to wall
-
-#define FOLlOW_WALL 	0
-#define MAP_REST 		1
-
-#define LEFT 			1
+#define PERFECT_DIST 	11	//Perfect distance from robot IR-sensors to wall	
+#define LEFT 			1 	//Which side to regulate on
 #define RIGHT 			2
 #define NONE 			0
-#define TURNED_RIGHT 	3
 
-uint8_t first_time 				= 0;
-uint8_t NODBROMS 				= 0;
+//-----VARIABLES------
+uint8_t first_time 				= 0; //Used for startup-only inits in an action
 uint8_t parallell_cnt 			= 0;
-int16_t deviation_from_wall 	= 0;
-int16_t old_deviation_from_wall = 0;
-int16_t derivata 				= 0;
-int16_t P 						= 0;
+int16_t deviation_from_wall 	= 0; //PERFECT_DIST - IR front right sensor value
+int16_t old_deviation_from_wall = 0; 
+int16_t derivata 				= 0; //Current old_deviation_from_wall - deviation_from_wall
+int16_t P 						= 0; 
 int16_t D 						= 0;
-uint8_t pidk 					= 4; //20 är okej
-uint8_t pidd 					= 4; //16 ok ish
-uint8_t front_sensor_active 	= 0;
-uint8_t regulate_side 			= 0; 
-uint8_t sensor_start 			= 0;
-uint8_t old_action 				= 0;
-uint16_t temptemp_action_done_c = 0;
+uint8_t pidk 					= 4; 
+uint8_t pidd 					= 4; 
+uint8_t regulate_side 			= 0;
+uint8_t old_action 				= 0; 
 
-void update_sensor_data(); 
+//-----PROTOTYPES------
+void update_sensor_data();
 void init_auto();
 void action_done(uint8_t update_map);
 void reset_reflex();
 
 
 void init_auto(){
+
 	first_time 		= 1;
 	s_ir_front 		= 0;
 	t_vagg_front  	= 0;
-
 	s_ir_h_f 		= 0;
 	s_ir_h_b 		= 0;
 	s_ir_v_f 		= 0;
 	s_ir_v_b 		= 0;
-
-	//	Token parallell vänster/höger
-
 	t_p_h 			= 0;
-	t_p_v 			= 0;	
-
-	t_vagg_h_f 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-	t_vagg_h_b 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-	t_vagg_v_f 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-	t_vagg_v_b 		= 0; // 0- ingen vägg , 1 - vägg inom 20 cm ish, 2 - vägg 20+40 cm
-
-	s_gyro_u 		= 0;
-	s_gyro_l 		= 0;
-	s_gyro 			= 0;
-	t_gyro 			= 0;		// bestäm vilka värden vi vill ha
-
+	t_p_v 			= 0;
+	t_vagg_h_f 		= 0;
+	t_vagg_h_b 		= 0; 
+	t_vagg_v_f 		= 0; 
+	t_vagg_v_b 		= 0; 
+	t_gyro 			= 0;
 	spinning 		= 0;
 
-
 	wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Mark start tile as foor
-	curr_action = PARALLELIZE;
-	dir = NORTH;
+	curr_action = PARALLELIZE; //Set first action as parallelize
+	dir = NORTH; //Set start direction as north
 
 	//----------------------------
 }
 void update_sensor_data(){
-	//från 08 ---> 1 7 rader
-	transmitByte_down(0x1D); //fråga efter all data
 
-	s_ir_h_f = receiveByte_down();
-	s_ir_h_b = receiveByte_down();
-	s_ir_v_f = receiveByte_down();
-	s_ir_v_b = receiveByte_down();
-	s_ir_front = receiveByte_down();
+	transmitByte_down(0x1D); //Request all sensor data
 
-	t_gyro = receiveByte_down();
-	t_p_h = receiveByte_down();
-	t_p_v = receiveByte_down();
-	t_vagg_h_f = receiveByte_down();
-	t_vagg_h_b = receiveByte_down();
-	t_vagg_v_f = receiveByte_down();
-	t_vagg_v_b = receiveByte_down();
-	t_vagg_front = receiveByte_down();
-	t_reflex = receiveByte_down();
-
-
-	s_gyro = ((s_gyro_u << 8) + s_gyro_l);
+	s_ir_h_f 		= receiveByte_down();
+	s_ir_h_b 		= receiveByte_down();
+	s_ir_v_f 		= receiveByte_down();
+	s_ir_v_b 		= receiveByte_down();
+	s_ir_front 		= receiveByte_down();
+	t_gyro 			= receiveByte_down();
+	t_p_h 			= receiveByte_down();
+	t_p_v 			= receiveByte_down();
+	t_vagg_h_f 		= receiveByte_down();
+	t_vagg_h_b 		= receiveByte_down();
+	t_vagg_v_f 		= receiveByte_down();
+	t_vagg_v_b 		= receiveByte_down();
+	t_vagg_front 	= receiveByte_down();
+	t_reflex 		= receiveByte_down();
 
 	return;
 }
 
 void autonom (){
 
-	uint8_t direction = 1;
-	old_action = curr_action;
+	old_action = curr_action; //Remember the old action
+
 	switch(curr_action){
-		case (EMPTY):
-			setSpeed(0, 0, 0, 0);
-			//action_done(UPDATE);
+
+		//-----NO ACTION-----
+
+		case (EMPTY): //If no action, stop
+			setSpeed(0, 0, FORWARD, FORWARD);
 		break;
-//------------------------ÅKA FRAMMÅT--------------
+
+		//-----GO FORWARD-----
+
 		case (FORWARD):
 
 			if((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //Decide which side to regulate on
@@ -120,15 +106,15 @@ void autonom (){
 				regulate_side = NONE;
 			}
 			
-			if(t_vagg_h_b == 2){
-				if(derivata > 3){ //4
+			if(t_vagg_h_b == 2){ //If the derivata is too large, don't regulate
+				if(derivata > 3){
 					regulate_side = NONE;
 				}
 			}
 
-			if((t_vagg_h_f != 2) && (t_vagg_h_b == 2)){
+			if((t_vagg_h_f != 2) && (t_vagg_h_b == 2)){	//If the front sensor lost its wall, break the forward action and nudge forward
 				curr_action = NUDGE_FORWARD;
-				if(dir == NORTH){
+				if(dir == NORTH){ //Update the robots position
 					robot_pos_y--;
 				}
 				else if(dir == WEST){
@@ -147,21 +133,21 @@ void autonom (){
 			deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
 			derivata = (deviation_from_wall - old_deviation_from_wall);
 
-			if(regulate_side == RIGHT){ //Om det finns en vägg höger eller vänster fram, reglera efter den
+			if(regulate_side == RIGHT){ //Normal regulation
 
-				int8_t control = 0;
+				int8_t control = 0; //The regulate value
 				uint8_t lspeed = 0;
 				uint8_t rspeed = 0;
 
-				P = pidk * deviation_from_wall;
+				P = pidk * deviation_from_wall; //Calculate contol value from derivata and parallel value
 				D = pidd * t_p_h;
 				control = P+D;
-				if(control > 0){
+
+				if(control > 0){ //Add and subtract abs(control) to the wheels max speed in order to regulate
 					rspeed = 100 - control;
 					lspeed = 100 + control;
 				}
-				else if(control < 0){
-					//nära höger vägg
+				else if(control < 0){ //Too close to the wall, add power to the right pair of wheels
 					lspeed = 100 + control;
 					rspeed = 100 - control;
 				}
@@ -169,7 +155,7 @@ void autonom (){
 					lspeed = 100;
 					rspeed = 100;
 				}
-				if(deviation_from_wall > 8){
+				if(deviation_from_wall > 8){ //Avoid overflow
 					rspeed = 0;
 					lspeed = 100;
 				}
@@ -183,16 +169,15 @@ void autonom (){
 				setSpeed(lspeed , rspeed,1,1);
 			}
 
-			else{
+			else{ //Do not regulate
 				setSpeed(100, 100, 1, 1);
 			}
 			
 			old_deviation_from_wall = deviation_from_wall;
 
-			if( (t_reflex > 31) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){
-				first_time = 1;
+			if( (t_reflex > 31) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){ //Stopping condition				
 
-				if(t_reflex > 26){ //var 20
+				if(t_reflex > 26){ //If the robot has traveled more than 26 reflex segments, it is considered to have moved a tile forward
 					if(dir == NORTH){
 						robot_pos_y--;
 					}
@@ -208,26 +193,27 @@ void autonom (){
 					distance_covered++;
 				}
 
+ 
+				first_time_on_island = 0; //Flag to prevent the robot to immediatly return to the outside wall upon arriving at an island
+				curr_action = EMPTY; //The forward action is done
 
-				first_time_on_island = 0;
-				curr_action = EMPTY;
-				if(land_o_hoy == 0){
+				if(land_o_hoy == 0){ //If in the traversing phase
 
-					next_action = SPIN_L;
+					next_action = SPIN_L; 
 					land_o_hoy = 1;
 					first_time_on_island = 1;
-					island_x = robot_pos_x;
+					island_x = robot_pos_x; //Save the island entry coordinates
 					island_y = robot_pos_y;
-					if(follow_island == 1){
+
+					if(follow_island == 1){ //Toggle follow_island on traverse
 						follow_island = 0;
 					}
 					else{
 						follow_island = 1;
-					}
-					
+					}					
 				}
 
-				if((s_ir_front < 14)&&(s_ir_front > 1)){ //fuckar upp vår position annars
+				if((s_ir_front < 14)&&(s_ir_front > 1)){ //Do not look for walls if the front sensor is too close to the wall
 					setSpeed(0,0,FORWARD,FORWARD);
 					action_done(DONTUPDATE);
 				}
@@ -238,12 +224,15 @@ void autonom (){
 			
 		break;
 
+		//-----NUDGE FORWARD-----
+
 		case(NUDGE_FORWARD):
 
 			setSpeed(30,30,1,1);
+
 			if(t_reflex > 3){
 				curr_action = EMPTY;
-				if(t_vagg_h_b != 2){
+				if(t_vagg_h_b != 2){ //Nudge forward until the front sensor is clear of the wall
 					next_action = LAST_NUDGE;
 				}
 				else{
@@ -254,46 +243,53 @@ void autonom (){
 
 		break;
 
+		//-----NUDGE TO THE WALL-----
+
 		case(NUDGE_TO_WALL):
 
 			setSpeed(50,50,1,1);
-			if(s_ir_front < 13){
+			if(s_ir_front < 13){ //Nudge forward until in a good distance from the wall
 				curr_action = EMPTY;
 				action_done(UPDATE);
 			}
 
 		break;
 
+		//-----LAST NUDGE-----
+
 		case(LAST_NUDGE):
 			setSpeed(30,30,1,1);
-			if(t_reflex > 3){ //3
+			if(t_reflex > 3){ //Do a last nudge to add margin to the turn
 				curr_action = EMPTY;
 				next_action = SPIN_R;
 				action_done(UPDATE);
 			}
 		break;
 
-//---------------------------------SVÄNGA--------------------------------
+		//----TURN RIGHT-----
+
 		case (SPIN_R):
 
 			if(first_time){
 				first_time = 0;
 				spinning = 1;
 				setSpeed(70, 70, 1, 0);
-				transmitByte_down(0x1C);
+				transmitByte_down(0x1C); //Set mimer to turning mode
 			}
 
 			if(t_gyro == 0x44){
 				dir++;
 				first_time = 1;
 				spinning = 0;
-				transmitByte_down(0x1E);
+				transmitByte_down(0x1E); //Tell mimer to exit turning mode
 
-				curr_action = FORWARD;
+				curr_action = FORWARD; //Force a forward action since the robot wants to turn right again.
 				action_done(DONTUPDATE);
 
 			}
 		break;
+
+		//-----TURN LEFT------
 
 		case (SPIN_L):
 
@@ -408,7 +404,6 @@ void autonom (){
 
 		case(BACKWARD):
 			if (first_time){
-				sensor_start = s_ir_front;
 				first_time = 0;
 			}
 			//Kolla så vi åker typ parallellt
@@ -432,8 +427,6 @@ void autonom (){
 }
 
 void action_done(uint8_t update_map){
-
-	temptemp_action_done_c++;
 
 	if(dir>3){
 		dir -=4;
@@ -483,13 +476,6 @@ void action_done(uint8_t update_map){
 
 		wmem_auto(FLOOR, robot_pos_x, robot_pos_y);
 
-		if(t_vagg_front != 2){
-			//wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
-		}
-		else if((t_vagg_front == 2) || (old_action == BACKWARD) || (old_action == NUDGE_TO_WALL)){ //IR WALL
-			//wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 
-			
-		}
 		
 		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //HÖGER IR FLOOR
 			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); 
