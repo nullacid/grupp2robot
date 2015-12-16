@@ -196,6 +196,8 @@ class MapMaster2002():
 		self.lastY = self.lastY - upmostWall
 		self.startPosition = (15 - leftmostWall, 15 - upmostWall)
 
+	#Updates any left walls to regular walls if the system determines that it is finished
+	#This only happens if there isn't any unexplored area, meaning that the left walls that are left are actually finished.
 	def confirmMap(self):
 		for i in range(0, len(self.arrayMap)):
 			for j in range(0, len(self.arrayMap)):
