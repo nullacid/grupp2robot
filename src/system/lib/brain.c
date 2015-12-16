@@ -1,23 +1,32 @@
+/*
+ * Created: November 2015
+ * Author : Mikael Å, Anton R, Michael S
+ * "it should be working now" -Peter
+ *
+ * The brain of the robot, using sensory data to make a desicion on which action to take now. It also makes sense of the map-data, using it to find 
+ * islands to plunder. Yar har!
+ */ 
+ 
 #include "brain.h"
 #include "mem.h"
 #include <avr/io.h>
 
+//-----PROTOTYPES-----
 void find_next_wall();
 void find_empty_tile();
-
 uint8_t dfs(uint8_t startx, uint8_t starty);
 uint8_t dfs_help(uint8_t startx, uint8_t starty);
 void gen_actions();
-
-uint8_t adj_matrix[32][32];
-
-uint8_t follow_wall = 1;
-
-uint8_t startup = 1;
 void find_target();
 void mark_walls();
 uint8_t done_unexp();
 uint8_t done_iwall();
+
+//
+uint8_t adj_matrix[32][32];
+uint8_t follow_wall = 1;
+uint8_t startup = 1;
+
 //För DFS
 uint8_t check = 0;
 uint8_t visited[32][32];

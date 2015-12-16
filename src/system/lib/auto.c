@@ -1,16 +1,22 @@
+/*
+ * Created: November 2015
+ * Author : Mikael Å, Anton R, Michael S
+ * "One reason you should not use web applications to do your computing is that you lose control." -Richard Stallman
+ *
+ * The spine of the robot, translating actions into motion of the wheels, while providing the "eyes" updating the map memory
+ */ 
+ 
 #include "auto.h"
 #include "usart.h"
 #include "mem.h"
 #include <avr/io.h>
 #include <util/delay.h>
 
-
-
 //-----DEFINES------
 
 #define UPDATE 			1
 #define DONTUPDATE 		0
-#define MAX_SPEED_R 	5 	//Max speed multiplier of right motors
+#define MAX_SPEED_R 	5 //5//Max speed multiplier of right motors
 #define MAX_SPEED_L 	5 	//Max speed multiplier of left motors
 #define PERFECT_DIST 	11	//Perfect distance from robot IR-sensors to wall	
 #define LEFT 			1 	//Which side to regulate on
@@ -174,7 +180,7 @@ void autonom (){
 			}
 			
 			old_deviation_from_wall = deviation_from_wall;
-
+												
 			if( (t_reflex > 31) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){ //Stopping condition				
 
 				if(t_reflex > 26){ //If the robot has traveled more than 26 reflex segments, it is considered to have moved a tile forward
@@ -440,9 +446,10 @@ void action_done(uint8_t update_map){
 		next_action = 0;
 	}
 
-	setSpeed(0,0,FORWARD,FORWARD);
-	_delay_ms(100); //Allow the robot to stop
-
+	//if(old_action == !FORWARD){
+		setSpeed(0,0,FORWARD,FORWARD);
+		_delay_ms(100); //Allow the robot to stop
+	//}	
 	int8_t temp_x = 0;
 	int8_t temp_y = 0;
 
@@ -473,30 +480,30 @@ void action_done(uint8_t update_map){
 
 		
 		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //If there is no wall to the right of the robot
-			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); //Add a wall to the right of the robot
-			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); 
+			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); //Add a floor to the right of the robot
+			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); //Add a floor 1 tile from the robot's right
 		}
 
-		if ((t_vagg_h_f == 1) && (t_vagg_h_b == 1)){ //HÖGER IR WALL + 1 FLOOR
-			wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2); 
+		if ((t_vagg_h_f == 1) && (t_vagg_h_b == 1)){ //If there is a wall 2 tiles to the right of the robot
+			wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + wall to the right
 			wmem_auto(FLOOR, robot_pos_x - temp_y, robot_pos_y + temp_x); 
 		}
 
-		if ((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //HÖGER IR WALL
-			wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); 
+		if ((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //If there is a wall directly to the right of the robot
+			wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
 		}	
 
-		if ((t_vagg_v_f == 0) && (t_vagg_v_b == 0)){ //VÄNSTER IR FLOOR
+		if ((t_vagg_v_f == 0) && (t_vagg_v_b == 0)){  //Same as abobe, but left side
 			wmem_auto(FLOOR, robot_pos_x + temp_y * 2 , robot_pos_y - temp_x * 2); 
 			wmem_auto(FLOOR, robot_pos_x + temp_y , robot_pos_y - temp_x); 
 		}
 
-		if ((t_vagg_v_f == 1) && (t_vagg_v_b == 1)){ //VÄNSTER IR WALL + 1 FLOOR
+		if ((t_vagg_v_f == 1) && (t_vagg_v_b == 1)){
 			wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 				
 			wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
 		}
 
-		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){ //VÄNSTER IR WALL
+		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){ 
 			wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
 			
 		}		
@@ -505,36 +512,35 @@ void action_done(uint8_t update_map){
 
 void setSpeed(uint8_t lspeed, uint8_t rspeed, uint8_t ldir , uint8_t rdir){
 	
-		if(ldir){
+		if(ldir){ //Insert a bit in PORTA bit 7
 			PORTA |= (1 << DDA7);			
 		}
 		else{			
 			PORTA &= 0x7F;
 		}
 
-		if(rdir){
+		if(rdir){ //Insert a bit in PORTA bit 6
 			PORTA |= (1 << DDA6);
 		}
 		else{			
 			PORTA &= 0xBF;
 		}
 
-	uint16_t rdone = rspeed * MAX_SPEED_R;
+	uint16_t rdone = rspeed * MAX_SPEED_R; //Multiply the regulated value with the max speed multiplier
 	uint16_t ldone = lspeed * MAX_SPEED_L;
 
 	if (rdone > 28){ // super magic number for driving straight
 		rdone -= 28;
 	}
 
-	// to not crash
-	if(rdone > 1000){
+	if(rdone > 1000){ //avoid overflow
 		rdone = 1000;
 	}
 	if(ldone > 1000){
 		ldone = 1000;
 	}
 
-	OCR1A = rdone;//set the duty cycle(out of 1023) Höger	(pin 19)
-	OCR3A = ldone;//set the duty cycle(out of 1023) Vänster (pin 7)
+	OCR1A = rdone;//set the duty cycle(out of 1023) right	(pin 19)
+	OCR3A = ldone;//set the duty cycle(out of 1023) left (pin 7)
 	
 }
