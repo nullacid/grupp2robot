@@ -1,8 +1,10 @@
 /*
  * Created: i den spirande vårens tid anno 1734 i väntan på vår herre jesus kristus återkomst
- * Author: Mikha'el and Eirikur
+ * Author: Michael S and Erik R
  * "Det är lätt med facit i hand,
  *  ändå var det folk som failade på logiktentan" - Peter
+ *
+ * This is the main file for the sensormodule. This handles the data from the sensors and the messages from steer.
  */
 #ifndef F_CPU
 #define F_CPU 20000000UL
