@@ -25,7 +25,7 @@ uint8_t cm_values[200] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 /*Constants for rotation with gyroscope*/
 uint32_t rotation_180 = 188000;			
 uint32_t rotation_c_clockwise = 54400;	// left turn
-uint32_t rotation_clockwise = 92000;	// höger turn
+uint32_t rotation_clockwise = 92000;	// right turn
 uint8_t gyro_offset = 10;
 	
 /*IR-sensor, normal and token values*/	
