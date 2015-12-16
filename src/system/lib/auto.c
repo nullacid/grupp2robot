@@ -277,7 +277,7 @@ void autonom (){
 				transmitByte_down(0x1C); //Set mimer to turning mode
 			}
 
-			if(t_gyro == 0x44){
+			if(t_gyro == 0x44){ //Done turning?
 				dir++;
 				first_time = 1;
 				spinning = 0;
@@ -315,7 +315,7 @@ void autonom (){
 
 				curr_action = EMPTY;
 
-				if(land_o_hoy == 1){
+				if(land_o_hoy == 1){ //If it is in traverse phase, force forward
 					curr_action = PARALLELIZE;
 				}
 				else{
@@ -327,6 +327,8 @@ void autonom (){
 
 			}
 		break;
+
+		//-----PARALLELIZE A BIT SLOPPY-----
 
 		case(P_WEAK):
 
@@ -351,6 +353,8 @@ void autonom (){
 
 		break;
 
+		//-----PARALLELIZE A BIT SLOPPY TO THE LEFT WALL-----
+
 		case(P_WEAK_L):
 
 			if(t_p_v == 0){
@@ -374,15 +378,15 @@ void autonom (){
 
 		break;
 
+		//-----PARALLELIZE TO THE RIGHT WALL------
+
 		case(PARALLELIZE):
 			if (t_p_h == 0){ //Parallellt
 
 				parallell_cnt++;
 
-				if(parallell_cnt >= 10){
+				if(parallell_cnt >= 10){ // The robot is considered parallel if the parallel-token is 0 ten times in a row
 					setSpeed(0, 0, FORWARD, FORWARD);
-					//dir = NORTH;
-					//curr_action = EMPTY;
 					curr_action = EMPTY;
 					action_done(UPDATE);
 				}
@@ -402,23 +406,16 @@ void autonom (){
 			
 		break;
 
+		//-----BACK-----
+
 		case(BACKWARD):
-			if (first_time){
-				first_time = 0;
-			}
-			//Kolla så vi åker typ parallellt
 
 			setSpeed(30, 30, 0, 0);
 							
-			if(s_ir_front >= 11){
-				first_time = 1;
+			if(s_ir_front >= 11){ //Back until the robot stands at least 11 cm from the wall in front of it
 				curr_action = EMPTY;
 				action_done(UPDATE);
 			}
-		break;
-
-		default:
-			debug = 0xFF;
 		break;
 	}
 
@@ -428,30 +425,28 @@ void autonom (){
 
 void action_done(uint8_t update_map){
 
-	if(dir>3){
+	if(dir>3){ //Calculate dir mod 4
 		dir -=4;
 	}
 
-	//------------UPPDATERA KARTDATA ----------------
-	//Räknat med 0,0 i övre högra hörnet
-	parallell_cnt = 0;
+	parallell_cnt = 0; 
 	old_deviation_from_wall = 0;
 	derivata = 0;
 	transmitByte_down(0x21); //Reset reflex-segments
-	receiveByte_down();
+	receiveByte_down(); //Wait for the reset to be done
 
-	if((next_action != 0) && (curr_action == 0)){
+	if((next_action != 0) && (curr_action == 0)){ //If there is an action in queue, put it as current action
 		curr_action = next_action;
 		next_action = 0;
 	}
 
 	setSpeed(0,0,FORWARD,FORWARD);
-	_delay_ms(100);
+	_delay_ms(100); //Allow the robot to stop
 
 	int8_t temp_x = 0;
 	int8_t temp_y = 0;
 
-	if(update_map == 1){
+	if(update_map == 1){ //Calculate X and Y offset ussed to update the map
 		switch(dir){
 			case(0):
 				temp_x = 0;
@@ -474,11 +469,11 @@ void action_done(uint8_t update_map){
 			break;
 		}
 
-		wmem_auto(FLOOR, robot_pos_x, robot_pos_y);
+		wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Force a floor where the robot is
 
 		
-		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //HÖGER IR FLOOR
-			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); 
+		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //If there is no wall to the right of the robot
+			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); //Add a wall to the right of the robot
 			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); 
 		}
 
