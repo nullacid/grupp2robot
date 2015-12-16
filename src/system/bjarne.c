@@ -202,7 +202,7 @@ void handle_messages(){
 			break;
 			
 			case (0x0D):
-			//lägg gyro-data i send-buffern
+			//send distance covered
 				transmitByte_up(s_gyro_u);
 				waitForSendNext_up();
 				transmitByte_up(s_gyro_l);

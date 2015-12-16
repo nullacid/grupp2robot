@@ -41,15 +41,17 @@ struct node{
 		uint8_t tileType;
 };
 
-typedef struct {
-		mapchange[100] inbox;
-		mapchange[50] outbox;
+typedef struct queue queue;
 
-		uint8_t sizeofIn;
-		uint8_t sizeofOut;
-} queue;
+struct queue{
+		mapchange inbox[100];
+		mapchange outbox[100];
 
-uint8_t enqueue(uint8_t x, uint8_t y, uint8_t t);
+		int8_t sizeofIn;
+		int8_t sizeofOut;
+};
+
+int8_t enqueue(uint8_t x, uint8_t y, uint8_t t);
 mapchange dequeue();
 
 void wmem(uint8_t data, uint8_t x, uint8_t y); 		//Write to map-memory
@@ -78,7 +80,7 @@ uint8_t STACK_MAX;  //Size of stack
 
 //-------------------------------------------------------------
 
-uint8_t distance_covered;
+uint16_t distance_covered;
 uint8_t land_o_hoy;
 
 uint8_t map_complete;

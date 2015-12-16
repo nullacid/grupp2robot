@@ -7,7 +7,6 @@ node mapmem[32][32];		//The map memory 33x33 tiles large
 mapchange change_stack[99];	//A stack where changes to the map will be waiting to be sent
 int8_t a_stack_top = -1;
 
-
 uint8_t action_s[50]; //The actions required to get to target
 
 //-------------------------------------------------------------
@@ -35,10 +34,8 @@ void init_mem(){
 	target_y = 0;
 	dir = 0;
 	c_stack_top = -1;
-	changeQ = 
 	debug = 0;
 	//OKÄND SKA VARA 1, fixa
-	uint8_t i = 0;
 	land_o_hoy = 1;
 	map_enclosed = 0;
 	next_action = 0;
@@ -49,6 +46,8 @@ void init_mem(){
 	map_complete = 0;
 	first_time_on_island = 0;
 
+
+	uint8_t i = 0;
 	for(i = 0; i < 32; i++){
 
 		wmem(OUTSIDE, i, 0);
@@ -58,38 +57,49 @@ void init_mem(){
 
 	}
 
+	mapchange temp = {.x = 0, .y = 0, .t = 0}; 
+
+	for(i = 0; i < 100; i++){
+		changeQ.inbox[i] = temp;
+		changeQ.outbox[i] = temp;
+
+	}
+
+	changeQ.sizeofIn = -1;
+	changeQ.sizeofOut = 0;
+
 	return;
 
 }
 
-uint8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
+int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 	if(changeQ.sizeofIn == (C_QUEUE_MAX-1)){
-		return 0; //Return false, since the queue is full
+		return -1; //Return false, since the queue is full
 	}
 	else{
 		mapchange temp = {.x = x, .y = y, .t = t}; 
-		if(t == 5){
-			temp.t = 1;
-		}
-		changeQ.inbox[sizeofIn] = temp;
 		changeQ.sizeofIn++;
+		changeQ.inbox[changeQ.sizeofIn] = temp;
 	}
 }
 
 mapchange dequeue(){
+
+
 	if(changeQ.sizeofOut == 0){
 		while(!changeQ.sizeofIn == 0){
 			//pop value from inbox stack
-			mapchange toBeMoved = changeQ.inbox[sizeofIn];
 			changeQ.sizeofIn--;
+			mapchange toBeMoved = changeQ.inbox[changeQ.sizeofIn];
 
 			//add to outbox stack
-			changeQ.outbox[sizeofOut] = toBeMoved;
 			changeQ.sizeofOut++;
+			changeQ.outbox[changeQ.sizeofOut] = toBeMoved;
 		}
 	}
-	mapchange data = changeQ.outbox[sizeofOut];
+
 	changeQ.sizeofOut--;
+	mapchange data = changeQ.outbox[changeQ.sizeofOut];
 	return data;
 }
 
@@ -105,10 +115,6 @@ uint8_t pstack(uint8_t x, uint8_t y, uint8_t t){
 	else{
 
 		mapchange temp = {.x = x, .y = y, .t = t}; 
-		if(t == 5){
-			temp.t = 1;
-		}
-
 		c_stack_top += 1;
 		change_stack[c_stack_top] = temp;
 	}

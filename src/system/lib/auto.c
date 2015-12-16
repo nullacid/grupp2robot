@@ -4,33 +4,33 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#define UPDATE 1
-#define DONTUPDATE 0
+#define UPDATE 			1
+#define DONTUPDATE 		0
 
-#define MAX_SPEED_R 5 //1 to 10, 10 is highest
-#define MAX_SPEED_L 5
+#define MAX_SPEED_R 	5 //1 to 10, 10 is highest
+#define MAX_SPEED_L 	5
 #define PERFECT_DIST 	11 	//12
 
 #define GYRO_NO_TURNING 0xB5 //KOMMER NOG ÄNDRAS
-#define FOLlOW_WALL 0
-#define MAP_REST 1
+#define FOLlOW_WALL 	0
+#define MAP_REST 		1
 
-#define LEFT 1
-#define RIGHT 2
-#define NONE 0
-#define TURNED_RIGHT 3
+#define LEFT 			1
+#define RIGHT 			2
+#define NONE 			0
+#define TURNED_RIGHT 	3
 
 int distance_LIDAR;
 uint8_t first_time;
-uint8_t NODBROMS = 0;
-uint8_t parallell_cnt = 0;
+uint8_t NODBROMS 				= 0;
+uint8_t parallell_cnt 			= 0;
 
-int16_t deviation_from_wall = 0;
+int16_t deviation_from_wall 	= 0;
 int16_t old_deviation_from_wall = 0;
-int16_t derivata = 0;
-int16_t P = 0;
-int16_t D = 0;
-uint8_t pidk = 4; //20 är okej
+int16_t derivata 				= 0;
+int16_t P 						= 0;
+int16_t D 						= 0;
+uint8_t pidk 					= 4; //20 är okej
 uint8_t pidd = 4; //16 ok ish
 uint8_t front_sensor_active = 0;
 uint8_t regulate_side = 0; 
@@ -146,6 +146,7 @@ void autonom (){
 					robot_pos_x++;
 				}
 				break;
+				distance_covered ++;
 			}
 			
 			deviation_from_wall = (s_ir_h_f - PERFECT_DIST);
@@ -209,6 +210,7 @@ void autonom (){
 					else{
 						robot_pos_x++;
 					}
+					distance_covered++;
 				}
 
 
