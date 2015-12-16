@@ -321,9 +321,9 @@ def getIRLB():
 	return int(harald.receiveData()[0])
 
 #Covered Distance Token
-def getReflexToken():
-	harald.sendData(b'\x57')
-	return int(harald.receiveData()[0])
+def getCoveredDistance():
+	harald.sendData(b'\x8D')
+	return int(harald.receiveData()[0])*256 + int(harald.receiveData()[0])
 
 #IR Front Token (not gathered anymore)
 def getIRFToken():
@@ -474,7 +474,7 @@ handle_dictionary_data = {
 	"IRrightBack" : getIRRB,
 	"IRleftFront" : getIRLF,
 	"IRleftBack" : getIRLB,
-	"Distance Covered" : getReflexToken,
+	"Distance Covered" : getCoveredDistance,
 	"IR Front (token)" : getIRFToken,
 	"Parallel Right" : getParallelRight,
 	"Parallel Left" : getParallelLeft,
