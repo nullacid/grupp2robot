@@ -389,6 +389,7 @@ def getMap():
 
 	#Special value sent when system has decided that it is finished
 	if msByte == b'\xEE' and lsByte == b'\xEE':
+		mapSystem.confirmMap()
 		pygame.mixer.init()
 		pygame.mixer.music.load("sounds/SEGER.wav")
 		pygame.mixer.music.play(loops = 0, start = 0.0)

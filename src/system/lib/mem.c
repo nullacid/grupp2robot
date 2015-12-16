@@ -84,13 +84,11 @@ int8_t enqueue(uint8_t x, uint8_t y, uint8_t t){
 }
 
 mapchange dequeue(){
-
-
 	if(changeQ.sizeofOut == -1){
-		while(!changeQ.sizeofIn == -1){
+		while(changeQ.sizeofIn != -1){
 			//pop value from inbox stack
-			changeQ.sizeofIn--;
 			mapchange toBeMoved = changeQ.inbox[changeQ.sizeofIn];
+			changeQ.sizeofIn--;
 
 			//add to outbox stack
 			changeQ.sizeofOut++;

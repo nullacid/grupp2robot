@@ -195,3 +195,9 @@ class MapMaster2002():
 		self.lastX = self.lastX - leftmostWall
 		self.lastY = self.lastY - upmostWall
 		self.startPosition = (15 - leftmostWall, 15 - upmostWall)
+
+	def confirmMap(self):
+		for i in range(0, len(self.arrayMap)):
+			for j in range(0, len(self.arrayMap)):
+				if self.arrayMap[i][j] == "LEFT WALL":
+					self.arrayMap[i][j] = "WALL"
