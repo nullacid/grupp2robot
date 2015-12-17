@@ -20,6 +20,7 @@ void gen_actions();
 void mark_walls();
 uint8_t done_unexp();
 uint8_t done_iwall();
+void purge_iwalls();
 
 
 uint8_t follow_wall = 1;
@@ -135,6 +136,8 @@ void think_hard(){
 		}
 	}
 
+	purge_iwalls();
+
 	if((done_unexp() == 1) || (done_iwall() == 1)){		//If there are no unexplored tiles or no inner walls left
 		if(map_enclosed == 1){							//Is the area enclosed as well
 			lets_go_home = 1;							//We are finished mapping, let's return to start
@@ -142,7 +145,8 @@ void think_hard(){
 	}
 
 	if(follow_island == 1){													
-		if((first_time_on_island == 0) || lets_go_home){					
+		if((first_time_on_island == 0) || lets_go_home){
+
 			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
 				land_o_hoy = 0;												
 				curr_action = PARALLELIZE;
@@ -223,8 +227,42 @@ void mark_walls(){
 				wmem(WALL,i,j);
 			}			
 		}
+	}	
+}
+
+
+void purge_iwalls(){
+
+	for(i = 0; i < 32; i++){
+		for(j = 0; j < 32; j++){
+
+
+			if(rmem(i,j) == IWALL){
+
+				uint8_t alone_iwall = 1;
+
+				if(rmem(i+1, j) == UNEXP){
+					alone_iwall = 0;
+				}
+				if(rmem(i-1, j) == UNEXP){
+					alone_iwall = 0;
+				}
+				if(rmem(i, j+1) == UNEXP){
+					alone_iwall = 0;
+				}
+				if(rmem(i, j-1) == UNEXP){
+					alone_iwall = 0;
+				}
+
+				if(alone_iwall == 1){
+					wmem_auto(WALL,i,j);
+				}
+
+			}
+		}
 	}
 }
+
 
 /*
  * Depth First Search that tries to find a way out of the enclosed area to the outer line of OUTSIDE. 

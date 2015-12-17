@@ -84,6 +84,7 @@ uint8_t WALL;	//Tile: Wall
 uint8_t OUTSIDE;	//Tile: Outside
 uint8_t IWALL;
 uint8_t STACK_MAX;  //Size of stack
+uint8_t OWALL;
 
 // Stack constants
 int8_t c_stack_top ; 		//The top of the stack

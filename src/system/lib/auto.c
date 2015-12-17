@@ -478,7 +478,13 @@ void action_done(uint8_t update_map){
 
 		wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Force a floor where the robot is
 
-		
+		//if(t_vagg_front != 2){
+		//	wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
+		//}
+		//else if((t_vagg_front == 2) || (old_action == BACKWARD) || (old_action == NUDGE_TO_WALL)){ //IR WALL
+		//	wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 			
+		//}
+
 		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //If there is no wall to the right of the robot
 			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); //Add a floor to the right of the robot
 			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); //Add a floor 1 tile from the robot's right
