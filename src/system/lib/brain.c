@@ -144,8 +144,8 @@ void think_hard(){
 		}
 	}
 
-	if(follow_island == 1){													
-		if((first_time_on_island == 0) || lets_go_home){
+	if(follow_island == 1){	//If we are currently following the island					
+		if((first_time_on_island == 0) || lets_go_home){ //If we should go home
 
 			uint8_t temp_x, temp_y;
 
@@ -172,8 +172,8 @@ void think_hard(){
 			} 
 
 			if(((robot_pos_x == island_x) && (robot_pos_y == island_y)) || 
-				(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == OWALL) || 
-				(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == OWALL)){
+			(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == OWALL) || 
+			(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == OWALL)){
 				land_o_hoy = 0;												
 				curr_action = PARALLELIZE;
 				next_action = SPIN_L;
@@ -258,6 +258,9 @@ void mark_walls(){
 
 
 void purge_iwalls(){
+
+	uint8_t i;
+	uint8_t j;
 
 	for(i = 0; i < 32; i++){
 		for(j = 0; j < 32; j++){

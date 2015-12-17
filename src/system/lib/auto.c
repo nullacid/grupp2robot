@@ -491,7 +491,7 @@ void action_done(uint8_t update_map){
 		}
 
 		if ((t_vagg_h_f == 1) && (t_vagg_h_b == 1)){ //If there is a wall 2 tiles to the right of the robot
-			if(follow_island == 1){			
+			if(map_enclosed == 1){			
 				wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + wall to the right
 			}
 			else{
@@ -502,7 +502,7 @@ void action_done(uint8_t update_map){
 		}
 
 		if ((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //If there is a wall directly to the right of the robot
-			if(follow_island == 1){
+			if(map_enclosed == 1){
 				wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
 			}
 			else{
@@ -516,13 +516,16 @@ void action_done(uint8_t update_map){
 		}
 
 		if ((t_vagg_v_f == 1) && (t_vagg_v_b == 1)){
-			wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 				
-			wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
+			if(map_enclosed == 0){
+				wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 				
+			}
+				wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
 		}
 
-		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){ 
-			wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
-			
+		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){
+			if(map_enclosed == 0){ 
+				wmem_auto(IWALL, robot_pos_x + temp_y , robot_pos_y - temp_x); 
+			}
 		}		
 	}
 }
