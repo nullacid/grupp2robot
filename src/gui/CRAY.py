@@ -410,9 +410,8 @@ def getMap():
 				tileType = "WALL"
 			#Adds the tile to the mapsystem
 			if xCoord < len(mapSystem.arrayMap) and yCoord < len(mapSystem.arrayMap):
-				if mapSystem.arrayMap[xCoord][yCoord] != "WALL":
-					mapSystem.arrayMap[xCoord][yCoord] = tileType
-					return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
+				mapSystem.arrayMap[xCoord][yCoord] = tileType
+				return "x: " + str(xCoord) + "; y: " + str(yCoord) + "; " + str(tileType)
 
 		return mapSystem.dataDict["Update Map"]
 	
