@@ -147,7 +147,33 @@ void think_hard(){
 	if(follow_island == 1){													
 		if((first_time_on_island == 0) || lets_go_home){
 
-			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
+			uint8_t temp_x, temp_y;
+
+			switch(dir){
+				case(0):
+					temp_x = 0;
+					temp_y = -1;
+				break;
+
+				case(1):
+					temp_x = 1;
+					temp_y = 0;
+				break;
+
+				case(2):
+					temp_x = 0;
+					temp_y = 1;
+				break;
+
+				case(3):
+					temp_x = -1;
+					temp_y = 0;
+				break;
+			} 
+
+			if(((robot_pos_x == island_x) && (robot_pos_y == island_y)) || 
+				(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == OWALL) || 
+				(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == OWALL)){
 				land_o_hoy = 0;												
 				curr_action = PARALLELIZE;
 				next_action = SPIN_L;
