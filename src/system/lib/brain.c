@@ -14,13 +14,14 @@
 //-----PROTOTYPES-----
 void find_next_wall();
 void find_empty_tile();
-uint8_t dfs(uint8_t startx, uint8_t starty);
-uint8_t dfs_help(uint8_t startx, uint8_t starty);
+uint8_t dfs(uint8_t startx, uint8_t starty, uint8_t tile);
+uint8_t dfs_help(uint8_t startx, uint8_t starty, uint8_t tile);
 void gen_actions();
 void mark_walls();
 uint8_t done_unexp();
 uint8_t done_iwall();
 void purge_iwalls();
+uint8_t purge_unexplored();
 
 
 uint8_t follow_wall = 1;
@@ -28,13 +29,15 @@ uint8_t startup = 1;
 
 //För DFS
 uint8_t check = 0;
-uint8_t visited[32][32];
+uint8_t visited[34][34];
 uint8_t first_time_on_island = 0;
 
 /*
  * Generate next action
  */
 void think(){
+
+	debug = lets_go_home;
 	if((curr_action == EMPTY) && (map_complete == 0)){	
 
 		if(follow_wall == 1){ //If in follow wall mode
@@ -82,34 +85,8 @@ void think(){
 			}
 
 			if(map_enclosed == 1){	//outer wall is connected, enclosing the inner area.
-
-				uint8_t temp_x, temp_y;
-
-				switch(dir){
-					case(0):
-						temp_x = 0;
-						temp_y = -1;
-					break;
-
-					case(1):
-						temp_x = 1;
-						temp_y = 0;
-					break;
-
-					case(2):
-						temp_x = 0;
-						temp_y = 1;
-					break;
-
-					case(3):
-						temp_x = -1;
-						temp_y = 0;
-					break;
-				} 
-
 				if((lets_go_home == 0) && (follow_island == 0)){
-					if ((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == IWALL) || 
-						(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == IWALL)){ 
+					if(traverse_here()){ 
 							land_o_hoy = 0;
 							first_time_on_island = 1;
 							curr_action = PARALLELIZE;
@@ -125,11 +102,10 @@ void think(){
 }
 
 
-
 void think_hard(){
 
 	if(map_enclosed == 0){ // Depth First Search to determine if the outer wall is closed
-		if(dfs(robot_pos_x, robot_pos_y) == 0){
+		if(dfs(robot_pos_x, robot_pos_y,OUTSIDE) == 0){
 			enqueue(0xFF, 0xFF, 0xFF);		//Send special command to tell CRAY to rescale its map
 			map_enclosed = 1;
 			mark_walls();					//Turns all squares outside of the enclosed area to walls
@@ -137,8 +113,9 @@ void think_hard(){
 	}
 
 	purge_iwalls();
+//	purge_unexplored();
 
-	if((done_unexp() == 1) || (done_iwall() == 1)){		//If there are no unexplored tiles or no inner walls left
+	if(purge_unexplored() == 0){ //(done_unexp() == 1) || (done_iwall() == 1)){		//If there are no unexplored tiles or no inner walls left
 		if(map_enclosed == 1){							//Is the area enclosed as well
 			lets_go_home = 1;							//We are finished mapping, let's return to start
 		}
@@ -196,8 +173,6 @@ struct tuple{
 		uint8_t y;
 };
 
-
-
 /*
  * Returns 0 if there are any UNEXP tiles on the map.
  * Otherwise returns 1.
@@ -247,8 +222,8 @@ void mark_walls(){
 	uint8_t i;
 	uint8_t j;
 
-	for(i = 1; i < 31; i++){
-		for(j = 1; j < 31; j++){
+	for(i = 1; i < 33; i++){
+		for(j = 1; j < 33; j++){
 			if(visited[i][j] == 0){
 				wmem(OWALL,i,j);
 			}			
@@ -256,6 +231,16 @@ void mark_walls(){
 	}	
 }
 
+
+uint8_t purge_unexplored(){
+	uint8_t hej = dfs(home_x,home_y,UNEXP);
+	//if(hej == 0){ // didn't find unexp
+		//lets_go_home = 1;
+	//	return hej;
+	//}
+	return hej;
+
+}
 
 void purge_iwalls(){
 
@@ -311,46 +296,44 @@ void purge_iwalls(){
 /*
  * Depth First Search that tries to find a way out of the enclosed area to the outer line of OUTSIDE. 
  * If this can be done, the area is not closed.
- * Returns 1 if area is NOT closed.
- * Returns 0 if area is closed.
+ * Returns 1 if finds target tile
+ * Returns 0 if not
  */
-uint8_t dfs(uint8_t startx, uint8_t starty){
+uint8_t dfs(uint8_t startx, uint8_t starty,uint8_t tile){
 	uint8_t i;
 	uint8_t j;
-	for(i = 0; i < 32; i++){
-		for(j = 0; j < 32; j++){
+	for(i = 0; i < 34; i++){
+		for(j = 0; j < 34; j++){
 			visited[i][j] = 0;
 		}
 	}
-	return dfs_help(startx, starty);
+	return dfs_help(startx, starty,tile);
 }
 
 /*
  * Recursive help function for DFS. 
- * Returns 1 if area is NOT closed.
- * Returns 0 if area is closed.
  */
-uint8_t dfs_help(uint8_t startx, uint8_t starty){
+uint8_t dfs_help(uint8_t startx, uint8_t starty,uint8_t tile){
 	if(visited[startx][starty] == 0){
 
-		if(rmem(startx,starty) == OUTSIDE){
+		if(rmem(startx,starty) == tile){
 			return 1;
 		}
-		if((rmem(startx,starty) == OWALL) || (rmem(startx,starty) == WALL)){
+		if((rmem(startx,starty) == OWALL) || (rmem(startx,starty) == WALL) || (rmem(startx,starty) == IWALL)){
 			return 0;
 		}
 		visited[startx][starty] = 1;
 		
-		if(dfs_help(startx,starty-1) == 1){
+		if(dfs_help(startx,starty-1,tile) == 1){
 			return 1;
 		}
-		if(dfs_help(startx+1,starty) == 1){
+		if(dfs_help(startx+1,starty,tile) == 1){
 			return 1;
 		}
-		if(dfs_help(startx,starty+1) == 1){
+		if(dfs_help(startx,starty+1,tile) == 1){
 			return 1;
 		}
-		if(dfs_help(startx-1,starty) == 1){
+		if(dfs_help(startx-1,starty,tile) == 1){
 			return 1;
 		}
 	}

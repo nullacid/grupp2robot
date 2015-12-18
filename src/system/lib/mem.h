@@ -74,7 +74,7 @@ void init_mem();
 // Stack functions
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t);
 mapchange gstack(); 
-
+uint8_t traverse_here();
 
 
 //----------------Constants------------------------------------
@@ -126,6 +126,7 @@ uint8_t s_ir_h_b;
 uint8_t s_ir_v_f;
 uint8_t s_ir_v_b;
 uint8_t s_ir_front;
+
 
 //	Token parallel left/right
 

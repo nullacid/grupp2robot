@@ -180,8 +180,8 @@ void autonom (){
 			}
 			
 			old_deviation_from_wall = deviation_from_wall;
-												
-			if( (t_reflex > 31) || ( (s_ir_front < 12) && (s_ir_front > 1) ) ){ //Stopping condition				
+												//12
+			if( (t_reflex > 31) || ( (s_ir_front < 13) && (s_ir_front > 1) ) ){ //Stopping condition				
 
 				if(t_reflex > 26){ //If the robot has traveled more than 26 reflex segments, it is considered to have moved a tile forward
 					if(dir == NORTH){
@@ -197,6 +197,16 @@ void autonom (){
 						robot_pos_x++;
 					}
 					distance_covered++;
+				}
+				if( (s_ir_front < 13) && (s_ir_front > 1) ){
+					setSpeed(30,30,FORWARD,FORWARD);
+					_delay_ms(10);
+					setSpeed(0,0,FORWARD,FORWARD);
+					_delay_ms(100);
+				}
+				if(traverse_here()){
+					setSpeed(0,0,FORWARD,FORWARD);
+					_delay_ms(100);
 				}
 
  
@@ -289,6 +299,9 @@ void autonom (){
 				spinning = 0;
 				transmitByte_down(0x1E); //Tell mimer to exit turning mode
 
+
+				setSpeed(0,0,FORWARD,FORWARD);
+				_delay_ms(100);
 				curr_action = FORWARD; //Force a forward action since the robot wants to turn right again.
 				action_done(DONTUPDATE);
 
@@ -318,6 +331,8 @@ void autonom (){
 				spinning = 0;
 				first_time = 1;	
 				transmitByte_down(0x1E);
+				setSpeed(0,0,FORWARD,FORWARD);
+				_delay_ms(100);
 
 				curr_action = EMPTY;
 
@@ -431,7 +446,7 @@ void autonom (){
 
 void action_done(uint8_t update_map){
 
-	debug = map_enclosed;
+	//debug = map_enclosed;
 
 	if(dir>3){ //Calculate dir mod 4
 		dir -=4;
@@ -448,10 +463,10 @@ void action_done(uint8_t update_map){
 		next_action = 0;
 	}
 
-	//if(old_action == !FORWARD){
-		setSpeed(0,0,FORWARD,FORWARD);
-		_delay_ms(100); //Allow the robot to stop
-	//}	
+//	if(old_action == !FORWARD){
+//		setSpeed(0,0,FORWARD,FORWARD);
+//		_delay_ms(100); //Allow the robot to stop
+//	}	
 	int8_t temp_x = 0;
 	int8_t temp_y = 0;
 

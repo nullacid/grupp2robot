@@ -9,7 +9,7 @@
 
 
 //----------------Variables------------------------------------
-node mapmem[32][32];		//The map memory 33x33 tiles large
+node mapmem[34][34];		//The map memory 33x33 tiles large
 mapchange change_stack[99];	//A stack where changes to the map will be waiting to be sent
 int8_t a_stack_top = -1;
 
@@ -55,13 +55,20 @@ void init_mem(){
 	distance_covered = 0;
 
 	// Set the outer layer of the map to OUTSIDE for the dfs
+
+	for(int i = 0; i < 34;i++){
+		for(int j = 0; j < 34;j++){
+			wmem(UNEXP,i,j);
+		}
+	}
+
 	uint8_t i = 0;
-	for(i = 0; i < 32; i++){
+	for(i = 0; i < 34; i++){
 
 		wmem(OUTSIDE, i, 0);
-		wmem(OUTSIDE, i, 32);
+		wmem(OUTSIDE, i, 33);
 		wmem(OUTSIDE, 0, i);
-		wmem(OUTSIDE, 32, i);
+		wmem(OUTSIDE, 33, i);
 
 	}
 
@@ -77,6 +84,42 @@ void init_mem(){
 	changeQ.sizeofOut = -1;
 
 	return;
+
+}
+
+uint8_t traverse_here(){
+
+	uint8_t answer = 0;
+	uint8_t temp_x, temp_y;
+
+	switch(dir){
+		case(0):
+			temp_x = 0;
+			temp_y = -1;
+		break;
+
+		case(1):
+			temp_x = 1;
+			temp_y = 0;
+		break;
+
+		case(2):
+			temp_x = 0;
+			temp_y = 1;
+		break;
+
+		case(3):
+			temp_x = -1;
+			temp_y = 0;
+		break;
+	} 
+
+	if((rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == IWALL) || 
+		(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == IWALL)){
+		answer = 1;
+	}
+
+	return answer;
 
 }
 
