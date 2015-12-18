@@ -486,22 +486,13 @@ void action_done(uint8_t update_map){
 		}
 
 		if ((t_vagg_h_f == 1) && (t_vagg_h_b == 1)){ //If there is a wall 2 tiles to the right of the robot
-			if(map_enclosed == 1){			
-				wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + wall to the right
-			}
-			else{		//OWALL
-				wmem_auto(OWALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + owall to the right1
-			}
+			wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + wall to the right
 			wmem_auto(FLOOR, robot_pos_x - temp_y, robot_pos_y + temp_x); 
 		}
 
 		if ((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //If there is a wall directly to the right of the robot
-			if(map_enclosed == 1){
-				wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
-			}
-			else{		//OWALL
-				wmem_auto(OWALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
-			}
+			wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
+			
 		}	
 
 		if ((t_vagg_v_f == 0) && (t_vagg_v_b == 0)){  //Same as abobe, but left side

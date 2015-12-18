@@ -171,9 +171,7 @@ void think_hard(){
 				break;
 			} 
 
-			if(((robot_pos_x == island_x) && (robot_pos_y == island_y)) || 
-			(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == OWALL) || 
-			(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == OWALL)){
+			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
 				land_o_hoy = 0;												
 				curr_action = PARALLELIZE;
 				next_action = SPIN_L;
@@ -250,7 +248,7 @@ void mark_walls(){
 	for(i = 1; i < 31; i++){
 		for(j = 1; j < 31; j++){
 			if(visited[i][j] == 0){
-				wmem(OWALL,i,j);
+				wmem(WALL,i,j);
 			}			
 		}
 	}	
@@ -336,7 +334,7 @@ uint8_t dfs_help(uint8_t startx, uint8_t starty){
 		if(rmem(startx,starty) == OUTSIDE){
 			return 1;
 		}
-		if((rmem(startx,starty) == OWALL) || (rmem(startx,starty) == WALL)){
+		if(rmem(startx,starty) == WALL){
 			return 0;
 		}
 		visited[startx][starty] = 1;
