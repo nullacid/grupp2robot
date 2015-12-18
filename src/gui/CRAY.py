@@ -221,6 +221,8 @@ def paintSquare(tileType, xCoord, yCoord):
 	elif tileType == "LEFT WALL":
 		tileImg = tileLEFTWALL
 
+
+
 	surface.blit(tileImg,(xCoord*mapSquareWidth, yCoord*mapSquareHeight))
 	
 	
