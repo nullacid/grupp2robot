@@ -23,7 +23,6 @@ uint8_t FLOOR 		= 2;	//Tile: Floor
 uint8_t WALL 		= 3;	//Tile: Inner wall
 uint8_t OUTSIDE 	= 4;	//Tile: Outside
 uint8_t IWALL		= 1;	//Tile: Inner wall
-uint8_t OWALL		= 4;	//Tile: Outside wall
 uint8_t C_STACK_MAX = 100;  //Size of stack
 uint8_t C_QUEUE_MAX = 100;	//Size of queue
 

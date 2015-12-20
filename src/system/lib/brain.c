@@ -171,9 +171,7 @@ void think_hard(){
 				break;
 			} 
 
-			if(((robot_pos_x == island_x) && (robot_pos_y == island_y)) || 
-			(rmem(robot_pos_x + temp_y, robot_pos_y - temp_x) == OWALL) || 
-			(rmem(robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2) == OWALL)){
+			if((robot_pos_x == island_x) && (robot_pos_y == island_y)){
 				land_o_hoy = 0;												
 				curr_action = PARALLELIZE;
 				next_action = SPIN_L;
@@ -247,8 +245,8 @@ void mark_walls(){
 	uint8_t i;
 	uint8_t j;
 
-	for(i = 0; i < 32; i++){
-		for(j = 0; j < 32; j++){
+	for(i = 1; i < 31; i++){
+		for(j = 1; j < 31; j++){
 			if(visited[i][j] == 0){
 				wmem(WALL,i,j);
 			}			
@@ -270,6 +268,7 @@ void purge_iwalls(){
 
 				uint8_t alone_iwall = 1;
 
+				// check the 8 surronding tiles 
 				if(rmem(i+1, j) == UNEXP){
 					alone_iwall = 0;
 				}
@@ -282,10 +281,24 @@ void purge_iwalls(){
 				if(rmem(i, j-1) == UNEXP){
 					alone_iwall = 0;
 				}
+				if(rmem(i+1, j+1) == UNEXP){
+					alone_iwall = 0;
+				}
+				if(rmem(i-1, j-1) == UNEXP){
+					alone_iwall = 0;
+				}
+				if(rmem(i-1, j+1) == UNEXP){
+					alone_iwall = 0;
+				}
+				if(rmem(i+1, j-1) == UNEXP){
+					alone_iwall = 0;
+				}
 
+				// if none unexp, mark as wall
 				if(alone_iwall == 1){
 					wmem_auto(WALL,i,j);
 				}
+
 
 			}
 		}
@@ -317,6 +330,7 @@ uint8_t dfs(uint8_t startx, uint8_t starty){
  */
 uint8_t dfs_help(uint8_t startx, uint8_t starty){
 	if(visited[startx][starty] == 0){
+
 		if(rmem(startx,starty) == OUTSIDE){
 			return 1;
 		}

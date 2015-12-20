@@ -75,8 +75,6 @@ void init_mem();
 uint8_t pstack(uint8_t x, uint8_t y, uint8_t t);
 mapchange gstack(); 
 
-
-
 //----------------Constants------------------------------------
 uint8_t UNEXP;	//Tile: Unexplored
 uint8_t FLOOR;	//Tile: Floor
@@ -84,7 +82,6 @@ uint8_t WALL;	//Tile: Wall
 uint8_t OUTSIDE;	//Tile: Outside
 uint8_t IWALL;
 uint8_t STACK_MAX;  //Size of stack
-uint8_t OWALL;
 
 // Stack constants
 int8_t c_stack_top ; 		//The top of the stack

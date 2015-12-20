@@ -431,6 +431,8 @@ void autonom (){
 
 void action_done(uint8_t update_map){
 
+	debug = map_enclosed;
+
 	if(dir>3){ //Calculate dir mod 4
 		dir -=4;
 	}
@@ -478,36 +480,19 @@ void action_done(uint8_t update_map){
 
 		wmem_auto(FLOOR, robot_pos_x, robot_pos_y); //Force a floor where the robot is
 
-		//if(t_vagg_front != 2){
-		//	wmem_auto(FLOOR, robot_pos_x + temp_x, robot_pos_y + temp_y);
-		//}
-		//else if((t_vagg_front == 2) || (old_action == BACKWARD) || (old_action == NUDGE_TO_WALL)){ //IR WALL
-		//	wmem_auto(IWALL, robot_pos_x + temp_x, robot_pos_y + temp_y); 			
-		//}
-
 		if ((t_vagg_h_f == 0) && (t_vagg_h_b == 0)){ //If there is no wall to the right of the robot
 			wmem_auto(FLOOR, robot_pos_x - temp_y  , robot_pos_y + temp_x); //Add a floor to the right of the robot
 			wmem_auto(FLOOR, robot_pos_x - temp_y*2 , robot_pos_y + temp_x * 2); //Add a floor 1 tile from the robot's right
 		}
 
 		if ((t_vagg_h_f == 1) && (t_vagg_h_b == 1)){ //If there is a wall 2 tiles to the right of the robot
-			if(map_enclosed == 1){			
-				wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + wall to the right
-			}
-			else{
-				wmem_auto(OWALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + owall to the right
-
-			}
+			wmem_auto(WALL, robot_pos_x - temp_y * 2, robot_pos_y + temp_x * 2);  //Add floor + wall to the right
 			wmem_auto(FLOOR, robot_pos_x - temp_y, robot_pos_y + temp_x); 
 		}
 
 		if ((t_vagg_h_f == 2) && (t_vagg_h_b == 2)){ //If there is a wall directly to the right of the robot
-			if(map_enclosed == 1){
-				wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
-			}
-			else{
-				wmem_auto(OWALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
-			}
+			wmem_auto(WALL, robot_pos_x - temp_y , robot_pos_y + temp_x); //add a wall there
+			
 		}	
 
 		if ((t_vagg_v_f == 0) && (t_vagg_v_b == 0)){  //Same as abobe, but left side
@@ -519,7 +504,7 @@ void action_done(uint8_t update_map){
 			if(map_enclosed == 0){
 				wmem_auto(IWALL, robot_pos_x + temp_y * 2, robot_pos_y - temp_x * 2); 				
 			}
-				wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
+			wmem_auto(FLOOR, robot_pos_x + temp_y, robot_pos_y - temp_x); 
 		}
 
 		if ((t_vagg_v_f == 2) && (t_vagg_v_b == 2)){

@@ -71,8 +71,8 @@ class MapMaster2002():
 						5 : "Distance Covered",
 						6 : "Steering data",
 						#7 : "Steering Decision",
-						7 : "System Position",
-						8 : "Update Map"#,
+						8 : "System Position",
+						9 : "Update Map",#,
 
 						#10 : "IR Front (token)",
 						#11 : "Parallel Right",
@@ -80,7 +80,7 @@ class MapMaster2002():
 						#13 : "IRright (token)",
 						#14 : "IRleft (token)",
 
-						#8 : "Debug"
+						7 : "Debug"
 		}
 		#Store values for each data type, the keys correspond to the values in indexDict
 		#Some of these values are not used anymore.
