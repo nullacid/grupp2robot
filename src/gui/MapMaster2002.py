@@ -116,7 +116,6 @@ class MapMaster2002():
 						"System Position" : self.systemPosFile
 		}
 
-
 	#Increments index and loops it at the end of indexDict.
 	def incIndex(self):
 		self.dataIndex += 1

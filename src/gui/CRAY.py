@@ -29,7 +29,7 @@ fullscreenMode = False
 
 
 #Create bluetooth object
-harald = Harald()
+#harald = Harald()
 
 #Create map object
 mapSystem = MapMaster2002()
@@ -51,10 +51,10 @@ offset = None
 
 #Initialize screen values to fullscreen mode
 if fullscreenMode:
-	screenWidth = 1536
-	screenHeight = 864
-	squareWidth = screenHeight/32
-	squareHeight = screenHeight/32
+	screenWidth = 1600
+	screenHeight = 900
+	squareWidth = int(screenHeight/32)
+	squareHeight = int(screenHeight/32)
 
 	screen_size = [screenWidth,screenHeight]
 
@@ -183,6 +183,8 @@ def paintData(mapSystem):
 	
 #Paints the entire map
 def paintMap(mapSystem):
+	pygame.draw.rect(surface, BLACK, [0, 0, screenWidth, screenHeight])
+
 	for i in range(0,len(mapSystem.arrayMap)):
 		for j in range(0,len(mapSystem.arrayMap)):
 			paintSquare(mapSystem.arrayMap[i][j], i, j)
@@ -267,6 +269,7 @@ def spinR_down():
 
 def spinR_up():
 	harald.sendData(b'\x25')
+
 	
 #dictionary of key bindings for keydown
 handle_dictionary_down = {
@@ -382,8 +385,8 @@ def getMap():
 			global mapSquareHeight
 			#resizes map
 			mapSystem.resize()
-			mapSquareWidth = screenHeight/len(mapSystem.arrayMap)
-			mapSquareHeight = screenHeight/len(mapSystem.arrayMap)
+			mapSquareWidth = int(screenHeight/len(mapSystem.arrayMap))
+			mapSquareHeight = int(screenHeight/len(mapSystem.arrayMap))
 			#rescales images
 			rescale()
 
@@ -509,7 +512,10 @@ def getData():
 
 #mainloop
 while(crayRunning):
-	getData()
+	#getData()
+
+	paintMap(mapSystem)
+	#paintData(mapSystem)
 
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
