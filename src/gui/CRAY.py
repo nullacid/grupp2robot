@@ -29,7 +29,7 @@ fullscreenMode = False
 
 
 #Create bluetooth object
-#harald = Harald()
+harald = Harald()
 
 #Create map object
 mapSystem = MapMaster2002()
@@ -514,10 +514,7 @@ def getData():
 
 #mainloop
 while(crayRunning):
-	#getData()
-
-	paintMap(mapSystem)
-	#paintData(mapSystem)
+	getData()
 
 	for event in pygame.event.get():
 		if event.type == pygame.KEYDOWN and event.key in handle_dictionary_down:
