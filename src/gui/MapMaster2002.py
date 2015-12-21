@@ -202,3 +202,22 @@ class MapMaster2002():
 			for j in range(0, len(self.arrayMap)):
 				if self.arrayMap[i][j] == "LEFT WALL":
 					self.arrayMap[i][j] = "WALL"
+
+				for i in range(0,6):
+					self.elimUnexp()
+
+	def elimUnexp(self):
+		for i in range(0, len(self.arrayMap)):
+			for j in range(0, len(self.arrayMap)):
+				if self.arrayMap[i][j] == "UNEXPLORED":
+					if self.openNearby(i, j):
+						self.arrayMap[i][j] = "OPEN"
+
+	def openNearby(self, x, y):
+		if x != 0 and y != 0 and x != len(self.arrayMap) - 1 and y != len(self.arrayMap) - 1:
+			if self.arrayMap[x-1][y] == "OPEN" or self.arrayMap[x][y-1] == "OPEN" or self.arrayMap[x+1][y] == "OPEN" or self.arrayMap[x][y+1] == "OPEN":
+				return True
+			else:
+				return False
+		else:
+			return False

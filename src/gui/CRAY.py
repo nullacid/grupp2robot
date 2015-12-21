@@ -24,7 +24,7 @@ import sys, os, traceback
 #Center the screen
 if sys.platform in ["win32","win64"]: os.environ["SDL_VIDEO_CENTERED"]="1"
 
-fullscreenMode = False
+fullscreenMode = True
 
 
 
@@ -158,7 +158,7 @@ def paintData(mapSystem):
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
 
 	#Loops through all data values (disregarding some values that are presented other ways)
-	for i in range(0, len(mapSystem.indexDict) - 2):
+	for i in range(0, len(mapSystem.indexDict) - 2):	
 		textString = mapSystem.indexDict[i] + ":  " + str(mapSystem.dataDict[mapSystem.indexDict[i]])
 		text = font.render(textString, 0, H4xx0R)
 		surface.blit(text, (35* squareWidth + offset, i * (5 * squareHeight)/3 + 10))
