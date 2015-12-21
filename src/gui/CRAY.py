@@ -155,8 +155,6 @@ crayRunning = True
 
 #Paints the data field with all sensor data
 def paintData(mapSystem):
-	pygame.draw.rect(surface, BLACK, [20*squareWidth, 0, screenWidth - (15*squareWidth), screenHeight])
-
 	font = pygame.font.Font(None, int((3*squareHeight)/2))
 
 	#Loops through all data values (disregarding some values that are presented other ways)
@@ -167,6 +165,7 @@ def paintData(mapSystem):
 		
 	#Start position symbol for legend
 	surface.blit(tile_start_data, (34*squareWidth, int(17 * (5 * squareHeight) / 3)))
+
 
 	text = "Start Position"
 	text = font.render(text, 0 , WHITE)
@@ -180,6 +179,9 @@ def paintData(mapSystem):
 	
 	#Connection status indicator
 	pygame.draw.rect(surface, GREEN, [screenWidth - 50 + harald.connectionstatus*10, screenHeight - 20, 10, 10])
+
+	#Update Screen
+	pygame.display.flip()
 	
 #Paints the entire map
 def paintMap(mapSystem):
@@ -208,8 +210,6 @@ def paintMap(mapSystem):
 	lastX = mapSystem.sysPosX
 	lastY = mapSystem.sysPosY
 	
-	#Update Screen
-	pygame.display.flip()
 
 #Paints a square give tile type and coordinates.
 def paintSquare(tileType, xCoord, yCoord):
